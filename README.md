@@ -1,15 +1,4 @@
 
-<table style="width:100%">
-
-<tr>  
-
-    <td align="center">G Undifinied</td>
-
-
-</tr>
-
-</table>
-
 
 
 <table style="width:100%">
