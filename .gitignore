@@ -1,0 +1,14 @@
+# Compiled class file
+*.class
+
+
+# Package Files #
+*.jar
+*.war
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# Txt Files #
+*.txt
