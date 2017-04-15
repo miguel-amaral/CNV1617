@@ -18,7 +18,43 @@ public class InstTool{
 	private static int anewarraycount = 0;
 	private static int multianewarraycount = 0;
 
+	//#############################################//
+
+	private static int method_count = 0;
+	private static int bb_count = 0;
+	private static int instr_count = 0;
+	private static int class_count = 0;
+
 	private static Logger logger;
+
+
+	public static void processStaticClass(String filename, String indir_abs_path){
+
+
+				if (filename.endsWith(".class")) {
+
+					if (filename.startsWith("Main.") || filename.startsWith("RayTracer.") || filename.startsWith("Vector.") || filename.startsWith("Point.")|| filename.startsWith("ColorUtil.")){
+
+								class_count++;
+								String in_filename = indir_abs_path + System.getProperty("file.separator") + filename;
+								logger.writeLine(in_filename);
+								ClassInfo ci = new ClassInfo(in_filename);
+								Vector routines = ci.getRoutines();
+								method_count += routines.size();
+
+								for (Enumeration e = routines.elements(); e.hasMoreElements(); ) {
+
+									Routine routine = (Routine) e.nextElement();
+									BasicBlockArray bba = routine.getBasicBlocks();
+									bb_count += bba.size();
+									InstructionArray ia = routine.getInstructionArray();
+									instr_count += ia.size();
+
+								}
+				}
+			}
+
+}
 
 
 	public static void printUsage(String error){
@@ -36,90 +72,76 @@ public class InstTool{
 			System.exit(-1);
 		}
 
-	public static void doStatic(File in_file){
+		public static void doStatic(File in_dir){
 
-      //String filelist[] = in_dir.list();
-			int method_count = 0;
-			int bb_count = 0;
-			int instr_count = 0;
-			int class_count = 0;
-
-			//for (int i = 0; i < filelist.length; i++) {
-				String filename = in_file.getName();
-
-        if (filename.endsWith(".class")) {
-
-          class_count++;
-					String in_filename = in_file.getAbsolutePath(); //+ System.getProperty("file.separator") + filename;
-					ClassInfo ci = new ClassInfo(in_filename);
-					Vector routines = ci.getRoutines();
-					method_count += routines.size();
-
-					for (Enumeration e = routines.elements(); e.hasMoreElements(); ) {
-
-          	Routine routine = (Routine) e.nextElement();
-						BasicBlockArray bba = routine.getBasicBlocks();
-						bb_count += bba.size();
-						InstructionArray ia = routine.getInstructionArray();
-						instr_count += ia.size();
-
-					}
+				if(!(in_dir.getName().equals("raytracer"))){
+					System.out.println("\n\nPlease supply the correct directory to analyze..\nRaytracer src/ directory expected..\n" + in_dir.getName() + " given..\n\nTerminating..\n");
+					System.exit(-1);
 				}
-			//}
 
-			System.out.println("Static information summary:");
-			System.out.println("Number of class files:  " + class_count);
-			System.out.println("Number of methods:      " + method_count);
-			System.out.println("Number of basic blocks: " + bb_count);
-			System.out.println("Number of instructions: " + instr_count);
+				String filelist[] = in_dir.list();
+				String indir_path = in_dir.getAbsolutePath();
 
-			if (class_count == 0 || method_count == 0) {
-				return;
+
+				for (int i = 0; i < filelist.length; i++) {
+
+					String filename = filelist[i];
+
+					processStaticClass(filename, indir_path);
+
+				}
+
+				System.out.println("Static information summary:");
+				System.out.println("Number of class files:  " + class_count);
+				System.out.println("Number of methods:      " + method_count);
+				System.out.println("Number of basic blocks: " + bb_count);
+				System.out.println("Number of instructions: " + instr_count);
+
+				if (class_count == 0 || method_count == 0) {
+					return;
+				}
+
+				float instr_per_bb = (float) instr_count / (float) bb_count;
+				float instr_per_method = (float) instr_count / (float) method_count;
+				float instr_per_class = (float) instr_count / (float) class_count;
+				float bb_per_method = (float) bb_count / (float) method_count;
+				float bb_per_class = (float) bb_count / (float) class_count;
+				float method_per_class = (float) method_count / (float) class_count;
+
+				System.out.println("Average number of instructions per basic block: " + instr_per_bb);
+				System.out.println("Average number of instructions per method:      " + instr_per_method);
+				System.out.println("Average number of instructions per class:       " + instr_per_class);
+				System.out.println("Average number of basic blocks per method:      " + bb_per_method);
+				System.out.println("Average number of basic blocks per class:       " + bb_per_class);
+				System.out.println("Average number of methods per class:            " + method_per_class);
 			}
 
-			float instr_per_bb = (float) instr_count / (float) bb_count;
-			float instr_per_method = (float) instr_count / (float) method_count;
-			float instr_per_class = (float) instr_count / (float) class_count;
-			float bb_per_method = (float) bb_count / (float) method_count;
-			float bb_per_class = (float) bb_count / (float) class_count;
-			float method_per_class = (float) method_count / (float) class_count;
 
-			System.out.println("Average number of instructions per basic block: " + instr_per_bb);
-			System.out.println("Average number of instructions per method:      " + instr_per_method);
-			System.out.println("Average number of instructions per class:       " + instr_per_class);
-			System.out.println("Average number of basic blocks per method:      " + bb_per_method);
-			System.out.println("Average number of basic blocks per class:       " + bb_per_class);
-			System.out.println("Average number of methods per class:            " + method_per_class);
-		}
 
-	public static void doDynamic(File in_file, File out_dir){
-			//String filelist[] = in_dir.list();
+public static void doDynamic(File in_dir, File out_dir){
 
-			//for (int i = 0; i < filelist.length; i++) {
-				String filename = in_file.getName();
+				String filelist[] = in_dir.list();
 
-				if (filename.endsWith(".class")) {
+				for (int i = 0; i < filelist.length; i++) {
+					String filename = filelist[i];
+					if (filename.endsWith(".class")) {
+						String in_filename = in_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
+						String out_filename = out_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
+						ClassInfo ci = new ClassInfo(in_filename);
+						for (Enumeration e = ci.getRoutines().elements(); e.hasMoreElements(); ) {
+							Routine routine = (Routine) e.nextElement();
+							routine.addBefore("StatisticsTool", "dynMethodCount", new Integer(1));
 
-          String in_filename = in_file.getAbsolutePath();// + System.getProperty("file.separator") + filename;
-					String out_filename = out_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
-					ClassInfo ci = new ClassInfo(in_filename);
-
-          for (Enumeration e = ci.getRoutines().elements(); e.hasMoreElements(); ) {
-
-          	Routine routine = (Routine) e.nextElement();
-						routine.addBefore("InstTool", "dynMethodCount", new Integer(1));
-
-						for (Enumeration b = routine.getBasicBlocks().elements(); b.hasMoreElements(); ) {
-
-              BasicBlock bb = (BasicBlock) b.nextElement();
-							bb.addBefore("InstTool", "dynInstrCount", new Integer(bb.size()));
+							for (Enumeration b = routine.getBasicBlocks().elements(); b.hasMoreElements(); ) {
+								BasicBlock bb = (BasicBlock) b.nextElement();
+								bb.addBefore("StatisticsTool", "dynInstrCount", new Integer(bb.size()));
+							}
 						}
+						ci.addAfter("StatisticsTool", "printDynamic", "null");
+						ci.write(out_filename);
 					}
-					ci.addAfter("InstTool", "printDynamic", "null");
-					ci.write(out_filename);
 				}
-			//}
-		}
+			}
 
     public static synchronized void printDynamic(String foo){
 
@@ -170,7 +192,7 @@ public class InstTool{
 				try {
 					File in_file = new File(argv[1]);
 
-					if (in_file.isFile()) {
+					if (in_file.isDirectory()) {
 						doStatic(in_file);
 					}
 					else {
