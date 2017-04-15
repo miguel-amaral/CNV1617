@@ -25,8 +25,6 @@ public class Logger {
 			bw.write(line);
 			bw.newLine();
 
-			System.out.println("Done");
-
 		} catch (IOException e) {
 
 			e.printStackTrace();
