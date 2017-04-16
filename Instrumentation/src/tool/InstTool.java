@@ -48,10 +48,10 @@ public class InstTool{
 	public static void printError(String error){
 
 			logger.writeLine("##################################################");
-			logger.writeLine("Syntax: java InstTool -stat_type in_path [out_path]");
+			logger.writeLine("Syntax: java InstTool -stat_type in_path out_path");
 			logger.writeLine("        in_path:  directory from which the class files are read");
 			logger.writeLine("        out_path: directory to which the class files are written");
-			logger.writeLine("Error found in: " + error);
+			logger.writeLine("Error found: " + error);
 			logger.writeLine("##################################################");
 			System.exit(-1);
 
