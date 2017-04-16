@@ -2,7 +2,11 @@ package tool;
 
 
 import BIT.highBIT.*;
+
 import java.io.File;
+import java.io.StringWriter;
+import java.io.PrintWriter;
+
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -41,21 +45,18 @@ public class InstTool{
 	//#############################################//
 
 
-	public static void printUsage(String error){
+	public static void printError(String error){
 
-			System.out.println("Syntax: java InstTool -stat_type in_path [out_path]");
-			System.out.println("        where stat_type can be:");
-			System.out.println("        static:     static properties");
-			System.out.println("        dynamic:    dynamic properties");
-			System.out.println();
-			System.out.println("        in_path:  directory from which the class files are read");
-			System.out.println("        out_path: directory to which the class files are written");
-			System.out.println("        Both in_path and out_path are required unless stat_type is static");
-			System.out.println("        in which case only in_path is required");
-
-      System.out.println("Error found in: " + error);
+			logger.writeLine("##################################################");
+			logger.writeLine("Syntax: java InstTool -stat_type in_path [out_path]");
+			logger.writeLine("        in_path:  directory from which the class files are read");
+			logger.writeLine("        out_path: directory to which the class files are written");
+			logger.writeLine("Error found in: " + error);
+			logger.writeLine("##################################################");
 			System.exit(-1);
+
 }
+
 
 public static synchronized void printDynamic(String foo){
 
@@ -236,6 +237,7 @@ public static void doDynamic(File in_dir, File out_dir){
 									String out_filename = out_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
 
 
+									System.out.println(in_filename + "\n " + out_filename );
 
 									processBasicDynInfo(in_filename, out_filename);
 									processBasicBranchInfo(in_filename, total);
@@ -265,33 +267,39 @@ public static void main(String argv[]){
 
 
 
-			if (argv[0].equals("-dynamic")) {
 
-					if (argv.length != 3) {
-							printUsage("argv[0].equals(-dynamic) && argv.length != 3 ");
+
+			if (argv.length < 2 || argv.length > 2) {
+					printError(" # of arguments < 2 || # of arguments > 2 ");
+			}
+
+			try {
+
+					File in_file = new File(argv[0]);
+					File out_dir = new File(argv[1]);
+
+					System.out.println("Checking is they're directories ..\n");
+
+					if (in_file.isDirectory() && out_dir.isDirectory()) {
+
+						doDynamic(in_file, out_dir);
 					}
 
-					try {
+					else {
 
-							File in_file = new File(argv[1]);
-							File out_dir = new File(argv[2]);
-
-							if (in_file.isDirectory() && out_dir.isDirectory()) {
-
-								doDynamic(in_file, out_dir);
-							}
-
-							else {
-
-								printUsage("argv[0].equals(-dynamic) && argv.length != 3 && !in_dir.isDirectory");
-							}
-					}
-
-					catch (NullPointerException e) {
-							printUsage("argv[0].equals(-dynamic) && argv.length != 3 && NullPointerException");
-
+						printError("in_path / out_path must be a directory");
 					}
 			}
+
+			catch (NullPointerException e) {
+
+				StringWriter error = new StringWriter();
+				e.printStackTrace(new PrintWriter(error));
+
+				printError(error.toString());
+
+			}
+
 
 
 }
