@@ -75,6 +75,16 @@ public class InvokeRay {
                 "coff: " + _columnOffset_coff + "\n" +
                 "roff: " + _rowsOffset_roff + "\n" ;
     }
+    public String toHMTLString(){
+        return "query: " + _query + "</br></br>\n\n" +
+                "f: " + _inputFilename + "</br>\n" +
+                "sc: " + _sceneWidth_scols + "</br>\n" +
+                "sr: " + _sceneHeight_srows + "</br>\n" +
+                "wc: " + _windowWidth_wcols + "</br>\n" +
+                "wr: " + _windowHeight_wrows + "</br>\n" +
+                "coff: " + _columnOffset_coff + "</br>\n" +
+                "roff: " + _rowsOffset_roff + "</br>\n" ;
+    }
 
     public String outputFileName() {
         return "images/" + "f_" + _inputFilename +

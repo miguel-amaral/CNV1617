@@ -36,10 +36,11 @@ public class WebServer {
             int requestStatus = 0;
 			try {
 				InvokeRay ray = new InvokeRay(query);
+				message = "<p>"+ray.toHMTLString()+"</br></br></br>";
 				ray.execute();
                 String ip = IpFinder.getMyIp() + ":8000/";
                 String localhost =  "localhost:8000/";
-				message = "<p><b>Amazon AWS context: </b><a href=\""+ip+ray.outputFileName()+"\">"+ip+ray.outputFileName()+"</a></br></br></br></br></br></br>";
+				message += "<b>Amazon AWS context: </b><a href=\""+ip+ray.outputFileName()+"\">"+ip+ray.outputFileName()+"</a></br></br></br></br></br></br>";
 				message += "<b>Home context: </b><a href=\""+localhost +ray.outputFileName()+"\">"+localhost +ray.outputFileName()+"</a></p>";
                 requestStatus = 200;
 			} catch (InvalidArgumentsException e) {
