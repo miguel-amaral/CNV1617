@@ -39,8 +39,8 @@ public class WebServer {
 				ray.execute();
                 String ip = IpFinder.getMyIp() + ":8000/";
                 String localhost =  "localhost:8000/";
-				message = "<p>Amazon AWS context: <a href=\""+ip+ray.outputFileName()+"\">"+ip+ray.outputFileName()+"</a></br></br></br></br></br></br>";
-				message += "Home context: <a href=\""+localhost +ray.outputFileName()+"\">"+localhost +ray.outputFileName()+"</a></p>";
+				message = "<p><b>Amazon AWS context: </b><a href=\""+ip+ray.outputFileName()+"\">"+ip+ray.outputFileName()+"</a></br></br></br></br></br></br>";
+				message += "<b>Home context: </b><a href=\""+localhost +ray.outputFileName()+"\">"+localhost +ray.outputFileName()+"</a></p>";
                 requestStatus = 200;
                 System.out.println(ip);
 			} catch (InvalidArgumentsException e) {
