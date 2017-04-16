@@ -25,10 +25,12 @@ public class IpFinder {
                     System.out.println((localhost.getHostAddress()).trim());
                     systemipaddress = (localhost.getHostAddress()).trim();
                 } catch (Exception e1) {
+                    e1.printStackTrace();
                     systemipaddress = error;
                 }
             }
         } catch (Exception e2) {
+            e2.printStackTrace();
             systemipaddress = error;
         }
         if(systemipaddress != error) ip = systemipaddress;

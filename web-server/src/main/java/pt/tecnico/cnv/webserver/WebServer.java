@@ -42,14 +42,14 @@ public class WebServer {
 				message = "<p><b>Amazon AWS context: </b><a href=\""+ip+ray.outputFileName()+"\">"+ip+ray.outputFileName()+"</a></br></br></br></br></br></br>";
 				message += "<b>Home context: </b><a href=\""+localhost +ray.outputFileName()+"\">"+localhost +ray.outputFileName()+"</a></p>";
                 requestStatus = 200;
-                System.out.println(ip);
 			} catch (InvalidArgumentsException e) {
 				e.printStackTrace();
 				message = "Error: InvalidArgumentsException";
 				requestStatus = 400;
                 System.err.println(message);
 			} catch (Throwable e) {
-			    message = "Error: " + e.getMessage();
+                e.printStackTrace();
+                message = "Error: " + e.getMessage();
                 System.err.println(message);
 			}
             t.sendResponseHeaders(requestStatus, message.length());
