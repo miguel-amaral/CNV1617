@@ -37,6 +37,7 @@ public class WebServer {
 			try {
 				InvokeRay ray = new InvokeRay(query);
 				message = "<p>"+ray.toHMTLString()+"</br></br></br>";
+				System.out.println(message);
 				ray.execute();
                 String ip = IpFinder.getMyIp() + ":8000/";
                 String localhost =  "localhost:8000/";
