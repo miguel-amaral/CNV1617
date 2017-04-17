@@ -16,12 +16,30 @@ public class WebServer {
 	public static void main(String[] args) throws Exception {
 		System.out.println("Booting server");
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+        server.createContext("/ping", new PingHandler());
         server.createContext("/r.html", new MyHandler());
         server.createContext("/images/", new GetImageHandler());
         server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
         server.start();
 		System.out.println("Server is now running");
 
+    }
+	
+    static class PingHandler implements HttpHandler {
+	public void handle(HttpExchange t) throws IOException {
+            String query = t.getRequestURI().getQuery();
+
+            // InstrumentationData data = InstrumentationData.getInstance(Thread.currentThread().getId());
+            // System.err.println(data.i_count + " instructions in " + data.b_count + " basic blocks were executed.");
+            System.out.println(query);
+            //TODO send data to MetricStorage
+            OutputStream os = t.getResponseBody();
+            String message = "ok";
+            int requestStatus = 200;
+            t.sendResponseHeaders(requestStatus, message.length());
+            os.write(message.getBytes());
+            os.close();
+        }
     }
     static class MyHandler implements HttpHandler {
         public void handle(HttpExchange t) throws IOException {
