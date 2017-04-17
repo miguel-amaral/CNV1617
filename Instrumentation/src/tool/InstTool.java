@@ -1,4 +1,3 @@
-package tool;
 
 
 import BIT.highBIT.*;
@@ -10,8 +9,7 @@ import java.io.PrintWriter;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import tool.Logger;
-import tool.StatsBranch;
+
 
 public class InstTool{
 
@@ -60,6 +58,8 @@ public class InstTool{
 
 public static synchronized void printDynamic(String foo){
 
+
+
 			logger.writeLine("##################################################");
 			logger.writeLine("Dynamic information summary of the class: " + foo);
 			logger.writeLine("Number of methods:      " + dyn_method_count);
@@ -72,7 +72,7 @@ public static synchronized void printDynamic(String foo){
 
 public static synchronized void printBranch(String foo){
 
-
+			if(branch_info.length == 0) return;
 			logger.writeLine("##################################################");
 			logger.writeLine("Branch summary:");
 			logger.writeLine("CLASS NAME" + '\t' + "METHOD" + '\t' + "PC" + '\t' + "TAKEN" + '\t' + "NOT_TAKEN");
@@ -156,7 +156,7 @@ public static synchronized void updateBranchOutcome(int br_outcome){
 
 
 
-public static void processBasicDynInfo(String in_filename, String out_filename){
+public static void processBasicDynInfo(String in_filename, String out_filename, int total, int k){
 
 
 				ClassInfo ci = new ClassInfo(in_filename);
@@ -164,75 +164,40 @@ public static void processBasicDynInfo(String in_filename, String out_filename){
 				for (Enumeration e = ci.getRoutines().elements(); e.hasMoreElements(); ) {
 
 					Routine routine = (Routine) e.nextElement();
-					routine.addBefore("tool.InstTool", "dynMethodCount", new Integer(1));
 
-					for (Enumeration b = routine.getBasicBlocks().elements(); b.hasMoreElements(); ) {
-						BasicBlock bb = (BasicBlock) b.nextElement();
-						bb.addBefore("tool.InstTool", "dynInstrCount", new Integer(bb.size()));
-					}
-				}
+					routine.addBefore("InstTool", "dynMethodCount", new Integer(1));  // +1 method
+					routine.addBefore("InstTool", "setBranchMethodName", routine.getMethodName());
 
-				ci.addAfter("tool.InstTool", "printDynamic", in_filename);
-				ci.write(out_filename);
-
-}
-
-public static void processBasicBranchInfo(String in_filename, int total){
-
-
-				ClassInfo ci = new ClassInfo(in_filename);
-
-				for (Enumeration e = ci.getRoutines().elements(); e.hasMoreElements(); ) {
-
-					Routine routine = (Routine) e.nextElement();
 					InstructionArray instructions = routine.getInstructionArray();
 
 					for (Enumeration b = routine.getBasicBlocks().elements(); b.hasMoreElements(); ) {
 
 						BasicBlock bb = (BasicBlock) b.nextElement();
+						bb.addBefore("InstTool", "dynInstrCount", new Integer(bb.size()));  // +1 BB and size of BB
 						Instruction instr = (Instruction) instructions.elementAt(bb.getEndAddress());
 						short instr_type = InstructionTable.InstructionTypeTable[instr.getOpcode()];
 
 						if (instr_type == InstructionTable.CONDITIONAL_INSTRUCTION) {
+
+							instr.addBefore("InstTool", "setBranchPC", new Integer(instr.getOffset()));
+							instr.addBefore("InstTool", "updateBranchNumber", new Integer(k));
+							instr.addBefore("InstTool", "updateBranchOutcome", "BranchOutcome");
+							k++;
 							total++;
 						}
 					}
-
-			  }
-}
-
-public static void processOutcomeBranchInfo(String in_filename, String out_filename, int total, int k){
-
-
-				ClassInfo ci = new ClassInfo(in_filename);
-
-				for (Enumeration e = ci.getRoutines().elements(); e.hasMoreElements(); ) {
-
-						Routine routine = (Routine) e.nextElement();
-						routine.addBefore("tool.InstTool", "setBranchMethodName", routine.getMethodName());
-						InstructionArray instructions = routine.getInstructionArray();
-
-					for (Enumeration b = routine.getBasicBlocks().elements(); b.hasMoreElements(); ) {
-
-							BasicBlock bb = (BasicBlock) b.nextElement();
-							Instruction instr = (Instruction) instructions.elementAt(bb.getEndAddress());
-							short instr_type = InstructionTable.InstructionTypeTable[instr.getOpcode()];
-
-							if (instr_type == InstructionTable.CONDITIONAL_INSTRUCTION) {
-
-									instr.addBefore("tool.InstTool", "setBranchPC", new Integer(instr.getOffset()));
-									instr.addBefore("tool.InstTool", "updateBranchNumber", new Integer(k));
-									instr.addBefore("tool.InstTool", "updateBranchOutcome", "BranchOutcome");
-									k++;
-							}
-					}
 				}
 
-				ci.addBefore("tool.InstTool", "setBranchClassName", ci.getClassName());
-				ci.addBefore("tool.InstTool", "branchInit", new Integer(total));
-				ci.addAfter("tool.InstTool", "printBranch", "null");
+
+				ci.addAfter("InstTool", "printDynamic", in_filename);
+				ci.addBefore("InstTool", "setBranchClassName", ci.getClassName());
+				ci.addBefore("InstTool", "branchInit", new Integer(total));
+				ci.addAfter("InstTool", "printBranch", "null");
 				ci.write(out_filename);
+
 }
+
+
 
 
 
@@ -247,17 +212,13 @@ public static void doDynamic(File in_dir, File out_dir){
 							String filename = filelist[i];
 
 							if(canProcess(filename)){
+							//if(filename.endsWith(".class")){
 
 
 									String in_filename = in_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
 									String out_filename = out_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
 
-
-									processBasicDynInfo(in_filename, out_filename);
-									processBasicBranchInfo(in_filename, total);
-
-									processOutcomeBranchInfo(in_filename, out_filename, total, k);
-
+									processBasicDynInfo(in_filename, out_filename, total, k);
 
 
 							}
