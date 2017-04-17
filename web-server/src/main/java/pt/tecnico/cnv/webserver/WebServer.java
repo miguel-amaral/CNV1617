@@ -34,12 +34,8 @@ public class WebServer {
             System.out.println(query);
             //TODO send data to MetricStorage
             OutputStream os = t.getResponseBody();
-            String message = null;
-            int requestStatus = 0;
-			try {
-				message = "ok";
-				requestStatus = 200;
-			}
+            String message = "ok";
+            int requestStatus = 200;
             t.sendResponseHeaders(requestStatus, message.length());
             os.write(message.getBytes());
             os.close();
