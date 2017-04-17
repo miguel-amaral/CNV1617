@@ -76,13 +76,14 @@ public static synchronized void printBranch(String foo){
 			logger.writeLine("##################################################");
 			logger.writeLine("Branch summary:");
 			logger.writeLine("CLASS NAME" + '\t' + "METHOD" + '\t' + "PC" + '\t' + "TAKEN" + '\t' + "NOT_TAKEN");
-			logger.writeLine("##################################################");
+
 
 	    for (int i = 0; i < branch_info.length; i++) {
 	      if (branch_info[i] != null) {
 	        branch_info[i].print(logger);
 	      }
 	    }
+			logger.writeLine("##################################################");
 }
 
 	//############################################################//
@@ -90,6 +91,23 @@ public static synchronized void printBranch(String foo){
 	//---------------DYNAMIC PROCESSMENT FUNCTIONS----------------//
 	//############################################################//
 	//############################################################//
+
+public static boolean canProcess(String filename){
+
+			if (filename.endsWith(".class"))
+
+					if(filename.startsWith("RayTracer") || filename.startsWith("Vector") || filename.startsWith("Matrix"))
+
+							return true;
+
+			return false;
+
+}
+
+
+
+
+
 
 public static synchronized void dynInstrCount(int incr){
 				dyn_instr_count += incr;
@@ -227,17 +245,13 @@ public static void doDynamic(File in_dir, File out_dir){
 					for (int i = 0; i < filelist.length; i++) {
 
 							String filename = filelist[i];
-							if (filename.endsWith(".class")) {
 
-
-
+							if(canProcess(filename)){
 
 
 									String in_filename = in_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
 									String out_filename = out_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
 
-
-									System.out.println(in_filename + "\n " + out_filename );
 
 									processBasicDynInfo(in_filename, out_filename);
 									processBasicBranchInfo(in_filename, total);
@@ -275,14 +289,13 @@ public static void main(String argv[]){
 
 			try {
 
-					File in_file = new File(argv[0]);
+					File in_dir = new File(argv[0]);
 					File out_dir = new File(argv[1]);
 
-					System.out.println("Checking is they're directories ..\n");
 
-					if (in_file.isDirectory() && out_dir.isDirectory()) {
+					if (in_dir.isDirectory() && out_dir.isDirectory()) {
 
-						doDynamic(in_file, out_dir);
+						doDynamic(in_dir, out_dir);
 					}
 
 					else {
