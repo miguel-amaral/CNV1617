@@ -4,9 +4,13 @@ mvn clean install
 ######## PROCEED WITH CAUTION #########
 #######################################
 
+export PROJ_DIR=$(pwd)
+
 cd Instrumentation/src/
 javac $(find . -name "*.java")
-export CLASSPATH=$CLASSPATH:$(pwd):./
+
+export CLASSPATH=$CLASSPATH:$(pwd):$(pwd)/tool:./
+java InstTool $PROJ_DIR/web-server/target/classes/raytracer $PROJ_DIR/web-server/target/classes/raytracer
 cd ../../web-server/
 
 
