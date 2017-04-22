@@ -109,15 +109,14 @@ public class InstTool {
 
 
     public static synchronized void dynInstrCount(int incr) {
-
-        dyn_instr_count += incr;
-        dyn_bb_count++;
-
+        DataContainer data = ContainerManager.getInstance(Thread.currentThread().getId());
+        data.instructions += incr;
+        data.bb_blocks++;
     }
 
     public static synchronized void dynMethodCount(int incr) {
-        System.out.print("|");
-        dyn_method_count++;
+        DataContainer data = ContainerManager.getInstance(Thread.currentThread().getId());
+        data.methods++;
 
     }
 
@@ -207,44 +206,13 @@ public class InstTool {
         int k = 0;
         int total = 0;
 
-        for (int i = 0; i < filelist.length; i++) {
 
-            String filename = filelist[i];
-
-            if (filename.endsWith(".class")) {
-
-                String in_filename = in_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
-                ClassInfo ci = new ClassInfo(in_filename);
-
-                for (Enumeration e = ci.getRoutines().elements(); e.hasMoreElements(); ) {
-
-                    Routine routine = (Routine) e.nextElement();
-
-
-                    InstructionArray instructions = routine.getInstructionArray();
-
-                    for (Enumeration b = routine.getBasicBlocks().elements(); b.hasMoreElements(); ) {
-
-                        BasicBlock bb = (BasicBlock) b.nextElement();
-
-
-                        Instruction instr = (Instruction) instructions.elementAt(bb.getEndAddress());
-                        short instr_type = InstructionTable.InstructionTypeTable[instr.getOpcode()];
-
-                        if (instr_type == InstructionTable.CONDITIONAL_INSTRUCTION) {
-                            total++;
-                        }
-                    }
-                }
-
-            }
-        }
 
         for (int i = 0; i < filelist.length; i++) {
 
             String filename = filelist[i];
 
-            if (filename.endsWith(".class")) {
+            if (canProcess(filename)) {
 
                 String in_filename = in_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
                 String out_filename = out_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
@@ -274,6 +242,7 @@ public class InstTool {
                             instr.addBefore("tool/InstTool", "updateBranchNumber", new Integer(k));
                             instr.addBefore("tool/InstTool", "updateBranchOutcome", "BranchOutcome");
                             k++;
+                            total++;
                         }
                     }
                 }
@@ -315,8 +284,8 @@ public class InstTool {
 
             if (in_dir.isDirectory() && out_dir.isDirectory()) {
 
-                doDynamic(in_dir, out_dir);
-//                doBranch(in_dir, out_dir);
+//                doDynamic(in_dir, out_dir);
+                doBranch(in_dir, out_dir);
             } else {
 
                 printError("in_path / out_path must be a directory");

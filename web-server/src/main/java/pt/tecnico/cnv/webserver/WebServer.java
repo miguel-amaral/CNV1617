@@ -4,6 +4,8 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import tool.ContainerManager;
+import tool.DataContainer;
 
 import java.io.*;
 import java.net.InetSocketAddress;
@@ -65,6 +67,14 @@ public class WebServer {
 				message += "<b>Amazon AWS context: </b><a href=\""+ip+ray.outputFileName()+"\">"+ip+ray.outputFileName()+"</a></br></br></br></br></br></br>";
 				message += "      <b>Home context: </b><a href=\""+localhost +ray.outputFileName()+"\">"+localhost +ray.outputFileName()+"</a></p>";
                 requestStatus = 200;
+
+                DataContainer data = ContainerManager.getInstance(Thread.currentThread().getId());
+                System.out.println("instructions: " + data.instructions);
+                System.out.println("bb_blocks: " + data.bb_blocks);
+                System.out.println("methods: " + data.methods);
+                System.out.println("branch_fail: " + data.branch_fail);
+                System.out.println("branch_success: " + data.branch_success);
+
 			} catch (InvalidArgumentsException e) {
 				e.printStackTrace();
 				message = "Error: InvalidArgumentsException";
