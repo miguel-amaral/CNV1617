@@ -15,12 +15,14 @@ import java.util.concurrent.Executors;
 
 @SuppressWarnings("restriction")
 public class WebServer {
+    private static int port = 31999;
+
 	public static void main(String[] args) throws Exception {
 	    for(String string : args) {
 	        System.out.println(string);
         }
 		System.out.println("Booting server");
-        HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
+        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/ping", new PingHandler());
         server.createContext("/r.html", new MyHandler());
         server.createContext("/images/", new GetImageHandler());
@@ -37,7 +39,6 @@ public class WebServer {
             // InstrumentationData data = InstrumentationData.getInstance(Thread.currentThread().getId());
             // System.err.println(data.i_count + " instructions in " + data.b_count + " basic blocks were executed.");
             System.out.println(query);
-            //TODO send data to MetricStorage
             OutputStream os = t.getResponseBody();
             String message = "ok";
             int requestStatus = 200;
@@ -52,28 +53,38 @@ public class WebServer {
 
             // InstrumentationData data = InstrumentationData.getInstance(Thread.currentThread().getId());
             // System.err.println(data.i_count + " instructions in " + data.b_count + " basic blocks were executed.");
-            System.out.println(query);
-            //TODO send data to MetricStorage
+//            System.out.println(query);
             OutputStream os = t.getResponseBody();
             String message = null;
             int requestStatus = 0;
 			try {
+			    System.out.println("thread: "+Thread.currentThread().getId());
+			    ContainerManager.clearInstance(Thread.currentThread().getId());
 				InvokeRay ray = new InvokeRay(query);
 				message = "<p>"+ray.toHMTLString()+"</br></br></br>";
-				System.out.println(message);
+//				System.out.println(message);
 				ray.execute();
-                String ip = "http://"+IpFinder.getMyIp() + ":8000/";
-                String localhost =  "http://localhost:8000/";
+                String ip = "http://"+IpFinder.getMyIp() + ":"+port+"/";
+                String localhost =  "http://localhost:"+port+"/";
 				message += "<b>Amazon AWS context: </b><a href=\""+ip+ray.outputFileName()+"\">"+ip+ray.outputFileName()+"</a></br></br></br></br></br></br>";
 				message += "      <b>Home context: </b><a href=\""+localhost +ray.outputFileName()+"\">"+localhost +ray.outputFileName()+"</a></p>";
                 requestStatus = 200;
 
                 DataContainer data = ContainerManager.getInstance(Thread.currentThread().getId());
-                System.out.println("instructions: " + data.instructions);
-                System.out.println("bb_blocks: " + data.bb_blocks);
-                System.out.println("methods: " + data.methods);
-                System.out.println("branch_fail: " + data.branch_fail);
-                System.out.println("branch_success: " + data.branch_success);
+                message += "<p>" +
+                        "instructions___: " + data.instructions + "<br/>" +
+                        "bb_blocks_____: " + data.bb_blocks + "<br/>" +
+                        "methods_____: " + data.methods + "<br/>" +
+                        "branch_fail____: " + data.branch_fail + "<br/>" +
+                        "branch_success: " + data.branch_success + "<br/>" +
+
+                        "</p>";
+
+//                System.out.println("instructions: " + data.instructions);
+//                System.out.println("bb_blocks: " + data.bb_blocks);
+//                System.out.println("methods: " + data.methods);
+//                System.out.println("branch_fail: " + data.branch_fail);
+//                System.out.println("branch_success: " + data.branch_success);
 
 			} catch (InvalidArgumentsException e) {
 				e.printStackTrace();

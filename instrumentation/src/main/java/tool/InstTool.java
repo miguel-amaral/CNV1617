@@ -16,15 +16,15 @@ public class InstTool {
     private static int dyn_bb_count = 0;
     private static int dyn_instr_count = 0;
 
-    private static int newcount = 0;
-    private static int newarraycount = 0;
-    private static int anewarraycount = 0;
-    private static int multianewarraycount = 0;
-
-    private static int loadcount = 0;
-    private static int storecount = 0;
-    private static int fieldloadcount = 0;
-    private static int fieldstorecount = 0;
+//    private static int newcount = 0;
+//    private static int newarraycount = 0;
+//    private static int anewarraycount = 0;
+//    private static int multianewarraycount = 0;
+//
+//    private static int loadcount = 0;
+//    private static int storecount = 0;
+//    private static int fieldloadcount = 0;
+//    private static int fieldstorecount = 0;
 
     private static StatsBranch[] branch_info;
     private static int branch_number;
@@ -95,7 +95,7 @@ public class InstTool {
 
     public static boolean canProcess(String filename) {
 
-        if (filename.endsWith("class"))
+        if (filename.endsWith(".class"))
 
             if (filename.startsWith("Main.") || filename.startsWith("RayTracer.") || filename.startsWith("Vector.") || filename.startsWith("Matrix.")) {
 
@@ -155,10 +155,18 @@ public class InstTool {
 
     public static synchronized void updateBranchOutcome(int br_outcome) {
 
+
+        DataContainer data = ContainerManager.getInstance(Thread.currentThread().getId());
+
+
         if (br_outcome == 0) {
-            branch_info[branch_number].incrNotTaken();
+
+            data.branch_fail++;
+//            branch_info[branch_number].incrNotTaken();
         } else {
-            branch_info[branch_number].incrTaken();
+
+            data.branch_success++;
+//            branch_info[branch_number].incrTaken();
         }
     }
 
@@ -206,7 +214,38 @@ public class InstTool {
         int k = 0;
         int total = 0;
 
+        for (int i = 0; i < filelist.length; i++) {
 
+            String filename = filelist[i];
+
+            if (canProcess(filename)) {
+
+                String in_filename = in_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
+                ClassInfo ci = new ClassInfo(in_filename);
+
+                for (Enumeration e = ci.getRoutines().elements(); e.hasMoreElements(); ) {
+
+                    Routine routine = (Routine) e.nextElement();
+
+
+                    InstructionArray instructions = routine.getInstructionArray();
+
+                    for (Enumeration b = routine.getBasicBlocks().elements(); b.hasMoreElements(); ) {
+
+                        BasicBlock bb = (BasicBlock) b.nextElement();
+
+
+                        Instruction instr = (Instruction) instructions.elementAt(bb.getEndAddress());
+                        short instr_type = InstructionTable.InstructionTypeTable[instr.getOpcode()];
+
+                        if (instr_type == InstructionTable.CONDITIONAL_INSTRUCTION) {
+                            total++;
+                        }
+                    }
+                }
+
+            }
+        }
 
         for (int i = 0; i < filelist.length; i++) {
 
@@ -242,7 +281,6 @@ public class InstTool {
                             instr.addBefore("tool/InstTool", "updateBranchNumber", new Integer(k));
                             instr.addBefore("tool/InstTool", "updateBranchOutcome", "BranchOutcome");
                             k++;
-                            total++;
                         }
                     }
                 }
@@ -250,8 +288,6 @@ public class InstTool {
                 ci.addBefore("tool/InstTool", "setBranchClassName", ci.getClassName());
                 ci.addBefore("tool/InstTool", "branchInit", new Integer(total));
 
-                ci.addAfter("tool/InstTool", "printDynamic", in_filename);
-                ci.addAfter("tool/InstTool", "printBranch", in_filename);
                 ci.write(out_filename);
             }
         }

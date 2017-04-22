@@ -9,5 +9,4 @@ public class DataContainer {
     public int instructions = 0;
     public int branch_success = 0;
     public int branch_fail = 0;
-
 }
