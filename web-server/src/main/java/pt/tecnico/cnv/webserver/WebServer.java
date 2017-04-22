@@ -15,7 +15,7 @@ import java.util.concurrent.Executors;
 
 @SuppressWarnings("restriction")
 public class WebServer {
-    private static int port = 31999;
+    private static int port = 8000;
 
 	public static void main(String[] args) throws Exception {
 	    for(String string : args) {
