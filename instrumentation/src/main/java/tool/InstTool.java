@@ -162,52 +162,14 @@ public class InstTool {
         if (br_outcome == 0) {
 
             data.branch_fail++;
-//            branch_info[branch_number].incrNotTaken();
         } else {
-
             data.branch_success++;
-//            branch_info[branch_number].incrTaken();
         }
     }
 
 
-    public static void doDynamic(File in_dir, File out_dir) {
 
-        String filelist[] = in_dir.list();
-
-        for (int i = 0; i < filelist.length; i++) {
-
-            String filename = filelist[i];
-
-            if (filename.endsWith(".class")) {
-
-
-                String in_filename = in_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
-                String out_filename = out_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
-                ClassInfo ci = new ClassInfo(in_filename);
-
-                for (Enumeration e = ci.getRoutines().elements(); e.hasMoreElements(); ) {
-
-                    Routine routine = (Routine) e.nextElement();
-                    routine.addBefore("tool/InstTool", "dynMethodCount", new Integer(1));
-
-                    for (Enumeration b = routine.getBasicBlocks().elements(); b.hasMoreElements(); ) {
-
-                        BasicBlock bb = (BasicBlock) b.nextElement();
-                        bb.addBefore("tool/InstTool", "dynInstrCount", new Integer(bb.size()));
-                    }
-
-                }
-
-                ci.addAfter("tool/InstTool", "printDynamic", "null");
-                ci.write(out_filename);
-            }
-        }
-
-    }
-
-
-    public static void doBranch(File in_dir, File out_dir) {
+    public static void doBranch(File in_dir) {
 
         String filelist[] = in_dir.list();
 
@@ -254,7 +216,6 @@ public class InstTool {
             if (canProcess(filename)) {
 
                 String in_filename = in_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
-                String out_filename = out_dir.getAbsolutePath() + System.getProperty("file.separator") + filename;
 
                 ClassInfo ci = new ClassInfo(in_filename);
 
@@ -288,7 +249,7 @@ public class InstTool {
                 ci.addBefore("tool/InstTool", "setBranchClassName", ci.getClassName());
                 ci.addBefore("tool/InstTool", "branchInit", new Integer(total));
 
-                ci.write(out_filename);
+                ci.write(in_filename);
             }
         }
 
@@ -311,17 +272,15 @@ public class InstTool {
             printError(" # of arguments < 2 || # of arguments > 2 ");
         }
         System.out.println("Instrumenting in dir: " + argv[0]);
-        System.out.println("Instrumenting output to dir: " + argv[1]);
+        System.out.println("Instrumenting output to dir: " + argv[0]);
         try {
 
             File in_dir = new File(argv[0]);
-            File out_dir = new File(argv[1]);
 
 
-            if (in_dir.isDirectory() && out_dir.isDirectory()) {
+            if (in_dir.isDirectory()) {
 
-//                doDynamic(in_dir, out_dir);
-                doBranch(in_dir, out_dir);
+                doBranch(in_dir);
             } else {
 
                 printError("in_path / out_path must be a directory");
