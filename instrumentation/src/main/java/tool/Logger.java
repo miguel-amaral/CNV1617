@@ -1,4 +1,4 @@
-
+package tool;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -8,12 +8,13 @@ public class Logger {
 
 	private static String FILENAME = "default.txt";
 
-  public Logger(){}
+	public Logger() {
+	}
 
-  public Logger(String file_name){
+	public Logger(String file_name) {
 
-    this.FILENAME = file_name + ".txt";
-  }
+		this.FILENAME = file_name + ".txt";
+	}
 
 	public static void writeLine(String line) {
 

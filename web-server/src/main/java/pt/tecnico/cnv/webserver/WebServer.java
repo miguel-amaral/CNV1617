@@ -14,6 +14,9 @@ import java.util.concurrent.Executors;
 @SuppressWarnings("restriction")
 public class WebServer {
 	public static void main(String[] args) throws Exception {
+	    for(String string : args) {
+	        System.out.println(string);
+        }
 		System.out.println("Booting server");
         HttpServer server = HttpServer.create(new InetSocketAddress(8000), 0);
         server.createContext("/ping", new PingHandler());
@@ -57,10 +60,10 @@ public class WebServer {
 				message = "<p>"+ray.toHMTLString()+"</br></br></br>";
 				System.out.println(message);
 				ray.execute();
-                String ip = IpFinder.getMyIp() + ":8000/";
-                String localhost =  "localhost:8000/";
+                String ip = "http://"+IpFinder.getMyIp() + ":8000/";
+                String localhost =  "http://localhost:8000/";
 				message += "<b>Amazon AWS context: </b><a href=\""+ip+ray.outputFileName()+"\">"+ip+ray.outputFileName()+"</a></br></br></br></br></br></br>";
-				message += "<b>Home context: </b><a href=\""+localhost +ray.outputFileName()+"\">"+localhost +ray.outputFileName()+"</a></p>";
+				message += "      <b>Home context: </b><a href=\""+localhost +ray.outputFileName()+"\">"+localhost +ray.outputFileName()+"</a></p>";
                 requestStatus = 200;
 			} catch (InvalidArgumentsException e) {
 				e.printStackTrace();
