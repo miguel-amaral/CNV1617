@@ -17,7 +17,7 @@
 	<modules>
 		<module>instrumentation</module> 
 		<module>web-server</module>
-		<!--<module>metricstorage</module>-->
+		<!--<module>storageserver</module>-->
 		<!-- <module>load-balancer</module> -->
 	</modules>
 </project>
