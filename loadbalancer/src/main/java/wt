@@ -1,0 +1,59 @@
+private void ola(){
+        if(startInstance){
+        System.out.println("Starting a new instance.");
+        RunInstancesRequest runInstancesRequest=
+        new RunInstancesRequest();
+
+        runInstancesRequest.withImageId("ami-a0e9d7c6")
+        .withInstanceType("t2.micro")
+        .withMinCount(1)
+        .withMaxCount(1)
+        .withKeyName("jog-aws")
+        .withSecurityGroups("ssh+http8000");
+        RunInstancesResult runInstancesResult=
+        ec2.runInstances(runInstancesRequest);
+        String newInstanceId=runInstancesResult.getReservation().getInstances().get(0).getInstanceId();
+        }
+        DescribeInstancesResult describeInstancesResult=ec2.describeInstances();
+        List<Reservation> reservations=describeInstancesResult.getReservations();
+        Set<Instance> instances=new HashSet<Instance>();
+
+        System.out.println("total reservations = "+reservations.size());
+        for(Reservation reservation:reservations){
+        instances.addAll(reservation.getInstances());
+        }
+        System.out.println("total instances = "+instances.size());
+            /* TODO total observation time in milliseconds */
+        long offsetInMilliseconds=1000*60*10;
+        Dimension instanceDimension=new Dimension();
+        instanceDimension.setName("InstanceId");
+        List<Dimension> dims=new ArrayList<Dimension>();
+        dims.add(instanceDimension);
+        for(Instance instance:instances){
+        String name=instance.getInstanceId();
+        String state=instance.getState().getName();
+        if(state.equals("running")){
+        System.out.println("running instance id = "+name);
+        instanceDimension.setValue(name);
+        GetMetricStatisticsRequest request=new GetMetricStatisticsRequest()
+        .withStartTime(new Date(new Date().getTime()-offsetInMilliseconds))
+        .withNamespace("AWS/EC2")
+        .withPeriod(60)
+        .withMetricName("CPUUtilization")
+        .withStatistics("Average")
+        .withDimensions(instanceDimension)
+        .withEndTime(new Date());
+        GetMetricStatisticsResult getMetricStatisticsResult=
+        cloudWatch.getMetricStatistics(request);
+        List<Datapoint> datapoints=getMetricStatisticsResult.getDatapoints();
+        for(Datapoint dp:datapoints){
+        System.out.println(" CPU utilization for instance "+name+
+        " = "+dp.getAverage());
+        }
+        }
+        else{
+        System.out.println("instance id = "+name);
+        }
+        System.out.println("Instance State : "+state+".");
+        }
+        }
