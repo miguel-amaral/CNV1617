@@ -18,6 +18,15 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk</artifactId>
+            <version>1.11.126</version>
+        </dependency>
+    </dependencies>
+
+
     <build>
         <plugins>
             <plugin>
@@ -41,7 +50,7 @@
                     </execution>
                 </executions>
                 <configuration>
-                    <mainClass>tool.InstTool</mainClass>
+                    <mainClass>pt.tecnico.cnv.loadbalancer.WebServer</mainClass>
                     <arguments>
                         <argument>${project.basedir}/../web-server/target/classes/raytracer</argument>
                         <argument>${project.basedir}/../web-server/target/classes/raytracer</argument>
