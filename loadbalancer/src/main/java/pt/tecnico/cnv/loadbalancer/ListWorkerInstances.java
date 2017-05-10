@@ -16,6 +16,8 @@ public class ListWorkerInstances {
     private final static String WORKER_AMI_ID = "ami-48b2a62c";
     private static AmazonEC2 ec2;
 
+    private List<String> _shutingDownInstances = new ArrayList<String>();
+
 
     public ListWorkerInstances(AmazonEC2 ec2) {
         this.ec2 = ec2;
@@ -43,6 +45,12 @@ public class ListWorkerInstances {
                 if (!ami.equals(WORKER_AMI_ID)) {
                     continue;
                 }
+                //ignore shutting down machines
+                String id = instance.getInstanceId();
+                if(_shutingDownInstances.contains(id)) {
+                    continue;
+                }
+
                 instancesToReturn.add(instance);
             }
         } catch (AmazonServiceException ase) {
@@ -52,5 +60,9 @@ public class ListWorkerInstances {
             System.out.println("Request ID: " + ase.getRequestId());
         }
         return instancesToReturn;
+    }
+
+    public void shutDownInstanceId(String id){
+        _shutingDownInstances.add(id);
     }
 }

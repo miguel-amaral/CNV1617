@@ -18,6 +18,6 @@
 		<module>instrumentation</module> 
 		<module>web-server</module>
 		<module>storageserver</module>
-		 <module>loadbalancer</module>
+		<module>loadbalancer</module>
 	</modules>
 </project>

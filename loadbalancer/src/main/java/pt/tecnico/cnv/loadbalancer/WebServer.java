@@ -24,13 +24,13 @@ public class WebServer {
     private static int port = 12000;
     private static AmazonEC2      ec2;
     private static AmazonCloudWatch cloudWatch;
-    private final static String WORKER_AMI_ID = "ami-48b2a62c";
-
 
 	public static void main(String[] args) throws Exception {
 		System.out.println("Booting server");
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/instances/list", new ListInstances());
+        server.createContext("/r.html", new ImageRequestHandler());
+
         server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
         server.start();
         init();
@@ -59,6 +59,22 @@ public class WebServer {
         }
     }
 
+    static class ImageRequestHandler implements HttpHandler {
+        public void handle(HttpExchange t) throws IOException {
+            String query = t.getRequestURI().getQuery();
+            ProcessQuery proccesser = new ProcessQuery(query);
+
+            proccesser.process();
+            int requestStatus = proccesser.status();
+            String message = proccesser.response();
+
+
+            OutputStream os = t.getResponseBody();
+            t.sendResponseHeaders(requestStatus, message.length());
+            os.write(message.getBytes());
+            os.close();
+        }
+    }
 
     private static void init() throws Exception {
 
