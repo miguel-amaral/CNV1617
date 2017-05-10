@@ -26,7 +26,6 @@ public class WebServer {
         server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
         server.start();
 		System.out.println("Server is now running");
-
     }
 	
     static class PingHandler implements HttpHandler {

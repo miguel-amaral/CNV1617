@@ -29,6 +29,7 @@ public class WebServer {
 		System.out.println("Booting server");
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/instances/list", new ListInstances());
+        server.createContext("/job/done", new ListInstances());
         server.createContext("/r.html", new ImageRequestHandler());
 
         server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
