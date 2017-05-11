@@ -22,7 +22,7 @@ import java.util.concurrent.Executors;
 
 @SuppressWarnings("restriction")
 public class WebServer {
-    private static int port = 12000;
+    private static int port = 8000;
     private static AmazonEC2      ec2;
     private static LoadBalancer _proccesser;
     private static AmazonCloudWatch cloudWatch;
