@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #mvn clean install
 #
 ################ BY RAFA ###############
@@ -26,4 +27,9 @@
 #export CLASSPATH= $original
 
 export MAVEN_OPTS=-XX:-UseSplitVerifier
-mvn clean install -q && mvn -pl instrumentation exec:java -q && (cd web-server ; mvn exec:java -q)
+(cd common ; mvn clean install -q )
+(cd instrumentation ; mvn clean install -q)
+(cd web-server ; mvn clean install -q )
+(cd instrumentation ; mvn exec:java -q )
+(cd web-server ; mvn exec:java -q)
+#mvn clean install -q && mvn -pl instrumentation exec:java -q && (cd web-server ; mvn exec:java -q)

@@ -22,9 +22,9 @@ import java.util.concurrent.Executors;
 
 @SuppressWarnings("restriction")
 public class WebServer {
-    private static int port = 12000;
+    private static int port = 8000;
     private static AmazonEC2      ec2;
-    private static ProcessQuery _proccesser;
+    private static LoadBalancer _proccesser;
     private static AmazonCloudWatch cloudWatch;
 
 	public static void main(String[] args) throws Exception {
@@ -38,8 +38,9 @@ public class WebServer {
 
         server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
         server.start();
-        init();
 		System.out.println("Server is now running");
+        init();
+		System.out.println("Credentials loaded");
     }
 
     static class GenericHandler implements HttpHandler {
@@ -91,7 +92,7 @@ public class WebServer {
 //        public void handle(HttpExchange t) throws IOException {
 //            String query = t.getRequestURI().getQuery();
 //
-//            _proccesser.process(query);
+//            _proccesser.processQuery(query);
 //            int requestStatus = _proccesser.status();
 //            String message = _proccesser.response();
 //
@@ -124,7 +125,7 @@ public class WebServer {
         ec2 = AmazonEC2ClientBuilder.standard().withRegion("eu-west-2").withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
         cloudWatch = AmazonCloudWatchClientBuilder.standard().withRegion("eu-west-2").withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
 
-        _proccesser = new ProcessQuery(ec2);
+        _proccesser = new LoadBalancer(ec2);
     }
 
     private static class ProccesserStatusStrategy extends HttpStrategy {
@@ -136,7 +137,7 @@ public class WebServer {
 
     private static class ProccessQueryStrategy extends HttpStrategy {
         HttpAnswer process(String query) {
-            return _proccesser.process(query);
+            return _proccesser.processQuery(query);
         }
     }
 }
