@@ -4,6 +4,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import pt.tecnico.cnv.common.InvalidArgumentsException;
 import tool.ContainerManager;
 import tool.DataContainer;
 

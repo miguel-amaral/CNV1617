@@ -1,4 +1,4 @@
-package pt.tecnico.cnv.webserver;
+package pt.tecnico.cnv.common;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Created by miguel on 16/04/17.
  */
-public class MSSQueryParser {
+public class QueryParser {
     protected String _inputFilename;
     protected String _sceneWidth_scols;
     protected String _sceneHeight_srows;
@@ -16,7 +16,7 @@ public class MSSQueryParser {
     protected String _rowsOffset_roff;
     protected String _query;
 
-    public MSSQueryParser(String query) throws InvalidArgumentsException {
+    public QueryParser(String query) throws InvalidArgumentsException {
         Map<String,String> arguments = this.queryToMap(query);
         _query = query;
         _inputFilename 		= arguments.get("f");
@@ -38,21 +38,9 @@ public class MSSQueryParser {
 
     }
 
-    public void execute() throws Exception {
-        String[] args = {
-                _inputFilename,
-                this.outputFileName(),
-                _sceneWidth_scols,
-                _sceneHeight_srows,
-                _windowWidth_wcols,
-                _windowHeight_wrows,
-                _columnOffset_coff,
-                _rowsOffset_roff
-        };
-        new raytracer.Main().createImage(args);
-    }
 
-    private Map<String, String> queryToMap(String query){
+
+    public Map<String, String> queryToMap(String query){
         Map<String, String> result = new HashMap<String, String>();
         for (String param : query.split("&")) {
             String pair[] = param.split("=");
