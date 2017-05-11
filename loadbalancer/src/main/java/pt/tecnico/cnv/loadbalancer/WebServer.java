@@ -43,6 +43,7 @@ public class WebServer {
         server.createContext("/job/done", new GenericHandler(new ListInstancesStrategy()));
 //        server.createContext("/r.html", new ImageRequestHandler());
         server.createContext("/processer/status", new GenericHandler(new ProccesserStatusStrategy()));
+        server.createContext("/status", new GenericHandler(new ProccesserStatusStrategy()));
         server.createContext("/r.html", new GenericHandler(new ProccessQueryStrategy()));
 
         server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
