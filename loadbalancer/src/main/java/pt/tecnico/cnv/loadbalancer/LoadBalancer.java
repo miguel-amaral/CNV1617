@@ -13,7 +13,7 @@ import java.util.Map;
 /**
  * Created by miguel on 10/05/17.
  */
-public class ProcessQuery {
+public class LoadBalancer {
 
     private AmazonEC2 ec2;
 
@@ -22,26 +22,37 @@ public class ProcessQuery {
 
     Map<String, Container> _instances = new HashMap<String, Container>();
 
-    public ProcessQuery(AmazonEC2 ec2)  {
+    public LoadBalancer(AmazonEC2 ec2)  {
         this.ec2 = ec2;
         updateInstances();
     }
 
-    public int metricValue() {
+    public int metricValue(String query) {
         //TODO ask mss the real value
         return 1;
     }
 
-    public HttpAnswer process(String query) {
+    private  void increaseMetric(Instance lowestInsance, String query) {
+        int metricValue = metricValue(query);
+        this.increaseMetric(lowestInsance,metricValue);
+    }
+
+    private synchronized void increaseMetric(Instance lowestInsance, int metricValue) {
+        _instances.get(lowestInsance.getInstanceId()).metric = _instances.get(lowestInsance.getInstanceId()).metric + metricValue;
+    }
+
+    public HttpAnswer processQuery(String query) {
 
         //update all instances ??
         updateInstances();
         Instance lowestInsance = getLighestMachine();
+        increaseMetric(lowestInsance,query);
         String ip = lowestInsance.getPublicIpAddress();
         System.out.println("lowest ip: " + ip);
         HttpAnswer answer = HttpRequest.sendGet(ip+":8000/r.html?"+query,new HashMap<String, String>());
         return answer;
     }
+
 
 
     private void updateInstances() {

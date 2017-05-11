@@ -1,2 +1,4 @@
+#!/usr/bin/env bash
 echo "Its a brave new world!"
-mvn clean install -q && mvn -pl loadbalancer exec:java -q
+(cd common ; mvn clean install -q )
+(cd loadbalancer ; mvn clean install exec:java -q )

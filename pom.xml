@@ -15,7 +15,8 @@
 	</properties>
 
 	<modules>
-		<module>instrumentation</module> 
+		<module>common</module>
+		<module>instrumentation</module>
 		<module>web-server</module>
 		<module>storageserver</module>
 		<module>loadbalancer</module>
