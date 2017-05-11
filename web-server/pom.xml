@@ -14,7 +14,6 @@
 	<name>webserver</name>
 	<url>http://maven.apache.org</url>
 
-
 	<build>
 		<plugins>
 			<plugin>
@@ -55,5 +54,10 @@
 			<artifactId>exec-maven-plugin</artifactId>
 			<version>1.4.0</version>
 		</dependency>
+        <dependency>
+            <groupId>pt.tecnico.cnv</groupId>
+            <artifactId>common</artifactId>
+            <version>0.0.1-SNAPSHOT</version>
+        </dependency>
 	</dependencies>
 </project>

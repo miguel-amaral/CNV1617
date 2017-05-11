@@ -12,6 +12,7 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import pt.tecnico.cnv.common.HttpAnswer;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -23,6 +24,7 @@ import java.util.concurrent.Executors;
 public class WebServer {
     private static int port = 12000;
     private static AmazonEC2      ec2;
+    private static ProcessQuery _proccesser;
     private static AmazonCloudWatch cloudWatch;
 
 	public static void main(String[] args) throws Exception {
@@ -30,12 +32,37 @@ public class WebServer {
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
         server.createContext("/instances/list", new ListInstances());
         server.createContext("/job/done", new ListInstances());
-        server.createContext("/r.html", new ImageRequestHandler());
+//        server.createContext("/r.html", new ImageRequestHandler());
+        server.createContext("/processer/status", new GenericHandler(new ProccesserStatusStrategy()));
+        server.createContext("/r.html", new GenericHandler(new ProccessQueryStrategy()));
 
         server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
         server.start();
         init();
 		System.out.println("Server is now running");
+    }
+
+    static class GenericHandler implements HttpHandler {
+
+        private final HttpStrategy _strategy;
+
+        GenericHandler(HttpStrategy strategy) {
+	        _strategy = strategy;
+        }
+
+        public void handle(HttpExchange httpExchange) throws IOException {
+            String query = httpExchange.getRequestURI().getQuery();
+
+            HttpAnswer answer = _strategy.process(query);
+            int requestStatus = answer.status();
+            String message = answer.response();
+
+
+            OutputStream os = httpExchange.getResponseBody();
+            httpExchange.sendResponseHeaders(requestStatus, message.length());
+            os.write(message.getBytes());
+            os.close();
+        }
     }
 	
     static class ListInstances implements HttpHandler {
@@ -60,24 +87,24 @@ public class WebServer {
         }
     }
 
-    static class ImageRequestHandler implements HttpHandler {
-        public void handle(HttpExchange t) throws IOException {
-            String query = t.getRequestURI().getQuery();
-            ProcessQuery proccesser = new ProcessQuery(query);
-
-            proccesser.process();
-            int requestStatus = proccesser.status();
-            String message = proccesser.response();
-
-
-            OutputStream os = t.getResponseBody();
-            t.sendResponseHeaders(requestStatus, message.length());
-            os.write(message.getBytes());
-            os.close();
-        }
-    }
+//    static class ImageRequestHandler implements HttpHandler {
+//        public void handle(HttpExchange t) throws IOException {
+//            String query = t.getRequestURI().getQuery();
+//
+//            _proccesser.process(query);
+//            int requestStatus = _proccesser.status();
+//            String message = _proccesser.response();
+//
+//
+//            OutputStream os = t.getResponseBody();
+//            t.sendResponseHeaders(requestStatus, message.length());
+//            os.write(message.getBytes());
+//            os.close();
+//        }
+//    }
 
     private static void init() throws Exception {
+
 
         /*
          * The ProfileCredentialsProvider will return your [default]
@@ -96,5 +123,20 @@ public class WebServer {
         }
         ec2 = AmazonEC2ClientBuilder.standard().withRegion("eu-west-2").withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
         cloudWatch = AmazonCloudWatchClientBuilder.standard().withRegion("eu-west-2").withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
+
+        _proccesser = new ProcessQuery(ec2);
+    }
+
+    private static class ProccesserStatusStrategy extends HttpStrategy {
+        HttpAnswer process(String query) {
+            String print = _proccesser.toString();
+            return new HttpAnswer(200,print);
+        }
+    }
+
+    private static class ProccessQueryStrategy extends HttpStrategy {
+        HttpAnswer process(String query) {
+            return _proccesser.process(query);
+        }
     }
 }
