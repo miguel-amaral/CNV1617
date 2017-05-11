@@ -68,26 +68,35 @@ public class WebServer {
 	
     static class ListInstances implements HttpHandler {
         public void handle(HttpExchange t) throws IOException {
-            String query = t.getRequestURI().getQuery();
-            System.out.println("Query: " + query);
+            try {
+                String query = t.getRequestURI().getQuery();
+                System.out.println("Query: " + query);
 
-            String newline = "\n";
-            String message = "ok" + newline;
-            System.out.println("message: " + message);
-            ListWorkerInstances executer = new ListWorkerInstances(ec2);
-            List<Instance> instances = executer.listInstances();
-            for(Instance instance : instances) {
-                String name = instance.getInstanceId();
-                message += name + newline;
+                String newline = "\n";
+                String message = "ok" + newline;
                 System.out.println("message: " + message);
+                ListWorkerInstances executer = new ListWorkerInstances(ec2);
+                List<Instance> instances = executer.listInstances();
+                for (Instance instance : instances) {
+                    String name = instance.getInstanceId();
+                    message += name + newline;
+                    System.out.println("message: " + message);
+                }
+                System.out.println("message: " + message);
+                OutputStream os = t.getResponseBody();
+                int requestStatus = 200;
+                t.sendResponseHeaders(requestStatus, message.length());
+                os.write(message.getBytes());
+                os.close();
+                System.out.println("close: " + message);
+            } catch (Exception e) {
+                e.printStackTrace();
+                try {
+                    throw e;
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
             }
-            System.out.println("message: " + message);
-            OutputStream os = t.getResponseBody();
-            int requestStatus = 200;
-            t.sendResponseHeaders(requestStatus, message.length());
-            os.write(message.getBytes());
-            os.close();
-            System.out.println("close: " + message);
         }
     }
 
