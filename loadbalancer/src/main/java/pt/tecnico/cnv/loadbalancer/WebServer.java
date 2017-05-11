@@ -73,18 +73,21 @@ public class WebServer {
 
             String newline = "\n";
             String message = "ok" + newline;
-
+            System.out.println("message: " + message);
             ListWorkerInstances executer = new ListWorkerInstances(ec2);
             List<Instance> instances = executer.listInstances();
             for(Instance instance : instances) {
                 String name = instance.getInstanceId();
                 message += name + newline;
+                System.out.println("message: " + message);
             }
+            System.out.println("message: " + message);
             OutputStream os = t.getResponseBody();
             int requestStatus = 200;
             t.sendResponseHeaders(requestStatus, message.length());
             os.write(message.getBytes());
             os.close();
+            System.out.println("close: " + message);
         }
     }
 
