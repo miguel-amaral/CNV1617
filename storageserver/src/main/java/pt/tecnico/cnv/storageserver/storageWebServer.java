@@ -28,7 +28,7 @@ public class storageWebServer extends Thread{
             HttpServer server;
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/ping", new PingHandler());
-            server.createContext("/r.html", new ReceiveDataHandler());
+            server.createContext("/data.html", new ReceiveDataHandler());
             server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
             server.start();
         } catch (IOException e) {
@@ -74,7 +74,7 @@ public class storageWebServer extends Thread{
 
                 message =  "THIS IS YOUR QUERY! LET'S PREPROCESS IT!!\n";
 
-                message += parser.toHMTLString();
+                message += parser.toString();
 
                 for (Map.Entry<String, String> entry : result.entrySet()){
 
