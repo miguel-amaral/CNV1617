@@ -16,6 +16,9 @@ public class HttpRequest {
     // HTTP GET request
     public static HttpAnswer sendGet(String url, Map<String,String> arguments){
         try {
+            if(!url.substring(0,5).equals("http")) {
+                url = "http://" + url;
+            }
             if (arguments.size() > 0) url += "?";
             for (Map.Entry<String, String> entry : arguments.entrySet()) {
                 url += entry.getKey() + "=" + entry.getValue() + "&";
