@@ -21,8 +21,8 @@ public class HttpRequest {
                 url += entry.getKey() + "=" + entry.getValue() + "&";
             }
             int length = url.length();
-            url = url.substring(length - 1, length);
-
+            if (arguments.size() > 0) url = url.substring(0, length-1);
+            System.out.println("url: "+ url);
 
             URL obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
@@ -48,6 +48,7 @@ public class HttpRequest {
             in.close();
 
             //print result
+            System.out.println("Answer: " +response.toString());
             return new HttpAnswer(responseCode, response.toString());
         }catch (Exception e ) {
             e.printStackTrace();
