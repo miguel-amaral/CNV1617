@@ -46,6 +46,19 @@
         </plugins>
     </build>
 
+    <dependencies>
+        <dependency>
+            <groupId>com.amazonaws</groupId>
+            <artifactId>aws-java-sdk</artifactId>
+            <version>1.11.126</version>
+        </dependency>
+        <dependency>
+        <groupId>pt.tecnico.cnv</groupId>
+        <artifactId>common</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+        </dependency>
+    </dependencies>
+
     <!--<dependencyManagement>-->
     <!--<dependencies>-->
     <!--<dependency>-->

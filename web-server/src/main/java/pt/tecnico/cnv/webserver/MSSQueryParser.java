@@ -6,7 +6,7 @@ import java.util.Map;
 /**
  * Created by miguel on 16/04/17.
  */
-public class InvokeRay {
+public class MSSQueryParser {
     protected String _inputFilename;
     protected String _sceneWidth_scols;
     protected String _sceneHeight_srows;
@@ -16,7 +16,7 @@ public class InvokeRay {
     protected String _rowsOffset_roff;
     protected String _query;
 
-    public InvokeRay(String query) throws InvalidArgumentsException {
+    public MSSQueryParser(String query) throws InvalidArgumentsException {
         Map<String,String> arguments = this.queryToMap(query);
         _query = query;
         _inputFilename 		= arguments.get("f");
