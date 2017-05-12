@@ -125,7 +125,7 @@ public class storageWebServer extends Thread{
                 requestStatus = 200;
 
 
-                message += "\n\n\n\n" + _app.createDefaultTable(message);
+                message += "\n\n\n\n" + _app.createDefaultTable();
 
             } catch (InvalidArgumentsException e) {
                 e.printStackTrace();

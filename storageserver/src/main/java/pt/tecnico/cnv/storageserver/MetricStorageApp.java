@@ -27,7 +27,7 @@ public class MetricStorageApp {
         //createDefaultTable();
     }
 
-    public static String createDefaultTable(String message){
+    public static String createDefaultTable(){
 
         String sms = "";
 
@@ -49,7 +49,7 @@ public class MetricStorageApp {
                     .withAttributeDefinitions(attributeDefinitions).withProvisionedThroughput(
                             new ProvisionedThroughput().withReadCapacityUnits(10L).withWriteCapacityUnits(10L));
 
-            System.out.println("Issuing CreateTable request for " + defaultTableName);
+            sms += "Issuing CreateTable request for " + defaultTableName;
 
 
 
@@ -82,7 +82,7 @@ public class MetricStorageApp {
             e.printStackTrace();
         }
 
-        return message + sms;
+        return sms;
 
     }
 
