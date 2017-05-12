@@ -10,7 +10,12 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import pt.tecnico.cnv.common.*;
+import pt.tecnico.cnv.common.GenericHandler;
+import pt.tecnico.cnv.common.HttpAnswer;
+import pt.tecnico.cnv.common.HttpStrategy;
+import pt.tecnico.cnv.common.InvalidArgumentsException;
+import pt.tecnico.cnv.common.QueryParser;
+import pt.tecnico.cnv.common.STATIC_VALUES;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -36,6 +41,7 @@ public class storageWebServer extends Thread{
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/ping", new PingHandler());
             server.createContext("/data.html", new ReceiveDataHandler());
+            server.createContext("/deleteTable", new DeleteTableHandler());
             server.createContext("/metric/value", new GenericHandler(new MetricValueStrategy()));
             server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
             server.start();
@@ -61,6 +67,34 @@ public class storageWebServer extends Thread{
             os.close();
         }
     }
+    static class DeleteTableHandler implements HttpHandler {
+        public void handle(HttpExchange t) throws IOException {
+
+            OutputStream os = t.getResponseBody();
+            String message = "";
+            int requestStatus = 0;
+
+            try {
+
+                message += _app.deleteDefaultTable();
+
+            } catch (Exception e) {
+                e.printStackTrace();
+                message = "Error: InvalidArgumentsException";
+                requestStatus = 400;
+                System.err.println(message);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                message = "Error: " + e.getMessage();
+                System.err.println(message);
+            }
+            t.sendResponseHeaders(requestStatus, message.length());
+            os.write(message.getBytes());
+
+            os.close();
+
+        }
+    }
 
     static class ReceiveDataHandler implements HttpHandler {
 
@@ -81,8 +115,6 @@ public class storageWebServer extends Thread{
 
                 message =  "THIS IS YOUR QUERY! LET'S PREPROCESS IT!!\n";
 
-                message += parser.toString();
-
                 for (Map.Entry<String, String> entry : result.entrySet()){
 
                     message +=  "KEY: " + entry.getKey() + "\t\tVALUE: " + entry.getValue() + "\n";
@@ -91,7 +123,7 @@ public class storageWebServer extends Thread{
                 requestStatus = 200;
 
 
-                message += "\n\n\n\n" + _app.createDefaultTable(message);
+                message += "\n\n\n\n" + _app.createDefaultTable();
 
             } catch (InvalidArgumentsException e) {
                 e.printStackTrace();
