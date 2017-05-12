@@ -128,13 +128,10 @@ public class LoadBalancer {
             }
         }
         int index = 0;
-        System.out.println("index: " + index);
         int size =minInstance.size();
-        System.out.println("size = " + size);
         if(size > 1) {
             Random rn = new Random();
             index = rn.nextInt(size);
-            System.out.println("index: " + index);
         }
         return minInstance.get(index);
     }
