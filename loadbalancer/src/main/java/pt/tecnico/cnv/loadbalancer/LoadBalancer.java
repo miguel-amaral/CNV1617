@@ -114,7 +114,7 @@ public class LoadBalancer {
         return toReturn.toString();
     }
 
-    public synchronized Instance getLightestMachine() {
+    public Instance getLightestMachine() {
         long min = Long.MAX_VALUE; //max int
 
         List<Instance> minInstance = null;
