@@ -80,11 +80,6 @@ public class WebServer {
                         "</pre>";
 
                   String jobID = ray.jobID();
-                Map<String,String> args =new HashMap<>();
-                args.put("jobID",jobID);
-                HttpAnswer answer = HttpRequest.sendGet("load-balancer-cnv.tk:8000/job/done",args);
-                System.out.println(answer);
-            } catch (InvalidArgumentsException e) {
 //                System.out.println("instructions: " + data.instructions);
 //                System.out.println("bb_blocks: " + data.bb_blocks);
 //                System.out.println("methods: " + data.methods);
@@ -102,7 +97,12 @@ public class WebServer {
 
                 message += "<b>Elapsed time: </b>" +  "<pre>" + elapsedTimeSec + "\n </pre>";
 
+                Map<String,String> args =new HashMap<>();
+                args.put("jobID",jobID);
+                HttpAnswer answer = HttpRequest.sendGet("load-balancer-cnv.tk:8000/job/done",args);
+                System.out.println(answer);
 
+            } catch (InvalidArgumentsException e) {
 				e.printStackTrace();
 				message = "Error: InvalidArgumentsException";
 				requestStatus = 400;
