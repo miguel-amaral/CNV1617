@@ -4,6 +4,7 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.Instance;
 import pt.tecnico.cnv.common.HttpAnswer;
 import pt.tecnico.cnv.common.HttpRequest;
+import pt.tecnico.cnv.common.STATIC_VALUES;
 
 import java.util.*;
 
@@ -49,9 +50,14 @@ public class LoadBalancer {
         _jobs.put(jobID,new Container(lowestInsance,metricValue));
 
         String ip = lowestInsance.getPublicIpAddress();
-        System.out.println("lowest ip: " + ip);
+        if(STATIC_VALUES.DEBUG_LOAD_BALANCER_CHOSEN_MACHINE) {
+            System.out.println("ip: " + ip + " chosen for " + jobID);
+        }
 
         String letter = alreadyInstrumented ? "alreadyInstrumented" : "r" ;
+        if(STATIC_VALUES.DEBUG_LOAD_BALANCER_JOB_ALREADY_INSTRUCTED ) {
+            System.out.println("jobID: "  + jobID + " already instrument: " + alreadyInstrumented);
+        }
         HttpAnswer answer = HttpRequest.sendGet(ip+":8000/"+letter+".html?"+query+"&jobID="+jobID,new HashMap<String, String>());
         return answer;
     }
@@ -77,7 +83,6 @@ public class LoadBalancer {
             return;
         }
         if(this.instanceIsReady(instance)){
-            System.out.println("New instance: " + instance.getPublicIpAddress());
             _instances.put(id,new Container(instance,0));
         }
     }
@@ -85,7 +90,9 @@ public class LoadBalancer {
     private boolean instanceIsReady(Instance instance) {
         String publicIpAddress = instance.getPublicIpAddress();
         HttpAnswer answer = HttpRequest.sendGet(publicIpAddress+":8000/ping", new HashMap<String, String>());
-        System.out.println("instance: "+publicIpAddress+" is ready: " + (answer.status() == 200));
+        if(STATIC_VALUES.DEBUG_LOAD_BALANCER_WEB_SERVER_READY) {
+            System.out.println("instance: " + publicIpAddress + " is ready: " + (answer.status() == 200));
+        }
         return answer.status() == 200;
     }
 

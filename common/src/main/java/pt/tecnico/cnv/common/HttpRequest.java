@@ -25,8 +25,9 @@ public class HttpRequest {
             }
             int length = url.length();
             if (arguments.size() > 0) url = url.substring(0, length-1);
-            System.out.println("url: "+ url);
-
+            if(STATIC_VALUES.DEBUG_HTTP_REQUEST) {
+                System.out.println("url: " + url);
+            }
             URL obj = new URL(url);
             HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
@@ -37,9 +38,11 @@ public class HttpRequest {
             con.setRequestProperty("User-Agent", USER_AGENT);
 
             int responseCode = con.getResponseCode();
-            System.out.println("\nSending 'GET' request to URL : " + url);
-            System.out.println("Response Code : " + responseCode);
 
+            if(STATIC_VALUES.DEBUG_HTTP_REQUEST) {
+                System.out.println("\nSending 'GET' request to URL : " + url);
+                System.out.println("Response Code : " + responseCode);
+            }
             BufferedReader in = new BufferedReader(
                     new InputStreamReader(con.getInputStream()));
             String inputLine;
@@ -51,7 +54,9 @@ public class HttpRequest {
             in.close();
 
             //print result
-            System.out.println("Answer: " +response.toString());
+            if(STATIC_VALUES.DEBUG_HTTP_REQUEST) {
+                System.out.println("Answer: " + response.toString());
+            }
             return new HttpAnswer(responseCode, response.toString());
         }catch (Exception e ) {
             e.printStackTrace();

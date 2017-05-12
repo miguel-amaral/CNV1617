@@ -92,15 +92,12 @@ public class WebServer {
 
             String newline = "\n";
             String message = "ok" + newline;
-            System.out.println("message: " + message);
             ListWorkerInstances executer = new ListWorkerInstances(ec2);
             List<Instance> instances = executer.listInstances();
             for (Instance instance : instances) {
                 String name = instance.getInstanceId();
                 message += name + newline;
-                System.out.println("message: " + message);
             }
-            System.out.println("message: " + message);
             int requestStatus = 200;
             return new HttpAnswer(requestStatus,message);
         }
@@ -112,7 +109,7 @@ public class WebServer {
             if(arg.length != 2) return new HttpAnswer();
             String jobId = arg[1];
             _proccesser.jobDone(jobId);
-            return new HttpAnswer(400,"thanks");
+            return new HttpAnswer(200,"thanks");
         }
     }
 }
