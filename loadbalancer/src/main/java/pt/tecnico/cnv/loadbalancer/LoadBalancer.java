@@ -108,15 +108,25 @@ public class LoadBalancer {
     }
 
     public Instance getLightestMachine() {
-        long min = 0; //max int
-        Instance minInstance = null;
+        long min = Long.MAX_VALUE; //max int
+
+        List<Instance> minInstance = null;
         for(Map.Entry<String,Container> entry : _instances.entrySet()){
             if(entry.getValue().metric < min || minInstance == null) {
-                minInstance = entry.getValue().instance;
+                minInstance = new ArrayList<Instance>();
+                minInstance.add(entry.getValue().instance);
                 min = entry.getValue().metric;
+            } else if(entry.getValue().metric == min) {
+                minInstance.add(entry.getValue().instance);
             }
         }
-        return minInstance;
+        int index = 0;
+        int size =minInstance.size();
+        if(size > 1) {
+            Random rn = new Random();
+            index = rn.nextInt() % size;
+        }
+        return minInstance.get(index);
     }
 
     public void jobDone(String jobId) {
@@ -124,7 +134,6 @@ public class LoadBalancer {
         this.decreaseMetric(job.instance,job.metric);
         _jobs.remove(jobId);
     }
-
 
     class Container {
         Instance instance;
