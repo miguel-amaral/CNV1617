@@ -133,7 +133,44 @@ public class MetricStorageApp {
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
 
-            message += "Result: " + putItemResult;
+
+        } catch (AmazonServiceException ase) {
+            error += "\n\nCaught an AmazonServiceException, which means your request made it "
+                    + "to AWS, but was rejected with an error response for some reason.";
+            error += "\nError Message:    " + ase.getMessage();
+            error += "\nHTTP Status Code: " + ase.getStatusCode();
+            error += "\nAWS Error Code:   " + ase.getErrorCode();
+            error += "\nError Type:       " + ase.getErrorType();
+            error += "\nRequest ID:       " + ase.getRequestId();
+        } catch (AmazonClientException ace) {
+            error += "\nCaught an AmazonClientException, which means the client encountered "
+                    + "a serious internal problem while trying to communicate with AWS, "
+                    + "such as not being able to access the network.";
+            error += "\nError Message: " + ace.getMessage();
+        } catch (Exception e){
+
+            e.printStackTrace();
+        }
+
+
+        return message + error;
+    }
+
+    public static String queryItem(String query){
+
+        String message = "";
+        String error = "";
+        try{
+            HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
+            Condition condition = new Condition()
+                    .withComparisonOperator(ComparisonOperator.EQ.toString())
+                    .withAttributeValueList(new AttributeValue(query));
+            scanFilter.put("fileName", condition);
+            ScanRequest scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
+            ScanResult scanResult = _dynamoDB.scan(scanRequest);
+            System.out.println("Result: " + scanResult);
+
+
 
         } catch (AmazonServiceException ase) {
             error += "\n\nCaught an AmazonServiceException, which means your request made it "

@@ -129,6 +129,12 @@ public class storageWebServer extends Thread{
 
                 message += _app.insertNewItem(query);
 
+                message += "\nQuerying new item ...";
+
+                message += _app.queryItem("text01.txt");
+
+
+
             } catch (InvalidArgumentsException e) {
                 e.printStackTrace();
                 message = "Error: InvalidArgumentsException";
