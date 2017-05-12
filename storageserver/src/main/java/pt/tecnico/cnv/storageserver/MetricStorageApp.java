@@ -161,14 +161,16 @@ public class MetricStorageApp {
         String message = "";
         String error = "";
         try{
+
+
             HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
             Condition condition = new Condition()
-                    .withComparisonOperator(ComparisonOperator.EQ.toString())
+                    .withComparisonOperator(ComparisonOperator.EQ)
                     .withAttributeValueList(new AttributeValue(query));
             scanFilter.put("fileName", condition);
             ScanRequest scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
             ScanResult scanResult = _dynamoDB.scan(scanRequest);
-            System.out.println("Result: " + scanResult);
+            message += "Result: " + scanResult;
 
 
 
