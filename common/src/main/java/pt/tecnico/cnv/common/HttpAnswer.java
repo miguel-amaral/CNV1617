@@ -21,4 +21,8 @@ public class HttpAnswer {
     public int status() {
         return _status;
     }
+
+    public String toString() {
+        return "HttpAnswer: " + _status + " : " + _message;
+    }
 }

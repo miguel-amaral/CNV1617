@@ -9,13 +9,11 @@ import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.Instance;
-import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
+import pt.tecnico.cnv.common.GenericHandler;
 import pt.tecnico.cnv.common.HttpAnswer;
+import pt.tecnico.cnv.common.HttpStrategy;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -39,9 +37,9 @@ public class WebServer {
         }
 
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
-        server.createContext("/instances/list", new GenericHandler(new ListInstancesStrategy()));
-        server.createContext("/job/done", new GenericHandler(new ListInstancesStrategy()));
 //        server.createContext("/r.html", new ImageRequestHandler());
+        server.createContext("/instances/list", new GenericHandler(new ListInstancesStrategy()));
+        server.createContext("/job/done", new GenericHandler(new JobDone()));
         server.createContext("/processer/status", new GenericHandler(new ProccesserStatusStrategy()));
         server.createContext("/status", new GenericHandler(new ProccesserStatusStrategy()));
         server.createContext("/r.html", new GenericHandler(new ProccessQueryStrategy()));
@@ -52,51 +50,7 @@ public class WebServer {
 		System.out.println("Credentials loaded");
     }
 
-    static class GenericHandler implements HttpHandler {
 
-        private final HttpStrategy _strategy;
-
-        GenericHandler(HttpStrategy strategy) {
-	        _strategy = strategy;
-        }
-
-        public void handle(HttpExchange httpExchange) throws IOException {
-                String query = httpExchange.getRequestURI().getQuery();
-
-            HttpAnswer answer = null;
-            try {
-                answer = _strategy.process(query);
-            } catch (Exception e) {
-                e.printStackTrace();
-                answer = new HttpAnswer();
-            }
-            int requestStatus = answer.status();
-            String message = answer.response();
-
-
-            OutputStream os = httpExchange.getResponseBody();
-            httpExchange.sendResponseHeaders(requestStatus, message.length());
-            os.write(message.getBytes());
-            os.close();
-
-        }
-    }
-
-//    static class ImageRequestHandler implements HttpHandler {
-//        public void handle(HttpExchange t) throws IOException {
-//            String query = t.getRequestURI().getQuery();
-//
-//            _proccesser.processQuery(query);
-//            int requestStatus = _proccesser.status();
-//            String message = _proccesser.response();
-//
-//
-//            OutputStream os = t.getResponseBody();
-//            t.sendResponseHeaders(requestStatus, message.length());
-//            os.write(message.getBytes());
-//            os.close();
-//        }
-//    }
 
     private static boolean init() {
 
@@ -124,19 +78,19 @@ public class WebServer {
     }
 
     private static class ProccesserStatusStrategy extends HttpStrategy {
-        HttpAnswer process(String query) throws Exception {
+        public HttpAnswer process(String query) throws Exception {
             String print = _proccesser.toString();
             return new HttpAnswer(200,print);
         }
     }
 
     private static class ProccessQueryStrategy extends HttpStrategy {
-        HttpAnswer process(String query) throws Exception {
+        public HttpAnswer process(String query) throws Exception {
             return _proccesser.processQuery(query);
         }
     }
     private static class ListInstancesStrategy extends HttpStrategy {
-        HttpAnswer process(String query) throws Exception{
+        public HttpAnswer process(String query) throws Exception{
 
             String newline = "\n";
             String message = "ok" + newline;
@@ -151,6 +105,16 @@ public class WebServer {
             System.out.println("message: " + message);
             int requestStatus = 200;
             return new HttpAnswer(requestStatus,message);
+        }
+    }
+
+    private static class JobDone extends HttpStrategy {
+        public HttpAnswer process(String query) throws Exception {
+            String[] arg = query.split("=");
+            if(arg.length != 2) return new HttpAnswer();
+            String jobId = arg[1];
+            _proccesser.jobDone(jobId);
+            return new HttpAnswer(400,"thanks");
         }
     }
 }

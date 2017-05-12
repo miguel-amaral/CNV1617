@@ -3,16 +3,16 @@ package pt.tecnico.cnv.webserver;
 import pt.tecnico.cnv.common.InvalidArgumentsException;
 import pt.tecnico.cnv.common.QueryParser;
 
-import java.util.HashMap;
-import java.util.Map;
-
 /**
  * Created by miguel on 16/04/17.
  */
 public class InvokeRay extends QueryParser {
 
+    protected String _jobID;
+
     public InvokeRay(String query) throws InvalidArgumentsException {
         super(query);
+        _jobID = _arguments.get("jobID");
     }
 
     public void execute() throws Exception {
@@ -29,5 +29,8 @@ public class InvokeRay extends QueryParser {
         new raytracer.Main().createImage(args);
     }
 
+    public String jobID() {
+        return _jobID;
+    }
 
 }

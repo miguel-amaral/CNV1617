@@ -5,10 +5,7 @@ import com.amazonaws.services.ec2.model.Instance;
 import pt.tecnico.cnv.common.HttpAnswer;
 import pt.tecnico.cnv.common.HttpRequest;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by miguel on 10/05/17.
@@ -21,39 +18,47 @@ public class LoadBalancer {
     List<String> _removed_instances = new ArrayList<String>();
 
     Map<String, Container> _instances = new HashMap<String, Container>();
+    Map<String,Container> _jobs = new HashMap<String, Container>();
+
 
     public LoadBalancer(AmazonEC2 ec2)  {
         this.ec2 = ec2;
         updateInstances();
     }
 
-    public int metricValue(String query) {
-        //TODO ask mss the real value
-        return 1;
+    private synchronized void increaseMetric(Instance instance, long metricValue) {
+        _instances.get(instance.getInstanceId()).metric = _instances.get(instance.getInstanceId()).metric + metricValue;
+    }
+    private synchronized void decreaseMetric(Instance instance, long metricValue) {
+        _instances.get(instance.getInstanceId()).metric = _instances.get(instance.getInstanceId()).metric - metricValue;
     }
 
-    private  void increaseMetric(Instance lowestInsance, String query) {
-        int metricValue = metricValue(query);
-        this.increaseMetric(lowestInsance,metricValue);
-    }
-
-    private synchronized void increaseMetric(Instance lowestInsance, int metricValue) {
-        _instances.get(lowestInsance.getInstanceId()).metric = _instances.get(lowestInsance.getInstanceId()).metric + metricValue;
-    }
 
     public HttpAnswer processQuery(String query) {
 
         //update all instances ??
         updateInstances();
-        Instance lowestInsance = getLighestMachine();
-        increaseMetric(lowestInsance,query);
+        Instance lowestInsance = getLightestMachine();
+
+        GetMetricValue requester = new GetMetricValue(query);
+
+        long metricValue = requester.getMetric();
+        boolean alreadyInstrumented = requester.isAlreadyIntrumented();
+        this.increaseMetric(lowestInsance,metricValue);
+        String jobID = newJobID();
+        _jobs.put(jobID,new Container(lowestInsance,metricValue));
+
         String ip = lowestInsance.getPublicIpAddress();
         System.out.println("lowest ip: " + ip);
-        HttpAnswer answer = HttpRequest.sendGet(ip+":8000/r.html?"+query,new HashMap<String, String>());
+
+        String letter = alreadyInstrumented ? "alreadyInstrumented" : "r" ;
+        HttpAnswer answer = HttpRequest.sendGet(ip+":8000/"+letter+".html?"+query+"&jobID="+jobID,new HashMap<String, String>());
         return answer;
     }
 
-
+    private synchronized String newJobID(){
+        return UUID.randomUUID().toString();
+    }
 
     private void updateInstances() {
         List<Instance> instances = new ListWorkerInstances(ec2).listInstances();
@@ -72,15 +77,16 @@ public class LoadBalancer {
             return;
         }
         if(this.instanceIsReady(instance)){
+            System.out.println("New instance: " + instance.getPublicIpAddress());
             _instances.put(id,new Container(instance,0));
         }
     }
 
     private boolean instanceIsReady(Instance instance) {
         String publicIpAddress = instance.getPublicIpAddress();
-
-        return true; //TODO
-
+        HttpAnswer answer = HttpRequest.sendGet(publicIpAddress+":8000/ping", new HashMap<String, String>());
+        System.out.println("instance: "+publicIpAddress+" is ready: " + (answer.status() == 200));
+        return answer.status() == 200;
     }
 
     public String toString() {
@@ -96,8 +102,8 @@ public class LoadBalancer {
         return toReturn.toString();
     }
 
-    public Instance getLighestMachine() {
-        int min = 0; //max int
+    public Instance getLightestMachine() {
+        long min = 0; //max int
         Instance minInstance = null;
         for(Map.Entry<String,Container> entry : _instances.entrySet()){
             if(entry.getValue().metric < min || minInstance == null) {
@@ -108,15 +114,18 @@ public class LoadBalancer {
         return minInstance;
     }
 
-    class Container {
-        Instance instance;
-        int metric;
-        Container(Instance instance, int metric) {
-            this.instance = instance;
-            this.metric = metric;
-        }
+    public void jobDone(String jobId) {
+        Container job = _jobs.get(jobId);
+        this.decreaseMetric(job.instance,job.metric);
+        _jobs.remove(jobId);
     }
 
 
-
-}
+    class Container {
+        Instance instance;
+        long metric;
+        Container(Instance instance, long metric) {
+            this.instance = instance;
+            this.metric = metric;
+        }
+    }}

@@ -15,17 +15,18 @@ public class QueryParser {
     protected String _columnOffset_coff;
     protected String _rowsOffset_roff;
     protected String _query;
+    protected Map<String,String > _arguments;
 
     public QueryParser(String query) throws InvalidArgumentsException {
-        Map<String,String> arguments = this.queryToMap(query);
+        _arguments = this.queryToMap(query);
         _query = query;
-        _inputFilename 		= arguments.get("f");
-        _sceneWidth_scols 	= arguments.get("sc");
-        _sceneHeight_srows 	= arguments.get("sr");
-        _windowWidth_wcols 	= arguments.get("wc");
-        _windowHeight_wrows = arguments.get("wr");
-        _columnOffset_coff 	= arguments.get("coff");
-        _rowsOffset_roff 	= arguments.get("roff");
+        _inputFilename 		= _arguments.get("f");
+        _sceneWidth_scols 	= _arguments.get("sc");
+        _sceneHeight_srows 	= _arguments.get("sr");
+        _windowWidth_wcols 	= _arguments.get("wc");
+        _windowHeight_wrows = _arguments.get("wr");
+        _columnOffset_coff 	= _arguments.get("coff");
+        _rowsOffset_roff 	= _arguments.get("roff");
 
 
         if(_inputFilename == null      || _inputFilename.equals("")) throw new InvalidArgumentsException();
