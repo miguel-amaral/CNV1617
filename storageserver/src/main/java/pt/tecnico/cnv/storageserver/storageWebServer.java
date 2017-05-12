@@ -5,15 +5,12 @@ import com.amazonaws.auth.AWSCredentials;
 import com.amazonaws.auth.AWSStaticCredentialsProvider;
 import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
-import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import pt.tecnico.cnv.common.InvalidArgumentsException;
-import pt.tecnico.cnv.common.QueryParser;
+import pt.tecnico.cnv.common.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -39,6 +36,7 @@ public class storageWebServer extends Thread{
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/ping", new PingHandler());
             server.createContext("/data.html", new ReceiveDataHandler());
+            server.createContext("/metric/value", new GenericHandler(new MetricValueStrategy()));
             server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
             server.start();
         } catch (IOException e) {
@@ -133,4 +131,17 @@ public class storageWebServer extends Thread{
     }
 
 
+    private static class MetricValueStrategy extends HttpStrategy {
+        @Override
+        public HttpAnswer process(String query) throws Exception {
+            boolean alreadyInstrumented = false;
+            long metric = 100;
+
+
+
+            //dont mess with what is below
+            String message = alreadyInstrumented + STATIC_VALUES.SEPARATOR_STORAGE_METRIC_REQUEST + metric;
+            return new HttpAnswer(200,message);
+        }
+    }
 }

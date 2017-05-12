@@ -1,5 +1,11 @@
 package pt.tecnico.cnv.loadbalancer;
 
+import pt.tecnico.cnv.common.HttpAnswer;
+import pt.tecnico.cnv.common.HttpRequest;
+import pt.tecnico.cnv.common.STATIC_VALUES;
+
+import java.util.HashMap;
+
 /**
  * Responsible for communicating with the MSS
  *
@@ -14,7 +20,18 @@ public class GetMetricValue {
     public GetMetricValue(String query) {
         metric = 1;
         alreadyIntrumented = false;
-        //TODO
+
+        HttpAnswer answer = HttpRequest.sendGet("storage-server-cnv.tk:8000/metric/value?"+query,new HashMap<String, String>());
+        if(answer.status() != 200) {
+            System.out.println("Storage Server error!!!");
+            return;
+        } else {
+            String message = answer.response();
+            String[] params = message.split(STATIC_VALUES.SEPARATOR_STORAGE_METRIC_REQUEST);
+
+            alreadyIntrumented = Boolean.parseBoolean(params[0]);
+            metric = Long.parseLong(params[1]);
+        }
     }
 
 

@@ -50,8 +50,6 @@ public class WebServer {
 		System.out.println("Credentials loaded");
     }
 
-
-
     private static boolean init() {
 
 
