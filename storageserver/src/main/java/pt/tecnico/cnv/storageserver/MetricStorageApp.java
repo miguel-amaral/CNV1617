@@ -2,20 +2,15 @@ package pt.tecnico.cnv.storageserver;
 
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.AWSStaticCredentialsProvider;
-import com.amazonaws.auth.profile.ProfileCredentialsProvider;
-import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.document.Table;
-import com.amazonaws.services.dynamodbv2.document.TableCollection;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import pt.tecnico.cnv.common.QueryParser;
 
-import javax.xml.crypto.Data;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Created by rafa32 on 11-05-2017.
@@ -24,7 +19,7 @@ public class MetricStorageApp {
 
     private static AmazonDynamoDB _dynamoDB;
 
-    private static String defaultTableName = "concatenation_of_query";
+    private static String defaultTableName = "metrics_table";
 
     public MetricStorageApp(AmazonDynamoDB dynamoDB){
 
@@ -34,20 +29,25 @@ public class MetricStorageApp {
 
     public static String createDefaultTable(String message){
 
+        String sms = "";
 
         try {
 
 
 
+
             List<AttributeDefinition> attributeDefinitions = new ArrayList<AttributeDefinition>();
-            attributeDefinitions.add(new AttributeDefinition().withAttributeName("concat").withAttributeType(ScalarAttributeType.S));
+            attributeDefinitions.add(new AttributeDefinition().withAttributeName("query").withAttributeType(ScalarAttributeType.S));
+            attributeDefinitions.add(new AttributeDefinition().withAttributeName("#_blocks").withAttributeType(ScalarAttributeType.S));
+            attributeDefinitions.add(new AttributeDefinition().withAttributeName("#_instrs").withAttributeType(ScalarAttributeType.S));
+            attributeDefinitions.add(new AttributeDefinition().withAttributeName("metric").withAttributeType(ScalarAttributeType.S));
 
             List<KeySchemaElement> keySchema = new ArrayList<KeySchemaElement>();
-            keySchema.add(new KeySchemaElement().withAttributeName("concat").withKeyType(KeyType.HASH)); // Partition key
+            keySchema.add(new KeySchemaElement().withAttributeName("query").withKeyType(KeyType.HASH)); // Partition key
 
             CreateTableRequest newRequest = new CreateTableRequest().withTableName(defaultTableName).withKeySchema(keySchema)
                     .withAttributeDefinitions(attributeDefinitions).withProvisionedThroughput(
-                            new ProvisionedThroughput().withReadCapacityUnits(5L).withWriteCapacityUnits(6L));
+                            new ProvisionedThroughput().withReadCapacityUnits(10L).withWriteCapacityUnits(10L));
 
             System.out.println("Issuing CreateTable request for " + defaultTableName);
 
@@ -58,9 +58,12 @@ public class MetricStorageApp {
             // wait for the table to move into ACTIVE state
             TableUtils.waitUntilActive(_dynamoDB, defaultTableName);
 
-            message += "Waiting for " + defaultTableName + " to be created...this may take a while...\n";
 
-            message += getTableInformation(message);
+
+
+            sms += "Waiting for " + defaultTableName + " to be created...this may take a while...\n";
+
+            sms += getTableInformation(sms);
 
         } catch (AmazonServiceException ase) {
             System.out.println("Caught an AmazonServiceException, which means your request made it "
@@ -79,7 +82,7 @@ public class MetricStorageApp {
             e.printStackTrace();
         }
 
-        return message;
+        return message + sms;
 
     }
 
@@ -100,7 +103,10 @@ public class MetricStorageApp {
         return message;
     }
 
-    private static void deleteDefaultTable() {
+    public static String deleteDefaultTable() {
+
+
+        String message = "Deleting table: " + defaultTableName;
 
         System.out.println("Deleting table: " + defaultTableName);
 
@@ -108,6 +114,10 @@ public class MetricStorageApp {
 
         // Deletes if table exists
         TableUtils.deleteTableIfExists(_dynamoDB, deleteRequest);
+
+        message += "\n Table successful deleted!!";
+
+        return message;
 
 
     }
