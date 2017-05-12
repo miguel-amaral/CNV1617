@@ -99,6 +99,11 @@ public class LoadBalancer {
         for (String id : _removed_instances) {
             toReturn.append(id).append(newLine);
         }
+        toReturn.append(newLine);
+        toReturn.append(newLine).append("Current Jobs:").append(newLine);
+        for(Map.Entry<String,Container> entry : _jobs.entrySet()){
+            toReturn.append(entry.getKey()).append(" : ").append(entry.getValue().instance.getPublicIpAddress()).append(newLine);
+        }
         return toReturn.toString();
     }
 
