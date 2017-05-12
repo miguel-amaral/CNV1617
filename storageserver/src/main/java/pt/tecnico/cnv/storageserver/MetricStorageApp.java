@@ -60,7 +60,9 @@ public class MetricStorageApp {
 
             sms += "Waiting for " + defaultTableName + " to be created...this may take a while...\n";
 
-            sms += getTableInformation(sms);
+            sms += getTableInformation();
+
+
 
         } catch (AmazonServiceException ase) {
             System.out.println("Caught an AmazonServiceException, which means your request made it "
@@ -83,14 +85,14 @@ public class MetricStorageApp {
 
     }
 
-    private static String getTableInformation(String message) {
+    private static String getTableInformation() {
 
         System.out.println("Describing " + defaultTableName);
 
         DescribeTableRequest describeTableRequest = new DescribeTableRequest().withTableName(defaultTableName);
         TableDescription tableDescription = _dynamoDB.describeTable(describeTableRequest).getTable();
 
-        message += String.format(
+        String message = String.format(
                 "Name: %s\n" + "Status: %s \n" + "Provisioned Throughput (read capacity units/sec): %d \n"
                         + "Provisioned Throughput (write capacity units/sec): %d \n",
                 tableDescription.getTableName(), tableDescription.getTableStatus(),
@@ -105,8 +107,6 @@ public class MetricStorageApp {
 
         String message = "Deleting table: " + defaultTableName;
 
-        System.out.println("Deleting table: " + defaultTableName);
-
         DeleteTableRequest deleteRequest = new DeleteTableRequest().withTableName(defaultTableName);
 
         // Deletes if table exists
@@ -119,8 +119,9 @@ public class MetricStorageApp {
 
     }
 
-    private static void insertNewItem(String query){
+    public static String insertNewItem(String query){
 
+        String message = "";
         try{
             Map<String, String> result = new HashMap<>();
 
@@ -131,7 +132,7 @@ public class MetricStorageApp {
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
 
-            System.out.println("Result: " + putItemResult);
+            message += "Result: " + putItemResult;
 
         } catch (AmazonServiceException ase) {
             System.out.println("Caught an AmazonServiceException, which means your request made it "
@@ -151,6 +152,8 @@ public class MetricStorageApp {
             e.printStackTrace();
         }
 
+
+        return message;
     }
 
 
