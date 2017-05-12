@@ -1,5 +1,14 @@
 package pt.tecnico.cnv.storageserver;
 
+import com.amazonaws.AmazonClientException;
+import com.amazonaws.auth.AWSCredentials;
+import com.amazonaws.auth.AWSStaticCredentialsProvider;
+import com.amazonaws.auth.profile.ProfileCredentialsProvider;
+import com.amazonaws.regions.Regions;
+import com.amazonaws.services.cloudwatch.AmazonCloudWatchClientBuilder;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -18,6 +27,7 @@ import java.util.concurrent.Executors;
 public class storageWebServer extends Thread{
 
     private static MetricStorageApp _app;
+    private static AmazonDynamoDB dynamoDB;
 
     private static int port = 8000;
 
@@ -35,8 +45,7 @@ public class storageWebServer extends Thread{
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        _app = getAppInstance();
-        _app.init();
+        init();
 
         System.out.println("Greetings summoners! MSS is now running..");
     }
@@ -84,6 +93,8 @@ public class storageWebServer extends Thread{
                 requestStatus = 200;
 
 
+                message += "\n\n\n\n" + _app.createDefaultTable(message);
+
             } catch (InvalidArgumentsException e) {
                 e.printStackTrace();
                 message = "Error: InvalidArgumentsException";
@@ -104,9 +115,21 @@ public class storageWebServer extends Thread{
     }
 
 
-    public static MetricStorageApp getAppInstance(){
-        if(_app == null) _app = new MetricStorageApp();
-        return _app;
+    private static void init() {
+
+
+        AWSCredentials credentials = null;
+        try {
+            credentials = new ProfileCredentialsProvider().getCredentials();
+        } catch (Exception e) {
+            throw new AmazonClientException(
+                    "Cannot load the credentials from the credential profiles file. " +
+                            "Please make sure that your credentials file is at the correct " +
+                            "location (~/.aws/credentials), and is in valid format.",
+                    e);
+        }
+        dynamoDB = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_WEST_2).withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
+        _app = new MetricStorageApp(dynamoDB);
     }
 
 

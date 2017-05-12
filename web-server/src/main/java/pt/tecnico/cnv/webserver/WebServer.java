@@ -53,6 +53,9 @@ public class WebServer {
             OutputStream os = t.getResponseBody();
             String message = null;
             int requestStatus = 0;
+
+            long start = System.currentTimeMillis();
+
 			try {
 			    System.out.println("thread: "+Thread.currentThread().getId());
 			    ContainerManager.clearInstance(Thread.currentThread().getId());
@@ -76,12 +79,30 @@ public class WebServer {
 
                         "</pre>";
 
-                String jobID = ray.jobID();
+                  String jobID = ray.jobID();
                 Map<String,String> args =new HashMap<>();
                 args.put("jobID",jobID);
                 HttpAnswer answer = HttpRequest.sendGet("load-balancer-cnv.tk:8000/job/done",args);
                 System.out.println(answer);
             } catch (InvalidArgumentsException e) {
+//                System.out.println("instructions: " + data.instructions);
+//                System.out.println("bb_blocks: " + data.bb_blocks);
+//                System.out.println("methods: " + data.methods);
+//                System.out.println("branch_fail: " + data.branch_fail);
+//                System.out.println("branch_success: " + data.branch_success);
+
+
+                long elapsedTimeMillis = System.currentTimeMillis()-start;
+
+                // Get elapsed time in seconds
+                float elapsedTimeSec = elapsedTimeMillis/1000F;
+
+                // Get elapsed time in minutes
+                float elapsedTimeMin = elapsedTimeMillis/(60*1000F);
+
+                message += "<b>Elapsed time: </b>" +  "<pre>" + elapsedTimeSec + "\n </pre>";
+
+
 				e.printStackTrace();
 				message = "Error: InvalidArgumentsException";
 				requestStatus = 400;

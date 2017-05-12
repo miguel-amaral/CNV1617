@@ -93,7 +93,7 @@ public class LoadBalancer {
         String newLine = "\n";
         StringBuilder toReturn = new StringBuilder("Instances:" + newLine);
         for(Map.Entry<String,Container> entry : _instances.entrySet()){
-            toReturn.append(entry.getKey()).append(" : ").append(entry.getValue().metric);
+            toReturn.append(entry.getKey()).append(" : ").append(entry.getValue().metric).append(newLine);
         }
         toReturn.append(newLine).append("Removed:").append(newLine);
         for (String id : _removed_instances) {
