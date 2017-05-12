@@ -167,10 +167,10 @@ public class MetricStorageApp {
             Condition condition = new Condition()
                     .withComparisonOperator(ComparisonOperator.EQ)
                     .withAttributeValueList(new AttributeValue(query));
-            scanFilter.put("fileName", condition);
+            scanFilter.put("filename", condition);
             ScanRequest scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
             ScanResult scanResult = _dynamoDB.scan(scanRequest);
-            message += "Result: " + scanResult;
+            message += "\n\nResult: " + scanResult;
 
 
 
@@ -207,7 +207,7 @@ public class MetricStorageApp {
 
             switch (entry.getKey()) {
                 case "f":
-                    item.put("fileName", new AttributeValue(entry.getValue()));
+                    item.put("filename", new AttributeValue(entry.getValue()));
                     break;
                 case "sc":
                     item.put("scols", new AttributeValue(entry.getValue()));
