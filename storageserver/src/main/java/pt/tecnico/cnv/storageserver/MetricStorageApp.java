@@ -37,7 +37,7 @@ public class MetricStorageApp {
 
         try {
 
-            DeleteTableRequest deleteRequest = new DeleteTableRequest().withTableName(defaultTableName);
+
 
             List<AttributeDefinition> attributeDefinitions = new ArrayList<AttributeDefinition>();
             attributeDefinitions.add(new AttributeDefinition().withAttributeName("concat").withAttributeType(ScalarAttributeType.S));
@@ -52,8 +52,7 @@ public class MetricStorageApp {
             System.out.println("Issuing CreateTable request for " + defaultTableName);
 
 
-            // Deletes if table exists
-            TableUtils.deleteTableIfExists(_dynamoDB, deleteRequest);
+
             // Create table if it does not exist yet
             TableUtils.createTableIfNotExists(_dynamoDB, newRequest);
             // wait for the table to move into ACTIVE state
@@ -92,13 +91,25 @@ public class MetricStorageApp {
         TableDescription tableDescription = _dynamoDB.describeTable(describeTableRequest).getTable();
 
         message += String.format(
-                "Name: %s:\n" + "Status: %s \n" + "Provisioned Throughput (read capacity units/sec): %d \n"
+                "Name: %s\n" + "Status: %s \n" + "Provisioned Throughput (read capacity units/sec): %d \n"
                         + "Provisioned Throughput (write capacity units/sec): %d \n",
                 tableDescription.getTableName(), tableDescription.getTableStatus(),
                 tableDescription.getProvisionedThroughput().getReadCapacityUnits(),
                 tableDescription.getProvisionedThroughput().getWriteCapacityUnits());
 
         return message;
+    }
+
+    private static void deleteDefaultTable() {
+
+        System.out.println("Deleting table: " + defaultTableName);
+
+        DeleteTableRequest deleteRequest = new DeleteTableRequest().withTableName(defaultTableName);
+
+        // Deletes if table exists
+        TableUtils.deleteTableIfExists(_dynamoDB, deleteRequest);
+
+
     }
 
     private static void insertNewItem(String query){
