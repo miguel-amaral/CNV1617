@@ -136,7 +136,7 @@ public class MetricStorageApp {
             message += "Result: " + putItemResult;
 
         } catch (AmazonServiceException ase) {
-            error += "Caught an AmazonServiceException, which means your request made it "
+            error += "\n\nCaught an AmazonServiceException, which means your request made it "
                     + "to AWS, but was rejected with an error response for some reason.";
             error += "\nError Message:    " + ase.getMessage();
             error += "\nHTTP Status Code: " + ase.getStatusCode();
@@ -162,7 +162,7 @@ public class MetricStorageApp {
     private static Map<String, AttributeValue> newItem(String query, Map<String, String> result) {
         Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
 
-        item.put("concat", new AttributeValue(query));
+        item.put("query", new AttributeValue(query));
 
         for (Map.Entry<String, String> entry : result.entrySet()){
 
