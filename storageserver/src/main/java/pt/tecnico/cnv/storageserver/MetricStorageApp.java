@@ -38,9 +38,6 @@ public class MetricStorageApp {
 
             List<AttributeDefinition> attributeDefinitions = new ArrayList<AttributeDefinition>();
             attributeDefinitions.add(new AttributeDefinition().withAttributeName("query").withAttributeType(ScalarAttributeType.S));
-            attributeDefinitions.add(new AttributeDefinition().withAttributeName("#_blocks").withAttributeType(ScalarAttributeType.S));
-            attributeDefinitions.add(new AttributeDefinition().withAttributeName("#_instrs").withAttributeType(ScalarAttributeType.S));
-            attributeDefinitions.add(new AttributeDefinition().withAttributeName("metric").withAttributeType(ScalarAttributeType.S));
 
             List<KeySchemaElement> keySchema = new ArrayList<KeySchemaElement>();
             keySchema.add(new KeySchemaElement().withAttributeName("query").withKeyType(KeyType.HASH)); // Partition key

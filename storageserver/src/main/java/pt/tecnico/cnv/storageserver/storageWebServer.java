@@ -115,8 +115,6 @@ public class storageWebServer extends Thread{
 
                 message =  "THIS IS YOUR QUERY! LET'S PREPROCESS IT!!\n";
 
-                message += parser.toString();
-
                 for (Map.Entry<String, String> entry : result.entrySet()){
 
                     message +=  "KEY: " + entry.getKey() + "\t\tVALUE: " + entry.getValue() + "\n";
