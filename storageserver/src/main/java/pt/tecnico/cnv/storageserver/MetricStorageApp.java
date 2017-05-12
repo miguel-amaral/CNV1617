@@ -58,7 +58,7 @@ public class MetricStorageApp {
 
 
 
-            sms += "Waiting for " + defaultTableName + " to be created...this may take a while...\n";
+            sms += "\nWaiting for " + defaultTableName + " to be created...this may take a while...\n";
 
             sms += getTableInformation();
 
@@ -122,6 +122,7 @@ public class MetricStorageApp {
     public static String insertNewItem(String query){
 
         String message = "";
+        String error = "";
         try{
             Map<String, String> result = new HashMap<>();
 
@@ -135,25 +136,25 @@ public class MetricStorageApp {
             message += "Result: " + putItemResult;
 
         } catch (AmazonServiceException ase) {
-            System.out.println("Caught an AmazonServiceException, which means your request made it "
-                    + "to AWS, but was rejected with an error response for some reason.");
-            System.out.println("Error Message:    " + ase.getMessage());
-            System.out.println("HTTP Status Code: " + ase.getStatusCode());
-            System.out.println("AWS Error Code:   " + ase.getErrorCode());
-            System.out.println("Error Type:       " + ase.getErrorType());
-            System.out.println("Request ID:       " + ase.getRequestId());
+            error += "Caught an AmazonServiceException, which means your request made it "
+                    + "to AWS, but was rejected with an error response for some reason.";
+            error += "\nError Message:    " + ase.getMessage();
+            error += "\nHTTP Status Code: " + ase.getStatusCode();
+            error += "\nAWS Error Code:   " + ase.getErrorCode();
+            error += "\nError Type:       " + ase.getErrorType();
+            error += "\nRequest ID:       " + ase.getRequestId();
         } catch (AmazonClientException ace) {
-            System.out.println("Caught an AmazonClientException, which means the client encountered "
+            error += "\nCaught an AmazonClientException, which means the client encountered "
                     + "a serious internal problem while trying to communicate with AWS, "
-                    + "such as not being able to access the network.");
-            System.out.println("Error Message: " + ace.getMessage());
+                    + "such as not being able to access the network.";
+            error += "\nError Message: " + ace.getMessage();
         } catch (Exception e){
 
             e.printStackTrace();
         }
 
 
-        return message;
+        return message + error;
     }
 
 
