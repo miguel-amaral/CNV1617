@@ -125,6 +125,10 @@ public class storageWebServer extends Thread{
 
                 message += "\n\n\n\n" + _app.createDefaultTable();
 
+                message += "\nCreating new item with query...";
+
+                message += _app.insertNewItem(query);
+
             } catch (InvalidArgumentsException e) {
                 e.printStackTrace();
                 message = "Error: InvalidArgumentsException";
