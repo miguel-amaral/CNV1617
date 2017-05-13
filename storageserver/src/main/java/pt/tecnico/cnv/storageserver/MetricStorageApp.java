@@ -119,7 +119,7 @@ public class MetricStorageApp {
 
     }
 
-    public static String insertNewItem(String query){
+    public static String insertNewItem(String query, int i){
 
         String message = "";
         String error = "";
@@ -129,23 +129,12 @@ public class MetricStorageApp {
             QueryParser parser = new QueryParser(query);
             result = parser.queryToMap(query);
 
-            Map<String, AttributeValue> item = newItem(query, result, 1);
+            Map<String, AttributeValue> item = newItem(query, result, i);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
 
             message += "\nItem inserted..";
 
-            item = newItem(query, result, 2);
-            putItemRequest = new PutItemRequest(defaultTableName, item);
-            putItemResult = _dynamoDB.putItem(putItemRequest);
-
-            message += "\nItem inserted..";
-
-            item = newItem(query, result, 3);
-            putItemRequest = new PutItemRequest(defaultTableName, item);
-            putItemResult = _dynamoDB.putItem(putItemRequest);
-
-            message += "\nItem inserted..";
 
         } catch (AmazonServiceException ase) {
             error += "\n\nCaught an AmazonServiceException, which means your request made it "

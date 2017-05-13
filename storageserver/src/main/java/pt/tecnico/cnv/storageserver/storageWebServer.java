@@ -32,6 +32,7 @@ public class storageWebServer extends Thread{
     private static AmazonDynamoDB dynamoDB;
 
     private static int port = 8000;
+    
 
 
 
@@ -127,7 +128,10 @@ public class storageWebServer extends Thread{
 
                 message += "\nCreating new item with query...";
 
-                message += _app.insertNewItem(query);
+                for(int i=0; i<4; i++)
+                    message += _app.insertNewItem(query, i);
+
+
 
                 message += "\nQuerying new item ...";
 
