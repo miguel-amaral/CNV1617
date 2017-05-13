@@ -12,7 +12,9 @@ import tool.DataContainer;
 
 import java.io.*;
 import java.net.InetSocketAddress;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
 
@@ -99,8 +101,38 @@ public class WebServer {
 
                 Map<String,String> args =new HashMap<>();
                 args.put("jobID",jobID);
-                HttpAnswer answer = HttpRequest.sendGet("load-balancer-cnv.tk:8000/job/done",args);
-                System.out.println(answer);
+                HttpAnswer answer_load_balancer = HttpRequest.sendGet("load-balancer-cnv.tk:8000/job/done",args);
+                System.out.println(answer_load_balancer);
+
+
+                String storageEndpoint = "data.html";
+                String instructions_key = "instructions";
+                String bb_blocks_key = "bb_blocks";
+                String methods_key = "methods";
+                String branch_fail_key = "branch_fail";
+                String branch_success_key = "branch_success";
+
+                List<String> keys = new ArrayList<>();
+                keys.add(instructions_key);
+                keys.add(bb_blocks_key);
+                keys.add(methods_key);
+                keys.add(branch_fail_key);
+                keys.add(branch_success_key);
+
+                List<String> values = new ArrayList<>();
+                values.add(data.instructions+"");
+                values.add(data.bb_blocks+"");
+                values.add(data.methods+"");
+                values.add(data.branch_fail+"");
+                values.add(data.branch_success+"");
+
+                StringBuilder finalEndpoint = new StringBuilder("storage-server-cnv.tk:8000/" + storageEndpoint + "?" + query);
+                for(int i = 0 ; i<keys.size();i++) {
+                    finalEndpoint.append("&").append(keys.get(i)).append("=").append(values.get(i));
+                }
+
+                HttpAnswer answer_storage_server = HttpRequest.sendGet(finalEndpoint.toString());
+                System.out.println(answer_storage_server);
 
             } catch (InvalidArgumentsException e) {
 				e.printStackTrace();

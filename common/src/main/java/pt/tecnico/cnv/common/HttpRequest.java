@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -14,6 +15,10 @@ public class HttpRequest {
     private final static String USER_AGENT = "Mozilla/5.0";
 
     // HTTP GET request
+    public static HttpAnswer sendGet(String url) {
+        return HttpRequest.sendGet(url,new HashMap<String, String>());
+    }
+
     public static HttpAnswer sendGet(String url, Map<String,String> arguments){
         try {
             if(!url.substring(0,5).equals("http")) {
