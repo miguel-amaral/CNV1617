@@ -196,7 +196,7 @@ public class MetricStorageApp {
             UpdateItemRequest updateItemRequest = new UpdateItemRequest()
                     .withTableName(defaultTableName)
                     .withKey(key)
-                    .withUpdateExpression(" set NewAttribute=:val")
+                    .withUpdateExpression(" set integer=:val")
                     .withExpressionAttributeValues(expressionAttributeValues)
                     .withReturnValues(returnValues);
 
