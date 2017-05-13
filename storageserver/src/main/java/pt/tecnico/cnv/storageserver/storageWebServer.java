@@ -158,8 +158,6 @@ public class storageWebServer extends Thread{
                 requestStatus = 200;
 
 
-                message += "\n\n\n\n" + _app.createDefaultTable();
-
                 message += "\nCreating new items with query...";
 
                 String filename = "";

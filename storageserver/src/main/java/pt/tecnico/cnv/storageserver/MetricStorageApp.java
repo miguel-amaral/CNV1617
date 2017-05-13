@@ -25,10 +25,10 @@ public class MetricStorageApp {
     public MetricStorageApp(AmazonDynamoDB dynamoDB){
 
         this._dynamoDB = dynamoDB;
-        //createDefaultTable();
+        createDefaultTable();
     }
 
-    public static String createDefaultTable(){
+    public static void createDefaultTable(){
 
         String sms = "";
 
@@ -81,8 +81,6 @@ public class MetricStorageApp {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-
-        return sms;
 
     }
 
