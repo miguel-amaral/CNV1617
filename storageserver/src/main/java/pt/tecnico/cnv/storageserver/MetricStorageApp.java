@@ -119,17 +119,13 @@ public class MetricStorageApp {
 
     }
 
-    public static String insertNewItem(String query, int i){
+    public static String insertNewItem(String query, String filename, int i){
 
         String message = "";
         String error = "";
         try{
-            Map<String, String> result = new HashMap<>();
 
-            QueryParser parser = new QueryParser(query);
-            result = parser.queryToMap(query);
-
-            Map<String, AttributeValue> item = newItem(query, result, i);
+            Map<String, AttributeValue> item = newItem(query, filename, i);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
 
@@ -158,7 +154,7 @@ public class MetricStorageApp {
         return message + error;
     }
 
-    public static String queryItem(String query){
+    public static String queryItem(String filename){
 
         String message = "";
         String error = "";
@@ -168,7 +164,7 @@ public class MetricStorageApp {
             HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
             Condition condition = new Condition()
                     .withComparisonOperator(ComparisonOperator.EQ.toString())
-                    .withAttributeValueList(new AttributeValue().withN("1"));
+                    .withAttributeValueList(new AttributeValue(filename));
             scanFilter.put("file", condition);
             ScanRequest scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
             ScanResult scanResult = _dynamoDB.scan(scanRequest);
@@ -178,7 +174,7 @@ public class MetricStorageApp {
             condition = new Condition()
                     .withComparisonOperator(ComparisonOperator.GT.toString())
                     .withAttributeValueList(new AttributeValue().withN("1"));
-            scanFilter.put("file", condition);
+            scanFilter.put("integer", condition);
             scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
             scanResult = _dynamoDB.scan(scanRequest);
             message += "\n\nResult of greater than: " + scanResult;
@@ -209,40 +205,13 @@ public class MetricStorageApp {
 
 
 
-    private static Map<String, AttributeValue> newItem(String query, Map<String, String> result, int i) {
+    private static Map<String, AttributeValue> newItem(String query, String filename, int i) {
         Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
 
         item.put("query", new AttributeValue(query));
-        item.put("file", new AttributeValue().withN(Integer.toString(i)));
+        item.put("file", new AttributeValue(filename));
+        item.put("integer", new AttributeValue().withN(Integer.toString(i)));
 
-/*        for (Map.Entry<String, String> entry : result.entrySet()){
-
-            switch (entry.getKey()) {
-                case "f":
-                    item.put("filename", new AttributeValue(entry.getValue()));
-                    break;
-                case "sc":
-                    item.put("scols", new AttributeValue(entry.getValue()));
-                    break;
-                case "sr":
-                    item.put("srows", new AttributeValue(entry.getValue()));
-                    break;
-                case "wc":
-                    item.put("wcols", new AttributeValue(entry.getValue()));
-                    break;
-                case "wr":
-                    item.put("wrows", new AttributeValue(entry.getValue()));
-                    break;
-                case "coff":
-                    item.put("coff", new AttributeValue(entry.getValue()));
-                    break;
-                case "roff":
-                    item.put("roff", new AttributeValue(entry.getValue()));
-                    break;
-                default:
-
-            }
-        }*/
 
         return item;
     }

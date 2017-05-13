@@ -7,6 +7,7 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
+import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
@@ -32,7 +33,8 @@ public class storageWebServer extends Thread{
     private static AmazonDynamoDB dynamoDB;
 
     private static int port = 8000;
-    
+
+    private static int inc = 0;
 
 
 
@@ -114,28 +116,31 @@ public class storageWebServer extends Thread{
                 QueryParser parser = new QueryParser(query);
                 result = parser.queryToMap(query);
 
-                message =  "THIS IS YOUR QUERY! LET'S PREPROCESS IT!!\n";
-
-                for (Map.Entry<String, String> entry : result.entrySet()){
-
-                    message +=  "KEY: " + entry.getKey() + "\t\tVALUE: " + entry.getValue() + "\n";
-                }
-
                 requestStatus = 200;
 
 
                 message += "\n\n\n\n" + _app.createDefaultTable();
 
-                message += "\nCreating new item with query...";
+                message += "\nCreating new items with query...";
 
-                for(int i=0; i<4; i++)
-                    message += _app.insertNewItem(query, i);
+                String filename = "";
 
+                for (Map.Entry<String, String> entry : result.entrySet()){
+
+                    if(entry.getKey().equals("f")) {
+
+                        message += _app.insertNewItem(query, entry.getValue(), inc);
+                        filename = entry.getValue();
+                        inc++;
+                        break;
+
+                    }
+                }
 
 
                 message += "\nQuerying new item ...";
 
-                message += _app.queryItem("text01.txt");
+                message += _app.queryItem(filename);
 
 
 
