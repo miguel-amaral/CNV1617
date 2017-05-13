@@ -44,6 +44,7 @@ public class storageWebServer extends Thread{
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/ping", new PingHandler());
             server.createContext("/data.html", new ReceiveDataHandler());
+            server.createContext("/update.html", new UpdateItemHandler());
             server.createContext("/metric/value", new GenericHandler(new MetricValueStrategy()));
             server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
             server.start();
@@ -69,6 +70,73 @@ public class storageWebServer extends Thread{
             os.close();
         }
     }
+
+
+    static class UpdateItemHandler implements HttpHandler {
+        public void handle(HttpExchange t) throws IOException {
+
+            String query = t.getRequestURI().getQuery();
+
+            OutputStream os = t.getResponseBody();
+            String message = null;
+            int requestStatus = 0;
+
+            Map<String, String> result = new HashMap<>();
+
+            try {
+
+                QueryParser parser = new QueryParser(query);
+                result = parser.queryToMap(query);
+
+                requestStatus = 200;
+
+                message += "\nUpdating new items with query...";
+
+
+                message += _app.updateItemAttributes(query);
+
+
+                String filename = "";
+
+                for (Map.Entry<String, String> entry : result.entrySet()){
+
+                    switch (entry.getKey()) {
+                        case "f":
+                            filename = entry.getValue();
+                            inc++;
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+
+
+                message += "\nQuerying new item ...";
+
+                message += _app.queryItem(filename);
+
+
+
+            } catch (InvalidArgumentsException e) {
+                e.printStackTrace();
+                message = "Error: InvalidArgumentsException";
+                requestStatus = 400;
+                System.err.println(message);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                message = "Error: " + e.getMessage();
+                System.err.println(message);
+            }
+            t.sendResponseHeaders(requestStatus, message.length());
+            os.write(message.getBytes());
+
+            os.close();
+        }
+
+    }
+
+
 
     static class ReceiveDataHandler implements HttpHandler {
 

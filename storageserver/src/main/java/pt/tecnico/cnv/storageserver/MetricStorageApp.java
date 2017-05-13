@@ -3,6 +3,7 @@ package pt.tecnico.cnv.storageserver;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import pt.tecnico.cnv.common.QueryParser;
@@ -58,7 +59,6 @@ public class MetricStorageApp {
 
 
 
-
             sms += "\nWaiting for " + defaultTableName + " to be created...this may take a while...\n";
 
             sms += getTableInformation();
@@ -99,6 +99,7 @@ public class MetricStorageApp {
             Map<String, AttributeValue> item = newItem(query, filename, i);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
+
 
             message += "\nItem inserted..";
 
@@ -152,6 +153,8 @@ public class MetricStorageApp {
 
 
 
+
+
         } catch (AmazonServiceException ase) {
             error += "\n\nCaught an AmazonServiceException, which means your request made it "
                     + "to AWS, but was rejected with an error response for some reason.";
@@ -170,6 +173,42 @@ public class MetricStorageApp {
             e.printStackTrace();
         }
 
+
+        return message + error;
+    }
+
+
+    public static String updateItemAttributes(String query) {
+
+
+        String message = "";
+        String error = "";
+
+        try {
+
+            HashMap<String, AttributeValue> key = new HashMap<String, AttributeValue>();
+            key.put("query", new AttributeValue().withS(query));
+
+            Map<String, AttributeValue> expressionAttributeValues = new HashMap<String, AttributeValue>();
+            expressionAttributeValues.put(":val", new AttributeValue().withN(Integer.toString(10)));
+
+            ReturnValue returnValues = ReturnValue.ALL_NEW;
+
+            UpdateItemRequest updateItemRequest = new UpdateItemRequest()
+                    .withTableName(defaultTableName)
+                    .withKey(key)
+                    .withUpdateExpression(" set Integer=:val")
+                    .withExpressionAttributeValues(expressionAttributeValues)
+                    .withReturnValues(returnValues);
+
+            UpdateItemResult result = _dynamoDB.updateItem(updateItemRequest);
+
+
+
+        }   catch (AmazonServiceException ase) {
+
+            error += ase.getMessage();
+        }
 
         return message + error;
     }
