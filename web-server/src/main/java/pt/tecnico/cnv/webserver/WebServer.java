@@ -133,6 +133,7 @@ public class WebServer {
 
                 HttpAnswer answer_storage_server = HttpRequest.sendGet(finalEndpoint.toString());
                 System.out.println(answer_storage_server);
+                message += "<b>Storage server answer: </b>" +  "<pre>" + answer_storage_server+ "\n </pre>";
 
             } catch (InvalidArgumentsException e) {
 				e.printStackTrace();
