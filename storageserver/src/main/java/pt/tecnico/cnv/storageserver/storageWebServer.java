@@ -44,7 +44,6 @@ public class storageWebServer extends Thread{
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/ping", new PingHandler());
             server.createContext("/data.html", new ReceiveDataHandler());
-            server.createContext("/deleteTable", new DeleteTableHandler());
             server.createContext("/metric/value", new GenericHandler(new MetricValueStrategy()));
             server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
             server.start();
@@ -68,34 +67,6 @@ public class storageWebServer extends Thread{
             t.sendResponseHeaders(requestStatus, message.length());
             os.write(message.getBytes());
             os.close();
-        }
-    }
-    static class DeleteTableHandler implements HttpHandler {
-        public void handle(HttpExchange t) throws IOException {
-
-            OutputStream os = t.getResponseBody();
-            String message = "";
-            int requestStatus = 0;
-
-            try {
-
-                message += _app.deleteDefaultTable();
-
-            } catch (Exception e) {
-                e.printStackTrace();
-                message = "Error: InvalidArgumentsException";
-                requestStatus = 400;
-                System.err.println(message);
-            } catch (Throwable e) {
-                e.printStackTrace();
-                message = "Error: " + e.getMessage();
-                System.err.println(message);
-            }
-            t.sendResponseHeaders(requestStatus, message.length());
-            os.write(message.getBytes());
-
-            os.close();
-
         }
     }
 
@@ -127,14 +98,16 @@ public class storageWebServer extends Thread{
 
                 for (Map.Entry<String, String> entry : result.entrySet()){
 
-                    if(entry.getKey().equals("f")) {
-
-                        message += _app.insertNewItem(query, entry.getValue(), inc);
-                        filename = entry.getValue();
-                        inc++;
-                        break;
-
+                    switch (entry.getKey()) {
+                        case "f":
+                            message += _app.insertNewItem(query, entry.getValue(), inc);
+                            filename = entry.getValue();
+                            inc++;
+                            break;
+                        default:
+                            break;
                     }
+
                 }
 
 
