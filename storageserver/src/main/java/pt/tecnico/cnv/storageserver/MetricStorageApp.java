@@ -129,11 +129,23 @@ public class MetricStorageApp {
             QueryParser parser = new QueryParser(query);
             result = parser.queryToMap(query);
 
-            Map<String, AttributeValue> item = newItem(query, result);
+            Map<String, AttributeValue> item = newItem(query, result, 1);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
 
-            message += "\n Item inserted.." + putItemResult;
+            message += "\nItem inserted..";
+
+            item = newItem(query, result, 2);
+            putItemRequest = new PutItemRequest(defaultTableName, item);
+            putItemResult = _dynamoDB.putItem(putItemRequest);
+
+            message += "\nItem inserted..";
+
+            item = newItem(query, result, 3);
+            putItemRequest = new PutItemRequest(defaultTableName, item);
+            putItemResult = _dynamoDB.putItem(putItemRequest);
+
+            message += "\nItem inserted..";
 
         } catch (AmazonServiceException ase) {
             error += "\n\nCaught an AmazonServiceException, which means your request made it "
@@ -208,13 +220,11 @@ public class MetricStorageApp {
 
 
 
-    private static Map<String, AttributeValue> newItem(String query, Map<String, String> result) {
+    private static Map<String, AttributeValue> newItem(String query, Map<String, String> result, int i) {
         Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
 
         item.put("query", new AttributeValue(query));
-        item.put("file", new AttributeValue().withN(Integer.toString(1)));
-        item.put("file", new AttributeValue().withN(Integer.toString(2)));
-        item.put("file", new AttributeValue().withN(Integer.toString(3)));
+        item.put("file", new AttributeValue().withN(Integer.toString(i)));
 
 /*        for (Map.Entry<String, String> entry : result.entrySet()){
 
