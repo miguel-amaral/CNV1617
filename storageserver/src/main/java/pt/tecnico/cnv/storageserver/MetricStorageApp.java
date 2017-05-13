@@ -187,6 +187,7 @@ public class MetricStorageApp {
             HashMap<String, AttributeValue> key = new HashMap<String, AttributeValue>();
             key.put("query", new AttributeValue().withS(query));
 
+
             Map<String, AttributeValue> expressionAttributeValues = new HashMap<String, AttributeValue>();
             expressionAttributeValues.put(":val", new AttributeValue().withN(Integer.toString(10)));
 
@@ -195,7 +196,7 @@ public class MetricStorageApp {
             UpdateItemRequest updateItemRequest = new UpdateItemRequest()
                     .withTableName(defaultTableName)
                     .withKey(key)
-                    .withUpdateExpression(" set Integer=:val")
+                    .withUpdateExpression(" set NewAttribute=:val")
                     .withExpressionAttributeValues(expressionAttributeValues)
                     .withReturnValues(returnValues);
 
