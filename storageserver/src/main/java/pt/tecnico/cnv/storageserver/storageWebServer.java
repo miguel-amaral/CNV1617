@@ -39,6 +39,18 @@ public class storageWebServer extends Thread{
 
 
     public static void main(String[] args) throws Exception {
+
+
+        try {
+            boolean success = init();
+        }catch (Exception e ) {
+            e.printStackTrace();
+            System.out.println("Init Failed!!");
+            return;
+
+        }
+
+
         try {
             HttpServer server;
             server = HttpServer.create(new InetSocketAddress(port), 0);
@@ -52,7 +64,6 @@ public class storageWebServer extends Thread{
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
-        init();
 
         System.out.println("Greetings summoners! MSS is now running..");
     }
@@ -78,7 +89,7 @@ public class storageWebServer extends Thread{
             String query = t.getRequestURI().getQuery();
 
             OutputStream os = t.getResponseBody();
-            String message = null;
+            String message = "";
             int requestStatus = 0;
 
             Map<String, String> result = new HashMap<>();
@@ -203,7 +214,7 @@ public class storageWebServer extends Thread{
     }
 
 
-    private static void init() {
+    private static boolean init() {
 
 
         AWSCredentials credentials = null;
@@ -218,6 +229,8 @@ public class storageWebServer extends Thread{
         }
         dynamoDB = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_WEST_2).withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
         _app = new MetricStorageApp(dynamoDB);
+
+        return true;
     }
 
 
