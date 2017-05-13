@@ -133,6 +133,7 @@ public class MetricStorageApp {
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
 
+            message += "\n Item inserted.." + putItemResult;
 
         } catch (AmazonServiceException ase) {
             error += "\n\nCaught an AmazonServiceException, which means your request made it "
@@ -165,12 +166,21 @@ public class MetricStorageApp {
 
             HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
             Condition condition = new Condition()
-                    .withComparisonOperator(ComparisonOperator.EQ)
-                    .withAttributeValueList(new AttributeValue(query));
-            scanFilter.put("filename", condition);
+                    .withComparisonOperator(ComparisonOperator.EQ.toString())
+                    .withAttributeValueList(new AttributeValue().withN("1"));
+            scanFilter.put("file", condition);
             ScanRequest scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
             ScanResult scanResult = _dynamoDB.scan(scanRequest);
-            message += "\n\nResult: " + scanResult;
+            message += "\n\nResult of equality: " + scanResult;
+
+            scanFilter = new HashMap<String, Condition>();
+            condition = new Condition()
+                    .withComparisonOperator(ComparisonOperator.GT.toString())
+                    .withAttributeValueList(new AttributeValue().withN("1"));
+            scanFilter.put("file", condition);
+            scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
+            scanResult = _dynamoDB.scan(scanRequest);
+            message += "\n\nResult of greater than: " + scanResult;
 
 
 
@@ -202,8 +212,11 @@ public class MetricStorageApp {
         Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
 
         item.put("query", new AttributeValue(query));
+        item.put("file", new AttributeValue().withN(Integer.toString(1)));
+        item.put("file", new AttributeValue().withN(Integer.toString(2)));
+        item.put("file", new AttributeValue().withN(Integer.toString(3)));
 
-        for (Map.Entry<String, String> entry : result.entrySet()){
+/*        for (Map.Entry<String, String> entry : result.entrySet()){
 
             switch (entry.getKey()) {
                 case "f":
@@ -230,7 +243,7 @@ public class MetricStorageApp {
                 default:
 
             }
-        }
+        }*/
 
         return item;
     }
