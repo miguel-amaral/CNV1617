@@ -159,45 +159,25 @@ public class storageWebServer extends Thread{
             String message = "";
             int requestStatus = 0;
 
-            Map<String, String> result = new HashMap<>();
+
 
             try {
 
-                InstQueryParser parser = new InstQueryParser(query);
-                result = parser.queryToMap(query);
 
                 requestStatus = 200;
 
                 message += "\nCreating new items with query...";
 
-                String filename = "";
 
-                for (Map.Entry<String, String> entry : result.entrySet()){
-
-                    switch (entry.getKey()) {
-                        case "f":
-                            message += _app.insertNewItem(query);
-                            filename = entry.getValue();
-                            inc++;
-                            break;
-                        default:
-                            break;
-                    }
-
-                }
+                message += _app.insertNewItem(query);
 
 
                 message += "\nQuerying new item ...";
 
-                message += _app.queryItem(filename);
+                message += _app.queryItem(query);
 
 
 
-            } catch (InvalidArgumentsException e) {
-                e.printStackTrace();
-                message = "Error: InvalidArgumentsException";
-                requestStatus = 400;
-                System.err.println(message);
             } catch (Throwable e) {
                 e.printStackTrace();
                 message = "Error: " + e.getMessage();

@@ -6,6 +6,7 @@ import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
+import pt.tecnico.cnv.common.InvalidArgumentsException;
 import pt.tecnico.cnv.common.QueryParser;
 
 import java.util.ArrayList;
@@ -125,7 +126,7 @@ public class MetricStorageApp {
                     + "a serious internal problem while trying to communicate with AWS, "
                     + "such as not being able to access the network.";
             error += "\nError Message: " + ace.getMessage();
-        } catch (Exception e){
+        } catch (InvalidArgumentsException e){
 
             e.printStackTrace();
         }
@@ -134,12 +135,30 @@ public class MetricStorageApp {
         return message + error;
     }
 
-    public static String queryItem(String filename){
+    public static String queryItem(String query){
 
         String message = "";
         String error = "";
+        Map<String, String> result = new HashMap<>();
+
         try{
 
+            InstQueryParser parser = new InstQueryParser(query);
+            result = parser.queryToMap(query);
+
+            String filename = "";
+
+            for (Map.Entry<String, String> entry : result.entrySet()){
+
+                switch (entry.getKey()) {
+                    case "f":
+                        filename = entry.getValue();
+                        break;
+                    default:
+                        break;
+                }
+
+            }
 
             HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
             Condition condition = new Condition()
@@ -182,7 +201,7 @@ public class MetricStorageApp {
                     + "a serious internal problem while trying to communicate with AWS, "
                     + "such as not being able to access the network.";
             error += "\nError Message: " + ace.getMessage();
-        } catch (Exception e){
+        } catch (InvalidArgumentsException e){
 
             e.printStackTrace();
         }
