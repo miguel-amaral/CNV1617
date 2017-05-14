@@ -368,13 +368,16 @@ public class MetricStorageApp {
                 case "branch_success":
                     item.put("branch_success", new AttributeValue().withN(entry.getValue()));
                     break;
+                case "sc":
+                    item.put("metric", new AttributeValue().withN(entry.getValue()));
+                    break;
                 default:
                     break;
             }
 
         }
 
-        item.put("metric", new AttributeValue().withN(Integer.toString(metric)));
+        //item.put("metric", new AttributeValue().withN(Integer.toString(metric)));
 
         return item;
     }
