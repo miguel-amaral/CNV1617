@@ -7,16 +7,10 @@ import com.amazonaws.auth.profile.ProfileCredentialsProvider;
 import com.amazonaws.regions.Regions;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDBClientBuilder;
-import com.amazonaws.services.dynamodbv2.model.AttributeValue;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import pt.tecnico.cnv.common.GenericHandler;
-import pt.tecnico.cnv.common.HttpAnswer;
-import pt.tecnico.cnv.common.HttpStrategy;
-import pt.tecnico.cnv.common.InvalidArgumentsException;
-import pt.tecnico.cnv.common.QueryParser;
-import pt.tecnico.cnv.common.STATIC_VALUES;
+import pt.tecnico.cnv.common.*;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -220,7 +214,7 @@ public class storageWebServer extends Thread{
             long metric = 100;
 
 
-            metric = Long.valueOf(_app.queryItemMetric(query)).longValue();
+            metric = Long.valueOf(_app.queryItemMetric(query));
             //dont mess with what is below
             String message = alreadyInstrumented + STATIC_VALUES.SEPARATOR_STORAGE_METRIC_REQUEST + metric;
             return new HttpAnswer(200,message);

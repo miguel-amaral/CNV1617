@@ -3,11 +3,9 @@ package pt.tecnico.cnv.storageserver;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import pt.tecnico.cnv.common.InvalidArgumentsException;
-import pt.tecnico.cnv.common.QueryParser;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -124,7 +122,7 @@ public class MetricStorageApp {
         try{
 
 
-            int index = query.indexOf("instructions");
+            int index = query.indexOf("jobID");
             String query_for_key = query.substring(0,index-1);
 
 
