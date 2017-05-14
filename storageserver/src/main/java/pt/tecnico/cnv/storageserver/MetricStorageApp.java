@@ -29,9 +29,7 @@ public class MetricStorageApp {
         createDefaultTable();
     }
 
-    public static void createDefaultTable(){
-
-        String sms = "";
+    private static void createDefaultTable(){
 
         try {
 
@@ -49,20 +47,12 @@ public class MetricStorageApp {
                     .withAttributeDefinitions(attributeDefinitions).withProvisionedThroughput(
                             new ProvisionedThroughput().withReadCapacityUnits(15L).withWriteCapacityUnits(15L));
 
-            sms += "Issuing CreateTable request for " + defaultTableName;
-
 
 
             // Create table if it does not exist yet
             TableUtils.createTableIfNotExists(_dynamoDB, newRequest);
             // wait for the table to move into ACTIVE state
             TableUtils.waitUntilActive(_dynamoDB, defaultTableName);
-
-
-
-            sms += "\nWaiting for " + defaultTableName + " to be created...this may take a while...\n";
-
-            sms += getTableInformation();
 
 
 
@@ -86,10 +76,100 @@ public class MetricStorageApp {
     }
 
 
+    public static void insertNewItem(String query){
+
+        try{
+
+            InstQueryParser parser = new InstQueryParser(query);
+
+            Map<String, String> result = new HashMap<>();
+            result = parser.queryToMap(query);
+
+            int index = query.indexOf("instructions");
+            String query_for_key = query.substring(0,index-1);
 
 
 
-    public static String insertNewItem(String query){
+            Map<String, AttributeValue> item = newItem(query_for_key, result);
+            PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
+            PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
+
+
+
+        } catch (AmazonServiceException ase) {
+            System.out.println("Caught an AmazonServiceException, which means your request made it "
+                    + "to AWS, but was rejected with an error response for some reason.");
+            System.out.println("Error Message:    " + ase.getMessage());
+            System.out.println("HTTP Status Code: " + ase.getStatusCode());
+            System.out.println("AWS Error Code:   " + ase.getErrorCode());
+            System.out.println("Error Type:       " + ase.getErrorType());
+            System.out.println("Request ID:       " + ase.getRequestId());
+        } catch (AmazonClientException ace) {
+            System.out.println("Caught an AmazonClientException, which means the client encountered "
+                    + "a serious internal problem while trying to communicate with AWS, "
+                    + "such as not being able to access the network.");
+            System.out.println("Error Message: " + ace.getMessage());
+        } catch (InvalidArgumentsException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    public static String queryItem(String query){
+
+        String message = "";
+
+
+        try{
+
+
+            int index = query.indexOf("instructions");
+            String query_for_key = query.substring(0,index-1);
+
+
+            HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
+            Condition condition = new Condition()
+                    .withComparisonOperator(ComparisonOperator.EQ.toString())
+                    .withAttributeValueList(new AttributeValue(query_for_key));
+            scanFilter.put("query", condition);
+            ScanRequest scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
+            ScanResult scanResult = _dynamoDB.scan(scanRequest);
+
+            message += "\n\nResult of equality: " + scanResult;
+            message += "\n\nFilename: " + scanResult.getItems().get(0).get("file").getS();
+
+            int insts = Integer.parseInt(scanResult.getItems().get(0).get("instructions").getN());
+
+            int metric = Integer.parseInt(scanResult.getItems().get(0).get("metric").getN());
+
+
+            message += "\n\n# of Instructions: " + Integer.toString(insts);
+            message += "\nMetric: " + Integer.toString(metric);
+
+
+
+
+        } catch (AmazonServiceException ase) {
+            System.out.println("Caught an AmazonServiceException, which means your request made it "
+                    + "to AWS, but was rejected with an error response for some reason.");
+            System.out.println("Error Message:    " + ase.getMessage());
+            System.out.println("HTTP Status Code: " + ase.getStatusCode());
+            System.out.println("AWS Error Code:   " + ase.getErrorCode());
+            System.out.println("Error Type:       " + ase.getErrorType());
+            System.out.println("Request ID:       " + ase.getRequestId());
+        } catch (AmazonClientException ace) {
+            System.out.println("Caught an AmazonClientException, which means the client encountered "
+                    + "a serious internal problem while trying to communicate with AWS, "
+                    + "such as not being able to access the network.");
+            System.out.println("Error Message: " + ace.getMessage());
+        }
+
+
+        return message;
+    }
+
+
+    public static String insertNewItemTest(String query){
 
         String message = "";
         String error = "";
@@ -135,7 +215,7 @@ public class MetricStorageApp {
         return message + error;
     }
 
-    public static String queryItem(String query){
+    public static String queryItemTest(String query){
 
         String message = "";
         String error = "";
@@ -211,6 +291,52 @@ public class MetricStorageApp {
     }
 
 
+    private static Map<String, AttributeValue> newItem(String query, Map<String, String> result) {
+
+        Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
+
+        item.put("query", new AttributeValue(query));
+
+        int metric = computeMetric(query);
+
+        for (Map.Entry<String, String> entry : result.entrySet()){
+
+            switch (entry.getKey()) {
+                case "f":
+                    item.put("file", new AttributeValue(entry.getValue()));
+                    break;
+                case "instructions":
+                    item.put("instructions", new AttributeValue().withN(entry.getValue()));
+                    break;
+                case "bb_blocks":
+                    item.put("bb_blocks", new AttributeValue().withN(entry.getValue()));
+                    break;
+                case "methods":
+                    item.put("methods", new AttributeValue().withN(entry.getValue()));
+                    break;
+                case "branch_fail":
+                    item.put("branch_fail", new AttributeValue().withN(entry.getValue()));
+                    break;
+                case "branch_success":
+                    item.put("branch_success", new AttributeValue().withN(entry.getValue()));
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        item.put("metric", new AttributeValue().withN(Integer.toString(metric)));
+
+        return item;
+    }
+
+    private static int computeMetric(String query) {
+
+        return 1;
+    }
+
+
     public static String updateItemAttributes(String query) {
 
 
@@ -245,44 +371,6 @@ public class MetricStorageApp {
         }
 
         return message + error;
-    }
-
-
-
-    private static Map<String, AttributeValue> newItem(String query, Map<String, String> result) {
-
-        Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
-
-        item.put("query", new AttributeValue(query));
-
-        for (Map.Entry<String, String> entry : result.entrySet()){
-
-            switch (entry.getKey()) {
-                case "f":
-                    item.put("file", new AttributeValue(entry.getValue()));
-                    break;
-                case "instructions":
-                    item.put("instructions", new AttributeValue().withN(entry.getValue()));
-                    break;
-                case "bb_blocks":
-                    item.put("bb_blocks", new AttributeValue().withN(entry.getValue()));
-                    break;
-                case "methods":
-                    item.put("methods", new AttributeValue().withN(entry.getValue()));
-                    break;
-                case "branch_fail":
-                    item.put("branch_fail", new AttributeValue().withN(entry.getValue()));
-                    break;
-                case "branch_success":
-                    item.put("branch_success", new AttributeValue().withN(entry.getValue()));
-                    break;
-                default:
-                    break;
-            }
-
-        }
-
-        return item;
     }
 
 
