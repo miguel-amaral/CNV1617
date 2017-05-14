@@ -96,6 +96,7 @@ public class MetricStorageApp {
 
 
 
+
         } catch (AmazonServiceException ase) {
             System.out.println("Caught an AmazonServiceException, which means your request made it "
                     + "to AWS, but was rejected with an error response for some reason.");

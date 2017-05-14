@@ -169,7 +169,7 @@ public class storageWebServer extends Thread{
                 message += "\nCreating new items with query...";
 
 
-                message += _app.insertNewItemTest(query);
+                _app.insertNewItem(query);
 
 
                 message += "\nQuerying new item ...";
