@@ -125,7 +125,7 @@ public class storageWebServer extends Thread{
 
                 message += "\nQuerying new item ...";
 
-                message += _app.queryItem(filename);
+                message += _app.queryItemFullTest(filename);
 
 
 
