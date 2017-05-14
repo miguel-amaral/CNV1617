@@ -148,6 +148,16 @@ public class MetricStorageApp {
             message += "\nMetric: " + Integer.toString(metric);
 
 
+            scanFilter = new HashMap<String, Condition>();
+            condition = new Condition()
+                    .withComparisonOperator(ComparisonOperator.GT.toString())
+                    .withAttributeValueList(new AttributeValue().withN("1"));
+            scanFilter.put("instructions", condition);
+            scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
+            scanResult = _dynamoDB.scan(scanRequest);
+            message += "\n\nResult of greater than: " + scanResult;
+
+
 
 
         } catch (AmazonServiceException ase) {
