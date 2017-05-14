@@ -139,7 +139,7 @@ public class MetricStorageApp {
 
             int metric = Integer.parseInt(scanResult.getItems().get(0).get("metric").getN());
 
-            message += "\nMetric: " + Integer.toString(metric);
+            message += Integer.toString(metric);
 
 
 
