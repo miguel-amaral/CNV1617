@@ -174,7 +174,7 @@ public class storageWebServer extends Thread{
 
                 message += "\nQuerying new item ...";
 
-                message += _app.queryItem(query);
+                message += _app.queryItemMetric(query);
 
 
 

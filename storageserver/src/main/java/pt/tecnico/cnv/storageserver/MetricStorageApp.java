@@ -116,7 +116,7 @@ public class MetricStorageApp {
 
     }
 
-    public static String queryItem(String query){
+    public static String queryItemMetric(String query){
 
         String message = "";
 
@@ -136,26 +136,10 @@ public class MetricStorageApp {
             ScanRequest scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
             ScanResult scanResult = _dynamoDB.scan(scanRequest);
 
-            message += "\n\nResult of equality: " + scanResult;
-            message += "\n\nFilename: " + scanResult.getItems().get(0).get("file").getS();
-
-            int insts = Integer.parseInt(scanResult.getItems().get(0).get("instructions").getN());
 
             int metric = Integer.parseInt(scanResult.getItems().get(0).get("metric").getN());
 
-
-            message += "\n\n# of Instructions: " + Integer.toString(insts);
             message += "\nMetric: " + Integer.toString(metric);
-
-
-            scanFilter = new HashMap<String, Condition>();
-            condition = new Condition()
-                    .withComparisonOperator(ComparisonOperator.GT.toString())
-                    .withAttributeValueList(new AttributeValue().withN("1"));
-            scanFilter.put("instructions", condition);
-            scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
-            scanResult = _dynamoDB.scan(scanRequest);
-            message += "\n\nResult of greater than: " + scanResult;
 
 
 
@@ -299,6 +283,59 @@ public class MetricStorageApp {
 
 
         return message + error;
+    }
+
+    public static String queryItemFullTest(String query){
+
+        String message = "";
+
+
+        try{
+
+
+            int index = query.indexOf("instructions");
+            String query_for_key = query.substring(0,index-1);
+
+
+            HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
+            Condition condition = new Condition()
+                    .withComparisonOperator(ComparisonOperator.EQ.toString())
+                    .withAttributeValueList(new AttributeValue(query_for_key));
+            scanFilter.put("query", condition);
+            ScanRequest scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
+            ScanResult scanResult = _dynamoDB.scan(scanRequest);
+
+            message += "\n\nResult of equality: " + scanResult;
+            message += "\n\nFilename: " + scanResult.getItems().get(0).get("file").getS();
+
+            int insts = Integer.parseInt(scanResult.getItems().get(0).get("instructions").getN());
+
+            int metric = Integer.parseInt(scanResult.getItems().get(0).get("metric").getN());
+
+
+            message += "\n\n# of Instructions: " + Integer.toString(insts);
+            message += "\nMetric: " + Integer.toString(metric);
+
+
+
+
+        } catch (AmazonServiceException ase) {
+            System.out.println("Caught an AmazonServiceException, which means your request made it "
+                    + "to AWS, but was rejected with an error response for some reason.");
+            System.out.println("Error Message:    " + ase.getMessage());
+            System.out.println("HTTP Status Code: " + ase.getStatusCode());
+            System.out.println("AWS Error Code:   " + ase.getErrorCode());
+            System.out.println("Error Type:       " + ase.getErrorType());
+            System.out.println("Request ID:       " + ase.getRequestId());
+        } catch (AmazonClientException ace) {
+            System.out.println("Caught an AmazonClientException, which means the client encountered "
+                    + "a serious internal problem while trying to communicate with AWS, "
+                    + "such as not being able to access the network.");
+            System.out.println("Error Message: " + ace.getMessage());
+        }
+
+
+        return message;
     }
 
 
