@@ -88,13 +88,40 @@ public class MetricStorageApp {
 
 
 
-    public static String insertNewItem(String query, String filename, int i){
+    public static String insertNewItem(String query){
 
         String message = "";
         String error = "";
         try{
 
-            Map<String, AttributeValue> item = newItem(query, filename, i);
+            InstQueryParser parser = new InstQueryParser(query);
+
+            Map<String, String> result = new HashMap<>();
+            result = parser.queryToMap(query);
+
+            int index = query.indexOf("instructions");
+            String query_for_key = query.substring(0,index);
+
+            String filename = "";
+            String instructions = "";
+
+            for (Map.Entry<String, String> entry : result.entrySet()){
+
+                switch (entry.getKey()) {
+                    case "f":
+                        filename = entry.getValue();
+                        break;
+                    case "instructions":
+                        instructions = entry.getValue();
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+
+
+            Map<String, AttributeValue> item = newItem(query, filename, instructions);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
 
@@ -214,12 +241,12 @@ public class MetricStorageApp {
 
 
 
-    private static Map<String, AttributeValue> newItem(String query, String filename, int i) {
+    private static Map<String, AttributeValue> newItem(String query, String filename, String instructions) {
         Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
 
         item.put("query", new AttributeValue(query));
         item.put("file", new AttributeValue(filename));
-        item.put("random_value", new AttributeValue().withN(Integer.toString(i)));
+        item.put("random_value", new AttributeValue().withN(instructions));
 
 
         return item;
