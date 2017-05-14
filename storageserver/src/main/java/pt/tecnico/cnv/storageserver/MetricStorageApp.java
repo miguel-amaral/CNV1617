@@ -102,26 +102,9 @@ public class MetricStorageApp {
             int index = query.indexOf("instructions");
             String query_for_key = query.substring(0,index);
 
-            String filename = "";
-            String instructions = "";
-
-            for (Map.Entry<String, String> entry : result.entrySet()){
-
-                switch (entry.getKey()) {
-                    case "f":
-                        filename = entry.getValue();
-                        break;
-                    case "instructions":
-                        instructions = entry.getValue();
-                        break;
-                    default:
-                        break;
-                }
-
-            }
 
 
-            Map<String, AttributeValue> item = newItem(query, filename, instructions);
+            Map<String, AttributeValue> item = newItem(query_for_key, result);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
 
@@ -241,13 +224,38 @@ public class MetricStorageApp {
 
 
 
-    private static Map<String, AttributeValue> newItem(String query, String filename, String instructions) {
+    private static Map<String, AttributeValue> newItem(String query, Map<String, String> result) {
+
         Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
 
         item.put("query", new AttributeValue(query));
-        item.put("file", new AttributeValue(filename));
-        item.put("instructions", new AttributeValue().withN(instructions));
 
+        for (Map.Entry<String, String> entry : result.entrySet()){
+
+            switch (entry.getKey()) {
+                case "f":
+                    item.put("file", new AttributeValue(entry.getValue()));
+                    break;
+                case "instructions":
+                    item.put("instructions", new AttributeValue().withN(entry.getValue()));
+                    break;
+                case "bb_blocks":
+                    item.put("bb_blocks", new AttributeValue().withN(entry.getValue()));
+                    break;
+                case "methods":
+                    item.put("methods", new AttributeValue().withN(entry.getValue()));
+                    break;
+                case "branch_fail":
+                    item.put("branch_fail", new AttributeValue().withN(entry.getValue()));
+                    break;
+                case "branch_success":
+                    item.put("branch_success", new AttributeValue().withN(entry.getValue()));
+                    break;
+                default:
+                    break;
+            }
+
+        }
 
         return item;
     }
