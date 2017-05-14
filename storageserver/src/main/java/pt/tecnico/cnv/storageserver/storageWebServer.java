@@ -168,6 +168,9 @@ public class storageWebServer extends Thread{
 
                 requestStatus = 200;
 
+                int index = query.indexOf("instructions");
+
+                String query_for_key = query.substring(0,index);
 
                 message += "\nCreating new items with query...";
 
@@ -177,7 +180,7 @@ public class storageWebServer extends Thread{
 
                     switch (entry.getKey()) {
                         case "f":
-                            message += _app.insertNewItem(query, entry.getValue(), inc);
+                            message += _app.insertNewItem(query_for_key, entry.getValue(), inc);
                             filename = entry.getValue();
                             inc++;
                             break;
