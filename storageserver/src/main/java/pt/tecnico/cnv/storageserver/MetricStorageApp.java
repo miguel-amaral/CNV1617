@@ -149,6 +149,12 @@ public class MetricStorageApp {
             ScanRequest scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
             ScanResult scanResult = _dynamoDB.scan(scanRequest);
             message += "\n\nResult of equality: " + scanResult;
+            message += "\n\nFilename: " + scanResult.getItems().get(0).get("file").getS();
+
+            int insts = Integer.parseInt(scanResult.getItems().get(0).get("instructions").getN());
+
+
+            message += "\n\n# of Instructions: " + Integer.toString(insts);
 
             scanFilter = new HashMap<String, Condition>();
             condition = new Condition()
