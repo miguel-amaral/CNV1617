@@ -156,14 +156,14 @@ public class storageWebServer extends Thread{
             String query = t.getRequestURI().getQuery();
 
             OutputStream os = t.getResponseBody();
-            String message = null;
+            String message = "";
             int requestStatus = 0;
 
             Map<String, String> result = new HashMap<>();
 
             try {
 
-                QueryParser parser = new QueryParser(query);
+                InstQueryParser parser = new InstQueryParser(query);
                 result = parser.queryToMap(query);
 
                 requestStatus = 200;
