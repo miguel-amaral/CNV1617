@@ -171,7 +171,7 @@ public class MetricStorageApp {
             condition = new Condition()
                     .withComparisonOperator(ComparisonOperator.GT.toString())
                     .withAttributeValueList(new AttributeValue().withN("1"));
-            scanFilter.put("random_value", condition);
+            scanFilter.put("instructions", condition);
             scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
             scanResult = _dynamoDB.scan(scanRequest);
             message += "\n\nResult of greater than: " + scanResult;
@@ -223,7 +223,7 @@ public class MetricStorageApp {
             UpdateItemRequest updateItemRequest = new UpdateItemRequest()
                     .withTableName(defaultTableName)
                     .withKey(key)
-                    .withUpdateExpression(" set random_value=:val")
+                    .withUpdateExpression(" set instructions=:val")
                     .withExpressionAttributeValues(expressionAttributeValues)
                     .withReturnValues(returnValues);
 
@@ -246,7 +246,7 @@ public class MetricStorageApp {
 
         item.put("query", new AttributeValue(query));
         item.put("file", new AttributeValue(filename));
-        item.put("random_value", new AttributeValue().withN(instructions));
+        item.put("instructions", new AttributeValue().withN(instructions));
 
 
         return item;
