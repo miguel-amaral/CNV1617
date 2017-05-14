@@ -100,7 +100,7 @@ public class MetricStorageApp {
             result = parser.queryToMap(query);
 
             int index = query.indexOf("instructions");
-            String query_for_key = query.substring(0,index);
+            String query_for_key = query.substring(0,index-1);
 
 
 
