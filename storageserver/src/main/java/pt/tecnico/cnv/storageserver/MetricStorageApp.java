@@ -21,18 +21,18 @@ public class MetricStorageApp {
 
     private static String defaultTableName = "metrics_table";
 
-    public MetricStorageApp(AmazonDynamoDB dynamoDB){
+    public MetricStorageApp(AmazonDynamoDB dynamoDB, boolean deleteOnInit){
 
         this._dynamoDB = dynamoDB;
+        if(deleteOnInit){
+            deleteDefaultTable();
+        }
         createDefaultTable();
     }
 
     private static void createDefaultTable(){
 
         try {
-
-            //Deletes table if exists;
-            deleteDefaultTable();
 
 
             List<AttributeDefinition> attributeDefinitions = new ArrayList<AttributeDefinition>();

@@ -34,9 +34,9 @@ public class storageWebServer extends Thread{
 
     public static void main(String[] args) throws Exception {
 
-
+        boolean deleteOnInit = Boolean.parseBoolean(args[0]);
         try {
-            boolean success = init();
+            boolean success = init(deleteOnInit);
         }catch (Exception e ) {
             e.printStackTrace();
             System.out.println("Init Failed!!");
@@ -183,7 +183,7 @@ public class storageWebServer extends Thread{
     }
 
 
-    private static boolean init() {
+    private static boolean init(boolean deleteOnInit) {
 
 
         AWSCredentials credentials = null;
@@ -197,7 +197,7 @@ public class storageWebServer extends Thread{
                     e);
         }
         dynamoDB = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_WEST_2).withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
-        _app = new MetricStorageApp(dynamoDB);
+        _app = new MetricStorageApp(dynamoDB, deleteOnInit);
 
         return true;
     }

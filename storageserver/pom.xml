@@ -15,6 +15,12 @@
     <url>http://maven.apache.org</url>
 
 
+    <properties>
+        <cleanTablesOnInit>true</cleanTablesOnInit>
+    </properties>
+
+
+
 
     <build>
         <plugins>
@@ -41,6 +47,9 @@
                 <configuration>
                     <workingDirectory>${project.basedir}</workingDirectory>
                     <mainClass>pt.tecnico.cnv.storageserver.storageWebServer</mainClass>
+                    <arguments>
+                        <argument>${cleanTablesOnInit}</argument>
+                    </arguments>
                 </configuration>
             </plugin>
         </plugins>
