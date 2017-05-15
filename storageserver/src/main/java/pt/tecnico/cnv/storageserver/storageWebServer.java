@@ -126,7 +126,7 @@ public class storageWebServer extends Thread{
             String query = t.getRequestURI().getQuery();
             System.out.println("PUT QUERY: "  + query);
             OutputStream os = t.getResponseBody();
-            String message = "";
+            String message = "PUT QUERY: "  + query + "\n\n\n";
             int requestStatus = 0;
 
             try {
@@ -135,7 +135,7 @@ public class storageWebServer extends Thread{
                 requestStatus = 200;
 
 
-                _app.insertNewItem(query);
+                message += _app.insertNewItem(query);
 
 
 

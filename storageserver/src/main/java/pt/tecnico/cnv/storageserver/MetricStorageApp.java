@@ -77,8 +77,10 @@ public class MetricStorageApp {
     }
 
 
-    public static void insertNewItem(String query){
+    public static String insertNewItem(String query){
 
+        String message = "";
+        String error = "";
         try{
 
             InstQueryParser parser = new InstQueryParser(query);
@@ -86,11 +88,13 @@ public class MetricStorageApp {
             Map<String, String> result = new HashMap<>();
             result = parser.queryToMap(query);
 
+
+            message += "THIS IS THE ORIGINAL QUERY: " + query + "\n\n\n";
             //int index = query.indexOf("instructions");
             int index = query.indexOf("jobID");
             String query_for_key = query.substring(0,index-1);
 
-
+            message += "THIS IS THE PROCESSED QUERY: " + query_for_key + "\n\n\n";
 
             Map<String, AttributeValue> item = newItem(query_for_key, result);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
@@ -100,21 +104,25 @@ public class MetricStorageApp {
 
 
         } catch (AmazonServiceException ase) {
-            System.out.println("Caught an AmazonServiceException, which means your request made it "
-                    + "to AWS, but was rejected with an error response for some reason.");
-            System.out.println("Error Message:    " + ase.getMessage());
-            System.out.println("HTTP Status Code: " + ase.getStatusCode());
-            System.out.println("AWS Error Code:   " + ase.getErrorCode());
-            System.out.println("Error Type:       " + ase.getErrorType());
-            System.out.println("Request ID:       " + ase.getRequestId());
+            error += "\n\nCaught an AmazonServiceException, which means your request made it "
+                    + "to AWS, but was rejected with an error response for some reason.";
+            error += "\nError Message:    " + ase.getMessage();
+            error += "\nHTTP Status Code: " + ase.getStatusCode();
+            error += "\nAWS Error Code:   " + ase.getErrorCode();
+            error += "\nError Type:       " + ase.getErrorType();
+            error += "\nRequest ID:       " + ase.getRequestId();
         } catch (AmazonClientException ace) {
-            System.out.println("Caught an AmazonClientException, which means the client encountered "
+            error += "\nCaught an AmazonClientException, which means the client encountered "
                     + "a serious internal problem while trying to communicate with AWS, "
-                    + "such as not being able to access the network.");
-            System.out.println("Error Message: " + ace.getMessage());
-        } catch (InvalidArgumentsException e) {
-            e.printStackTrace();
+                    + "such as not being able to access the network.";
+            error += "\nError Message: " + ace.getMessage();
+        } catch (InvalidArgumentsException e){
+
+            error += e.getMessage();
         }
+
+
+        return message + error;
 
     }
 
