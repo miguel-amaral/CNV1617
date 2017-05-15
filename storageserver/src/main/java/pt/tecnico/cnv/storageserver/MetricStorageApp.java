@@ -7,6 +7,7 @@ import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import pt.tecnico.cnv.common.InvalidArgumentsException;
+import pt.tecnico.cnv.common.QueryParser;
 import pt.tecnico.cnv.common.STATIC_VALUES;
 
 import java.util.ArrayList;
@@ -144,7 +145,7 @@ public class MetricStorageApp {
 
         } catch (IndexOutOfBoundsException e) {
 
-            message = false + STATIC_VALUES.SEPARATOR_STORAGE_METRIC_REQUEST + Integer.toString(69);
+            message = false + STATIC_VALUES.SEPARATOR_STORAGE_METRIC_REQUEST + Integer.toString(guessMetric(query));
             //TODO-FIXME
             //inserir so metric
             //guess metric & insert
@@ -351,9 +352,9 @@ public class MetricStorageApp {
 
         item.put("query", new AttributeValue(query));
 
-        int metric = computeMetric(query);
+        int metric = computeMetric(result);
 
-        for (Map.Entry<String, String> entry : result.entrySet()){
+        /*for (Map.Entry<String, String> entry : result.entrySet()){
 
             switch (entry.getKey()) {
                 case "f":
@@ -381,16 +382,92 @@ public class MetricStorageApp {
                     break;
             }
 
-        }
+        }*/
 
-        //item.put("metric", new AttributeValue().withN(Integer.toString(metric)));
+        item.put("metric", new AttributeValue().withN(Integer.toString(metric)));
 
         return item;
     }
 
-    private static int computeMetric(String query) {
+    private static int computeMetric(Map<String, String> result) {
 
-        return 1;
+        int instructions = 0, bb_blocks = 0, methods = 0, branch_fail = 0, branch_success = 0;
+
+        for (Map.Entry<String, String> entry : result.entrySet()){
+
+            switch (entry.getKey()) {
+
+                case "instructions":
+                    instructions = Integer.getInteger(entry.getValue());
+                    break;
+                case "bb_blocks":
+                    bb_blocks = Integer.getInteger(entry.getValue());
+                    break;
+                case "methods":
+                    methods = Integer.getInteger(entry.getValue());
+                    break;
+                case "branch_fail":
+                    branch_fail = Integer.getInteger(entry.getValue());
+                    break;
+                case "branch_success":
+                    branch_success = Integer.getInteger(entry.getValue());
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        return (instructions/bb_blocks) * methods;
+    }
+
+    private static int guessMetric(String query) {
+
+        int f = 0, sc = 0, sr = 0, wc = 0, wr = 0, coff = 0, roff = 0;
+
+        QueryParser parser = null;
+        try {
+            parser = new QueryParser(query);
+        } catch (InvalidArgumentsException e) {
+            e.printStackTrace();
+        }
+
+        Map<String, String> result = new HashMap<>();
+        result = parser.queryToMap(query);
+
+
+        for (Map.Entry<String, String> entry : result.entrySet()){
+
+            switch (entry.getKey()) {
+
+                case "f":
+                    f = Integer.getInteger(entry.getValue());
+                    break;
+                case "sc":
+                    sc = Integer.getInteger(entry.getValue());
+                    break;
+                case "sr":
+                    sr = Integer.getInteger(entry.getValue());
+                    break;
+                case "wc":
+                    wc = Integer.getInteger(entry.getValue());
+                    break;
+                case "wr":
+                    wr = Integer.getInteger(entry.getValue());
+                    break;
+                case "coff":
+                    coff = Integer.getInteger(entry.getValue());
+                    break;
+                case "roff":
+                    roff = Integer.getInteger(entry.getValue());
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+        return sc * sr;
     }
 
 

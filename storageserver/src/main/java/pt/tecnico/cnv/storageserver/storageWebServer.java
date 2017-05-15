@@ -50,7 +50,7 @@ public class storageWebServer extends Thread{
             server = HttpServer.create(new InetSocketAddress(port), 0);
             server.createContext("/ping", new PingHandler());
             server.createContext("/data.html", new ReceiveDataHandler());
-            server.createContext("/update.html", new UpdateItemHandler());
+            server.createContext("/testmetric.html", new TestMetricHandler());
             server.createContext("/metric/value", new GenericHandler(new MetricValueStrategy()));
             server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
             server.start();
@@ -77,58 +77,34 @@ public class storageWebServer extends Thread{
     }
 
 
-    static class UpdateItemHandler implements HttpHandler {
+    static class TestMetricHandler implements HttpHandler {
         public void handle(HttpExchange t) throws IOException {
 
             String query = t.getRequestURI().getQuery();
 
+            System.out.println("TEST QUERY: "  + query);
             OutputStream os = t.getResponseBody();
             String message = "";
             int requestStatus = 0;
 
-            Map<String, String> result = new HashMap<>();
 
             try {
 
-                QueryParser parser = new QueryParser(query);
-                result = parser.queryToMap(query);
-
-                requestStatus = 200;
-
-                message += "\nUpdating new items with query...";
 
 
-                message += _app.updateItemAttributes(query);
+                message += "\nQuerying item with query: " + query + "\n\n\n";
 
 
-                String filename = "";
-
-                for (Map.Entry<String, String> entry : result.entrySet()){
-
-                    switch (entry.getKey()) {
-                        case "f":
-                            filename = entry.getValue();
-                            inc++;
-                            break;
-                        default:
-                            break;
-                    }
-
-                }
-
-
-                message += "\nQuerying new item ...";
-
-                message += _app.queryItemFullTest(filename);
+                message += "METRIC VALUE: " +_app.queryItemMetric(query);
 
 
 
-            } catch (InvalidArgumentsException e) {
+            /*} catch (InvalidArgumentsException e) {
                 e.printStackTrace();
                 message = "Error: InvalidArgumentsException";
                 requestStatus = 400;
                 System.err.println(message);
-            } catch (Throwable e) {
+            }*/} catch (Throwable e) {
                 e.printStackTrace();
                 message = "Error: " + e.getMessage();
                 System.err.println(message);
