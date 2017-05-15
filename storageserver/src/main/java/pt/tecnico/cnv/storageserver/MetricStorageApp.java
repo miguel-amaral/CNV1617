@@ -123,14 +123,12 @@ public class MetricStorageApp {
         try{
 
 
-            int index = query.indexOf("jobID");
-            String query_for_key = query.substring(0,index-1);
 
 
             HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
             Condition condition = new Condition()
                     .withComparisonOperator(ComparisonOperator.EQ.toString())
-                    .withAttributeValueList(new AttributeValue(query_for_key));
+                    .withAttributeValueList(new AttributeValue(query));
             scanFilter.put("query", condition);
             ScanRequest scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
             ScanResult scanResult = _dynamoDB.scan(scanRequest);
