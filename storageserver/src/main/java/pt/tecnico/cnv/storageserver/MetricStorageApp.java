@@ -3,9 +3,11 @@ package pt.tecnico.cnv.storageserver;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
+import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import pt.tecnico.cnv.common.InvalidArgumentsException;
+import pt.tecnico.cnv.common.STATIC_VALUES;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -136,9 +138,16 @@ public class MetricStorageApp {
 
             int metric = Integer.parseInt(scanResult.getItems().get(0).get("metric").getN());
 
-            message += Integer.toString(metric);
+            message = true + STATIC_VALUES.SEPARATOR_STORAGE_METRIC_REQUEST + Integer.toString(metric);
 
 
+
+        } catch (IndexOutOfBoundsException e) {
+
+            message = false + STATIC_VALUES.SEPARATOR_STORAGE_METRIC_REQUEST + Integer.toString(69);
+            //TODO-FIXME
+            //inserir so metric
+            //guess metric & insert
 
 
         } catch (AmazonServiceException ase) {

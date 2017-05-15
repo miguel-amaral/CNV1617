@@ -202,15 +202,13 @@ public class storageWebServer extends Thread{
     private static class MetricValueStrategy extends HttpStrategy {
         @Override
         public HttpAnswer process(String query) throws Exception {
-            boolean alreadyInstrumented = false;
-            long metric = 100;
 
             System.out.println("QUERY: "  + query);
 
+            String message = _app.queryItemMetric(query);
 
-            metric = Long.valueOf(_app.queryItemMetric(query));
             //dont mess with what is below
-            String message = alreadyInstrumented + STATIC_VALUES.SEPARATOR_STORAGE_METRIC_REQUEST + metric;
+
             return new HttpAnswer(200,message);
         }
     }
