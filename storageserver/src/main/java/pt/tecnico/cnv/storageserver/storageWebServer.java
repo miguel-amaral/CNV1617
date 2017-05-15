@@ -158,13 +158,9 @@ public class storageWebServer extends Thread{
 
                 requestStatus = 200;
 
-                message += "\nQuery: "+ query+"<br/>";
-                message += "\nCreating new items with query..."+"<br/>";
 
                 _app.insertNewItem(query);
 
-                message += "\nQuerying new item ..."+"<br/>";
-                message += _app.queryItemMetric(query);
 
 
 
