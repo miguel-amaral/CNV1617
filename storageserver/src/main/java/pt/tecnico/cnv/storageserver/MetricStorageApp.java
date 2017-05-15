@@ -83,7 +83,8 @@ public class MetricStorageApp {
             Map<String, String> result = new HashMap<>();
             result = parser.queryToMap(query);
 
-            int index = query.indexOf("instructions");
+            //int index = query.indexOf("instructions");
+            int index = query.indexOf("jobID");
             String query_for_key = query.substring(0,index-1);
 
 
