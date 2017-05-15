@@ -148,26 +148,22 @@ public class storageWebServer extends Thread{
         public void handle(HttpExchange t) throws IOException {
 
             String query = t.getRequestURI().getQuery();
-
+            System.out.println("PUT QUERY: "  + query);
             OutputStream os = t.getResponseBody();
             String message = "";
             int requestStatus = 0;
-
-
 
             try {
 
 
                 requestStatus = 200;
 
-                message += "\nCreating new items with query...";
-
+                message += "\nQuery: "+ query+"<br/>";
+                message += "\nCreating new items with query..."+"<br/>";
 
                 _app.insertNewItem(query);
 
-
-                message += "\nQuerying new item ...";
-
+                message += "\nQuerying new item ..."+"<br/>";
                 message += _app.queryItemMetric(query);
 
 
@@ -212,6 +208,8 @@ public class storageWebServer extends Thread{
         public HttpAnswer process(String query) throws Exception {
             boolean alreadyInstrumented = false;
             long metric = 100;
+
+            System.out.println("QUERY: "  + query);
 
 
             metric = Long.valueOf(_app.queryItemMetric(query));

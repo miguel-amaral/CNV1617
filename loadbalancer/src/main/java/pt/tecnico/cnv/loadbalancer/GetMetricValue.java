@@ -18,7 +18,7 @@ public class GetMetricValue {
     private boolean alreadyIntrumented;
 
     public GetMetricValue(String query) {
-        metric = 1;
+        metric = 2;
         alreadyIntrumented = false;
 
         HttpAnswer answer = HttpRequest.sendGet("storage-server-cnv.tk:8000/metric/value?"+query,new HashMap<String, String>());
