@@ -16,7 +16,7 @@
 
 
     <properties>
-        <cleanTablesOnInit>false</cleanTablesOnInit>
+        <cleanTablesOnInit>true</cleanTablesOnInit>
     </properties>
 
 
