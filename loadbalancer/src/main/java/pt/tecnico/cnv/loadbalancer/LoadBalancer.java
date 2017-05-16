@@ -54,7 +54,9 @@ public class LoadBalancer {
             System.out.println("ip: " + ip + " chosen for " + jobID);
         }
 
-        String letter = alreadyInstrumented ? "alreadyInstrumented" : "r" ;
+        //String letter = alreadyInstrumented ? "alreadyInstrumented" : "r" ;
+        String letter = alreadyInstrumented ? "r" : "r" ;
+
         if(STATIC_VALUES.DEBUG_LOAD_BALANCER_JOB_ALREADY_INSTRUCTED ) {
             System.out.println("jobID: "  + jobID + " already instrument: " + alreadyInstrumented);
         }
