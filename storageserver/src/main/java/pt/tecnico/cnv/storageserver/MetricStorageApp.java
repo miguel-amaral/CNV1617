@@ -444,7 +444,7 @@ public class MetricStorageApp {
 
     private static int guessMetric(String query) {
 
-        int f = 0, sc = 0, sr = 0, wc = 0, wr = 0, coff = 0, roff = 0;
+        int sc = 0, sr = 0, wc = 0, wr = 0, coff = 0, roff = 0;
 
         QueryParser parser = null;
         try {
@@ -461,9 +461,6 @@ public class MetricStorageApp {
 
             switch (entry.getKey()) {
 
-                case "f":
-                    f = Integer.parseInt(entry.getValue());
-                    break;
                 case "sc":
                     sc = Integer.parseInt(entry.getValue());
                     break;
