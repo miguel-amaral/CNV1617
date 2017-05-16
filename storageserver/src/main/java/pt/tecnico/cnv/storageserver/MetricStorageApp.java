@@ -410,29 +410,28 @@ public class MetricStorageApp {
 
     private static int computeMetric(Map<String, String> result) {
 
-        int insts = 0, blocks = 0, meths = 1, b_fail = 0, b_success = 0;
 
-
-        System.out.println("THIS IS THE SIZE:" + Integer.toString(result.size()) + "\n\n\n");
-
+        int insts = 0, blocks = 0, meths = 0, b_fail = 0, b_success = 0;
 
 
         for (Map.Entry<String, String> entry : result.entrySet()){
 
-            System.out.println("THIS IS THE KEY:" + entry.getKey() + "\n\n\n");
             switch (entry.getKey()) {
 
                 case "instructions":
-                    insts = Integer.getInteger(entry.getValue());
+                    insts = Integer.parseInt(entry.getValue());
                     break;
                 case "bb_blocks":
-                    blocks = Integer.getInteger(entry.getValue());
+                    blocks = Integer.parseInt(entry.getValue());
+                    break;
+                case "methods":
+                    meths = Integer.parseInt(entry.getValue());
                     break;
                 case "branch_fail":
-                    b_fail = Integer.getInteger(entry.getValue());
+                    b_fail = Integer.parseInt(entry.getValue());
                     break;
                 case "branch_success":
-                    b_success = Integer.getInteger(entry.getValue());
+                    b_success = Integer.parseInt(entry.getValue());
                     break;
                 default:
                     break;
@@ -463,25 +462,25 @@ public class MetricStorageApp {
             switch (entry.getKey()) {
 
                 case "f":
-                    f = Integer.getInteger(entry.getValue());
+                    f = Integer.parseInt(entry.getValue());
                     break;
                 case "sc":
-                    sc = Integer.getInteger(entry.getValue());
+                    sc = Integer.parseInt(entry.getValue());
                     break;
                 case "sr":
-                    sr = Integer.getInteger(entry.getValue());
+                    sr = Integer.parseInt(entry.getValue());
                     break;
                 case "wc":
-                    wc = Integer.getInteger(entry.getValue());
+                    wc = Integer.parseInt(entry.getValue());
                     break;
                 case "wr":
-                    wr = Integer.getInteger(entry.getValue());
+                    wr = Integer.parseInt(entry.getValue());
                     break;
                 case "coff":
-                    coff = Integer.getInteger(entry.getValue());
+                    coff = Integer.parseInt(entry.getValue());
                     break;
                 case "roff":
-                    roff = Integer.getInteger(entry.getValue());
+                    roff = Integer.parseInt(entry.getValue());
                     break;
                 default:
                     break;
