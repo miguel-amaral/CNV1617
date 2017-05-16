@@ -416,6 +416,7 @@ public class MetricStorageApp {
         System.out.println("THIS IS THE SIZE:" + Integer.toString(result.size()) + "\n\n\n");
 
 
+
         for (Map.Entry<String, String> entry : result.entrySet()){
 
             System.out.println("THIS IS THE KEY:" + entry.getKey() + "\n\n\n");
