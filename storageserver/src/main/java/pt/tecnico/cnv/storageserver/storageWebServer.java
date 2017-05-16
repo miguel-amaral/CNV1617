@@ -15,8 +15,6 @@ import pt.tecnico.cnv.common.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Executors;
 
 
@@ -66,7 +64,7 @@ public class storageWebServer extends Thread{
         public void handle(HttpExchange t) throws IOException {
             String query = t.getRequestURI().getQuery();
 
-            System.out.println(query);
+            System.out.println("pong");
             OutputStream os = t.getResponseBody();
             String message = "ok";
             int requestStatus = 200;

@@ -84,7 +84,7 @@ public class MetricStorageApp {
 
 
 
-                Map<String, AttributeValue> item = newItem(query);
+            Map<String, AttributeValue> item = newItem(query);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
 
@@ -352,26 +352,30 @@ public class MetricStorageApp {
 
 
 
-        System.out.println("THIS IS THE ORIGINAL QUERY: " + query + "\n\n\n");
+        System.out.println("THIS IS THE ORIGINAL QUERY: " + query + "\n");
 
         int index = query.indexOf("jobID");
         String query_for_key = query.substring(0,index-1);
 
 
 
-        System.out.println("THIS IS THE PROCESSED QUERY: " + query_for_key + "\n\n\n");
-        System.out.println("THIS IS THE MAP: \n" + parser.toString() + "\n\n\n");
+        System.out.println("THIS IS THE PROCESSED QUERY: " + query_for_key + "\n");
+        System.out.println("THIS IS THE MAP: \n" + parser.toString() + "\n");
 
         Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
 
 
-        System.out.println("INSERTING THIS QUERY: " + query_for_key + "\n\n\n");
+        System.out.println("INSERTING THIS QUERY: " + query_for_key + "\n");
 
         item.put("query", new AttributeValue(query_for_key));
 
 
 
+
+
         int metric = computeMetric(resultMap);
+
+        System.out.println("INSERTING WITH METRIC: " + Integer.toString(metric) + "\n");
 
         /*for (Map.Entry<String, String> entry : result.entrySet()){
 
@@ -485,6 +489,9 @@ public class MetricStorageApp {
 
         }
 
+
+        System.out.println("GUESSING METRIC WITH SC = : " + Integer.toString(sc) + " AND " +
+                "WITH SR = : " + Integer.toString(sr)+ "\n");
         return sc * sr;
     }
 
@@ -529,15 +536,6 @@ public class MetricStorageApp {
     private static void deleteDefaultTable() {
 
         DeleteTableRequest deleteRequest = new DeleteTableRequest().withTableName(defaultTableName);
-        // Deletes if table exists
-        TableUtils.deleteTableIfExists(_dynamoDB, deleteRequest);
-
-    }
-
-
-    private static void deleteTable(String table_name) {
-
-        DeleteTableRequest deleteRequest = new DeleteTableRequest().withTableName(table_name);
         // Deletes if table exists
         TableUtils.deleteTableIfExists(_dynamoDB, deleteRequest);
 
