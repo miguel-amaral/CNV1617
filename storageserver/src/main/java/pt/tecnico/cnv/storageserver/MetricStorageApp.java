@@ -82,26 +82,9 @@ public class MetricStorageApp {
 
         try{
 
-            InstQueryParser parser = new InstQueryParser(query);
-
-            Map<String, String> result = new HashMap<>();
-            result = parser.queryToMap(query);
 
 
-
-
-            System.out.println("THIS IS THE ORIGINAL QUERY: " + query + "\n\n\n");
-            //int index = query.indexOf("instructions");
-            int index = query.indexOf("jobID");
-            String query_for_key = query.substring(0,index-1);
-
-
-
-            System.out.println("THIS IS THE PROCESSED QUERY: " + query_for_key + "\n\n\n");
-            System.out.println("THIS IS THE MAP: " + parser.toString() + "\n\n\n");
-
-
-            Map<String, AttributeValue> item = newItem(query_for_key, result);
+                Map<String, AttributeValue> item = newItem(query);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
 
@@ -121,9 +104,6 @@ public class MetricStorageApp {
                     + "a serious internal problem while trying to communicate with AWS, "
                     + "such as not being able to access the network.");
             System.out.println("Error Message: " + ace.getMessage());
-        } catch (InvalidArgumentsException e){
-
-            System.out.println("Error Message: " + e.getMessage());
         }
 
 
@@ -198,7 +178,7 @@ public class MetricStorageApp {
 
 
 
-            Map<String, AttributeValue> item = newItem(query_for_key, result);
+            Map<String, AttributeValue> item = newItem(query);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
 
@@ -357,14 +337,37 @@ public class MetricStorageApp {
     }
 
 
-    private static Map<String, AttributeValue> newItem(String query, Map<String, String> result) {
+    private static Map<String, AttributeValue> newItem(String query) {
+
+        InstQueryParser parser = null;
+        try {
+            parser = new InstQueryParser(query);
+        } catch (InvalidArgumentsException e) {
+            e.printStackTrace();
+        }
+
+        Map<String, String> result = new HashMap<>();
+        result = parser.queryToMap(query);
+
+
+
+
+        System.out.println("THIS IS THE ORIGINAL QUERY: " + query + "\n\n\n");
+
+        int index = query.indexOf("jobID");
+        String query_for_key = query.substring(0,index-1);
+
+
+
+        System.out.println("THIS IS THE PROCESSED QUERY: " + query_for_key + "\n\n\n");
+        System.out.println("THIS IS THE MAP: \n" + parser.toString() + "\n\n\n");
 
         Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
 
 
-        System.out.println("INSERTING THIS QUERY: " + query + "\n\n\n");
+        System.out.println("INSERTING THIS QUERY: " + query_for_key + "\n\n\n");
 
-        item.put("query", new AttributeValue(query));
+        item.put("query", new AttributeValue(query_for_key));
 
 
 
@@ -409,6 +412,8 @@ public class MetricStorageApp {
 
         int insts = 0, blocks = 0, meths = 0, b_fail = 0, b_success = 0;
 
+
+        System.out.println("THIS IS THE SIZE:" + Integer.toString(result.size()) + "\n\n\n");
 
 
         for (Map.Entry<String, String> entry : result.entrySet()){
