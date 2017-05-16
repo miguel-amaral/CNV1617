@@ -43,6 +43,7 @@ public class WebServer {
         server.createContext("/processer/status", new GenericHandler(new ProccesserStatusStrategy()));
         server.createContext("/status", new GenericHandler(new ProccesserStatusStrategy()));
         server.createContext("/r.html", new GenericHandler(new ProccessQueryStrategy()));
+        server.createContext("/metrics", new GenericHandler(new GetMetricsStrategy()));
 
         server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
         server.start();
@@ -84,12 +85,16 @@ public class WebServer {
 
     private static class ProccessQueryStrategy extends HttpStrategy {
         public HttpAnswer process(String query) throws Exception {
-            return _proccesser.processQuery(query);
+            return _proccesser.processQuery(query,false);
+        }
+    }
+    private static class GetMetricsStrategy extends HttpStrategy {
+        public HttpAnswer process(String query) throws Exception {
+            return _proccesser.processQuery(query,true);
         }
     }
     private static class ListInstancesStrategy extends HttpStrategy {
         public HttpAnswer process(String query) throws Exception{
-
             String newline = "\n";
             String message = "ok" + newline;
             ListWorkerInstances executer = new ListWorkerInstances(ec2);
@@ -102,7 +107,6 @@ public class WebServer {
             return new HttpAnswer(requestStatus,message);
         }
     }
-
     private static class JobDone extends HttpStrategy {
         public HttpAnswer process(String query) throws Exception {
             String[] arg = query.split("=");

@@ -4,9 +4,7 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import com.sun.net.httpserver.HttpServer;
-import pt.tecnico.cnv.common.HttpAnswer;
-import pt.tecnico.cnv.common.HttpRequest;
-import pt.tecnico.cnv.common.InvalidArgumentsException;
+import pt.tecnico.cnv.common.*;
 import tool.ContainerManager;
 import tool.DataContainer;
 
@@ -30,6 +28,7 @@ public class WebServer {
         server.createContext("/ping", new PingHandler());
         server.createContext("/r.html", new MyHandler());
         server.createContext("/images/", new GetImageHandler());
+        server.createContext("/metrics", new GenericHandler(new onlyMetricsStrategy()));
         server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
         server.start();
 		System.out.println("Server is now running");
@@ -189,4 +188,72 @@ public class WebServer {
         }
     }
 
+    private static class onlyMetricsStrategy extends HttpStrategy {
+        @Override
+        public HttpAnswer process(String query) throws Exception {
+            String message = null;
+            int requestStatus = 0;
+
+            try {
+                System.out.println("thread: " + Thread.currentThread().getId());
+                ContainerManager.clearInstance(Thread.currentThread().getId());
+                InvokeRay ray = new InvokeRay(query);
+
+                ray.execute();
+                requestStatus = 200;
+
+                DataContainer data = ContainerManager.getInstance(Thread.currentThread().getId());
+                String separator = ", ";
+                message +=
+                        data.instructions + separator +
+                        data.bb_blocks + separator +
+                        data.methods + separator +
+                        data.branch_fail + separator +
+                        data.branch_success;
+
+                String jobID = ray.jobID();
+
+                Map<String, String> args = new HashMap<>();
+                args.put("jobID", jobID);
+                HttpRequest.sendGet("load-balancer-cnv.tk:8000/job/done", args);
+
+//                String storageEndpoint = "data.html";
+//                String instructions_key = "instructions";
+//                String bb_blocks_key = "bb_blocks";
+//                String methods_key = "methods";
+//                String branch_fail_key = "branch_fail";
+//                String branch_success_key = "branch_success";
+//
+//                List<String> keys = new ArrayList<>();
+//                keys.add(instructions_key);
+//                keys.add(bb_blocks_key);
+//                keys.add(methods_key);
+//                keys.add(branch_fail_key);
+//                keys.add(branch_success_key);
+//
+//                List<String> values = new ArrayList<>();
+//                values.add(data.instructions + "");
+//                values.add(data.bb_blocks + "");
+//                values.add(data.methods + "");
+//                values.add(data.branch_fail + "");
+//                values.add(data.branch_success + "");
+//
+//                StringBuilder finalEndpoint = new StringBuilder("storage-server-cnv.tk:8000/" + storageEndpoint + "?" + query);
+//                for (int i = 0; i < keys.size(); i++) {
+//                    finalEndpoint.append("&").append(keys.get(i)).append("=").append(values.get(i));
+//                }
+
+            } catch (InvalidArgumentsException e) {
+                e.printStackTrace();
+                message = "Error: InvalidArgumentsException";
+                requestStatus = 400;
+                System.err.println(message);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                message = "Error: " + e.getMessage();
+                System.err.println(message);
+            }
+            return new HttpAnswer(requestStatus,message);
+        }
+    }
 }

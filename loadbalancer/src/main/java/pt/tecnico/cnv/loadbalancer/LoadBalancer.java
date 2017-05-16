@@ -35,7 +35,7 @@ public class LoadBalancer {
     }
 
 
-    public HttpAnswer processQuery(String query) {
+    public HttpAnswer processQuery(String query, boolean returnMetricsOnly) {
 
         //update all instances ??
         updateInstances();
@@ -55,7 +55,8 @@ public class LoadBalancer {
         }
 
         //String letter = alreadyInstrumented ? "alreadyInstrumented" : "r" ;
-        String letter = alreadyInstrumented ? "r" : "r" ;
+
+        String letter = returnMetricsOnly ? "metrics" : "r" ;
 
         if(STATIC_VALUES.DEBUG_LOAD_BALANCER_JOB_ALREADY_INSTRUCTED ) {
             System.out.println("jobID: "  + jobID + " already instrument: " + alreadyInstrumented);
