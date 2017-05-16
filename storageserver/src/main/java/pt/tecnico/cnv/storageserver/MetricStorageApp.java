@@ -364,6 +364,9 @@ public class MetricStorageApp {
 
         Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
 
+
+        System.out.println("INSERTING THIS QUERY: " + query + "\n\n\n");
+
         item.put("query", new AttributeValue(query));
 
 
@@ -413,6 +416,7 @@ public class MetricStorageApp {
 
         for (Map.Entry<String, String> entry : result.entrySet()){
 
+            System.out.println("THIS IS THE KEY:" + entry.getKey() + "\n\n\n");
             switch (entry.getKey()) {
 
                 case "instructions":
