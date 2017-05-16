@@ -191,7 +191,7 @@ public class WebServer {
     private static class onlyMetricsStrategy extends HttpStrategy {
         @Override
         public HttpAnswer process(String query) throws Exception {
-            String message = null;
+            String message = "";
             int requestStatus = 0;
 
             try {
