@@ -90,11 +90,17 @@ public class MetricStorageApp {
 
 
             message += "THIS IS THE ORIGINAL QUERY: " + query + "\n\n\n";
+
+            System.out.println("THIS IS THE ORIGINAL QUERY: " + query + "\n\n\n");
             //int index = query.indexOf("instructions");
             int index = query.indexOf("jobID");
             String query_for_key = query.substring(0,index-1);
 
             message += "THIS IS THE PROCESSED QUERY: " + query_for_key + "\n\n\n";
+
+            System.out.println("THIS IS THE PROCESSED QUERY: " + query_for_key + "\n\n\n");
+            System.out.println("THIS IS THE MAP: " + parser.toString() + "\n\n\n");
+
 
             Map<String, AttributeValue> item = newItem(query_for_key, result);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
@@ -360,6 +366,8 @@ public class MetricStorageApp {
 
         item.put("query", new AttributeValue(query));
 
+
+
         int metric = computeMetric(result);
 
         /*for (Map.Entry<String, String> entry : result.entrySet()){
@@ -400,6 +408,8 @@ public class MetricStorageApp {
     private static int computeMetric(Map<String, String> result) {
 
         int instructions = 0, bb_blocks = 0, methods = 0, branch_fail = 0, branch_success = 0;
+
+
 
         for (Map.Entry<String, String> entry : result.entrySet()){
 
