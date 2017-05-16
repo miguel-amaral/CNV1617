@@ -73,11 +73,11 @@ public class WebServer {
 
                 DataContainer data = ContainerManager.getInstance(Thread.currentThread().getId());
                 message += "<pre>" +
-                        "instru: " + data.instructions + "\n" +
-                        "blocks: " + data.bb_blocks + "\n" +
-                        "method: " + data.methods + "\n" +
-                        "b_fail: " + data.branch_fail + "\n" +
-                        "b_hits: " + data.branch_success + "\n" +
+                        "instru: " + data.instructions + "</br>" +
+                        "blocks: " + data.bb_blocks + "</br>" +
+                        "method: " + data.methods + "</br>" +
+                        "b_fail: " + data.branch_fail + "</br>" +
+                        "b_hits: " + data.branch_success + "</br>" +
 
                         "</pre>";
 
