@@ -135,7 +135,7 @@ public class storageWebServer extends Thread{
                 requestStatus = 200;
 
 
-                message += _app.insertNewItem(query);
+                _app.insertNewItem(query);
 
 
 

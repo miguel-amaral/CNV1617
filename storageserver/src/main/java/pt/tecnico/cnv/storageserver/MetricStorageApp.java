@@ -77,10 +77,9 @@ public class MetricStorageApp {
     }
 
 
-    public static String insertNewItem(String query){
+    public static void insertNewItem(String query){
 
-        String message = "";
-        String error = "";
+
         try{
 
             InstQueryParser parser = new InstQueryParser(query);
@@ -89,14 +88,14 @@ public class MetricStorageApp {
             result = parser.queryToMap(query);
 
 
-            message += "THIS IS THE ORIGINAL QUERY: " + query + "\n\n\n";
+
 
             System.out.println("THIS IS THE ORIGINAL QUERY: " + query + "\n\n\n");
             //int index = query.indexOf("instructions");
             int index = query.indexOf("jobID");
             String query_for_key = query.substring(0,index-1);
 
-            message += "THIS IS THE PROCESSED QUERY: " + query_for_key + "\n\n\n";
+
 
             System.out.println("THIS IS THE PROCESSED QUERY: " + query_for_key + "\n\n\n");
             System.out.println("THIS IS THE MAP: " + parser.toString() + "\n\n\n");
@@ -110,25 +109,23 @@ public class MetricStorageApp {
 
 
         } catch (AmazonServiceException ase) {
-            error += "\n\nCaught an AmazonServiceException, which means your request made it "
-                    + "to AWS, but was rejected with an error response for some reason.";
-            error += "\nError Message:    " + ase.getMessage();
-            error += "\nHTTP Status Code: " + ase.getStatusCode();
-            error += "\nAWS Error Code:   " + ase.getErrorCode();
-            error += "\nError Type:       " + ase.getErrorType();
-            error += "\nRequest ID:       " + ase.getRequestId();
+            System.out.println("Caught an AmazonServiceException, which means your request made it "
+                    + "to AWS, but was rejected with an error response for some reason.");
+            System.out.println("Error Message:    " + ase.getMessage());
+            System.out.println("HTTP Status Code: " + ase.getStatusCode());
+            System.out.println("AWS Error Code:   " + ase.getErrorCode());
+            System.out.println("Error Type:       " + ase.getErrorType());
+            System.out.println("Request ID:       " + ase.getRequestId());
         } catch (AmazonClientException ace) {
-            error += "\nCaught an AmazonClientException, which means the client encountered "
+            System.out.println("Caught an AmazonClientException, which means the client encountered "
                     + "a serious internal problem while trying to communicate with AWS, "
-                    + "such as not being able to access the network.";
-            error += "\nError Message: " + ace.getMessage();
+                    + "such as not being able to access the network.");
+            System.out.println("Error Message: " + ace.getMessage());
         } catch (InvalidArgumentsException e){
 
-            error += e.getMessage();
+            System.out.println("Error Message: " + e.getMessage());
         }
 
-
-        return message + error;
 
     }
 
@@ -410,7 +407,7 @@ public class MetricStorageApp {
 
     private static int computeMetric(Map<String, String> result) {
 
-        int instructions = 0, bb_blocks = 0, methods = 0, branch_fail = 0, branch_success = 0;
+        int insts = 0, blocks = 0, meths = 0, b_fail = 0, b_success = 0;
 
 
 
@@ -420,19 +417,19 @@ public class MetricStorageApp {
             switch (entry.getKey()) {
 
                 case "instructions":
-                    instructions = Integer.getInteger(entry.getValue());
+                    insts = Integer.getInteger(entry.getValue());
                     break;
                 case "bb_blocks":
-                    bb_blocks = Integer.getInteger(entry.getValue());
+                    blocks = Integer.getInteger(entry.getValue());
                     break;
                 case "methods":
-                    methods = Integer.getInteger(entry.getValue());
+                    meths = Integer.getInteger(entry.getValue());
                     break;
                 case "branch_fail":
-                    branch_fail = Integer.getInteger(entry.getValue());
+                    b_fail = Integer.getInteger(entry.getValue());
                     break;
                 case "branch_success":
-                    branch_success = Integer.getInteger(entry.getValue());
+                    b_success = Integer.getInteger(entry.getValue());
                     break;
                 default:
                     break;
@@ -440,7 +437,7 @@ public class MetricStorageApp {
 
         }
 
-        return (instructions/bb_blocks) * methods;
+        return (insts/blocks) * meths;
     }
 
     private static int guessMetric(String query) {
