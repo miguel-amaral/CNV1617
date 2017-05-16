@@ -346,8 +346,8 @@ public class MetricStorageApp {
             e.printStackTrace();
         }
 
-        Map<String, String> result = new HashMap<>();
-        result = parser.queryToMap(query);
+        Map<String, String> resultMap = new HashMap<>();
+        resultMap = parser.queryToMap(query);
 
 
 
@@ -371,7 +371,7 @@ public class MetricStorageApp {
 
 
 
-        int metric = computeMetric(result);
+        int metric = computeMetric(resultMap);
 
         /*for (Map.Entry<String, String> entry : result.entrySet()){
 
@@ -410,7 +410,7 @@ public class MetricStorageApp {
 
     private static int computeMetric(Map<String, String> result) {
 
-        int insts = 0, blocks = 0, meths = 0, b_fail = 0, b_success = 0;
+        int insts = 0, blocks = 0, meths = 1, b_fail = 0, b_success = 0;
 
 
         System.out.println("THIS IS THE SIZE:" + Integer.toString(result.size()) + "\n\n\n");
@@ -427,9 +427,6 @@ public class MetricStorageApp {
                     break;
                 case "bb_blocks":
                     blocks = Integer.getInteger(entry.getValue());
-                    break;
-                case "methods":
-                    meths = Integer.getInteger(entry.getValue());
                     break;
                 case "branch_fail":
                     b_fail = Integer.getInteger(entry.getValue());
