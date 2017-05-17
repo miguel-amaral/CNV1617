@@ -201,7 +201,7 @@ public class MetricStorageApp {
         int index = query.indexOf("jobID");
         String query_for_key = query.substring(0,index-1);
 
-        System.out.println("PARAMS: \n" + parser.toString() + "\n");
+        System.out.println("\n\nPARAMS: \n" + parser.toString() + "\n");
 
         Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
 
