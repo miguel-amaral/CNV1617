@@ -95,8 +95,8 @@ public class LoadBalancer {
                 }
             }
             for (String zombieId : keys) {
-                System.out.println("We have " + zombieId + " down");
-//                _instances.remove(zombieId);
+                System.out.println("We have " + zombieId + " down :(");
+                _instances.remove(zombieId);
             }
         }
     }
