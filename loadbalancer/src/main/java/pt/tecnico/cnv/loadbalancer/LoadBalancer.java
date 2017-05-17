@@ -51,31 +51,36 @@ public class LoadBalancer {
     }
 
     public HttpAnswer processQuery(String query, String letter) {
+        while(true) {
+            updateInstances();
+            Instance lowestInsance = getLightestMachine();
 
-        updateInstances();
-        Instance lowestInsance = getLightestMachine();
+            GetMetricValue requester = new GetMetricValue(query);
 
-        GetMetricValue requester = new GetMetricValue(query);
+            long metricValue = requester.getMetric();
+            boolean alreadyInstrumented = requester.isAlreadyIntrumented();
+            this.increaseMetric(lowestInsance, metricValue);
+            String jobID = newJobID();
+            _jobs.put(jobID, new Container(lowestInsance, metricValue));
 
-        long metricValue = requester.getMetric();
-        boolean alreadyInstrumented = requester.isAlreadyIntrumented();
-        this.increaseMetric(lowestInsance,metricValue);
-        String jobID = newJobID();
-        _jobs.put(jobID,new Container(lowestInsance,metricValue));
+            String ip = lowestInsance.getPublicIpAddress();
+            if (STATIC_VALUES.DEBUG_LOAD_BALANCER_CHOSEN_MACHINE) {
+                System.out.println("ip: " + ip + " chosen for " + jobID);
+            }
 
-        String ip = lowestInsance.getPublicIpAddress();
-        if(STATIC_VALUES.DEBUG_LOAD_BALANCER_CHOSEN_MACHINE) {
-            System.out.println("ip: " + ip + " chosen for " + jobID);
+            //String letter = alreadyInstrumented ? "alreadyInstrumented" : "r" ;
+
+
+            if (STATIC_VALUES.DEBUG_LOAD_BALANCER_JOB_ALREADY_INSTRUCTED) {
+                System.out.println("jobID: " + jobID + " already instrument: " + alreadyInstrumented);
+            }
+            HttpAnswer answer = HttpRequest.sendGet(ip + ":8000/" + letter + "?" + query + "&jobID=" + jobID, new HashMap<String, String>());
+            if(answer.status() != 200) {
+                continue;
+            } else {
+                return answer;
+            }
         }
-
-        //String letter = alreadyInstrumented ? "alreadyInstrumented" : "r" ;
-
-
-        if(STATIC_VALUES.DEBUG_LOAD_BALANCER_JOB_ALREADY_INSTRUCTED ) {
-            System.out.println("jobID: "  + jobID + " already instrument: " + alreadyInstrumented);
-        }
-        HttpAnswer answer = HttpRequest.sendGet(ip+":8000/"+letter+"?"+query+"&jobID="+jobID,new HashMap<String, String>());
-        return answer;
     }
 
     private synchronized String newJobID(){
