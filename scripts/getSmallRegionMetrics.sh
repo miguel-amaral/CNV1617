@@ -13,7 +13,7 @@ number_columns=$((scene_width / $small_width -1))
 #number_rows=0
 counter=0
 subprocess=0
-limit_processes=70
+limit_processes=80
 for file in 01 02 03 04 05
 do
     for c in $(eval echo "{0..${number_columns}}")

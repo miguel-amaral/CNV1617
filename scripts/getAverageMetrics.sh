@@ -15,9 +15,10 @@ then
 #    for try in $(eval echo "{1..${repetitions}}")
 #    do
 #        echo ${try}
-    { wget ${endpoint} -O "results/${number}_metric" -o /dev/null ; }
+    { wget ${endpoint} -O "results/${number}_metric" -o /dev/null ; } &
 #    done
 fi
+wait
 #echo "REQUESTS ALL DONE"
 #echo
 #echo
