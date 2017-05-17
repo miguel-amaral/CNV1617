@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 
 @SuppressWarnings("restriction")
@@ -63,11 +65,21 @@ public class WebServer {
 				InvokeRay ray = new InvokeRay(query);
 				message = "<pre>"+ray.toHMTLString()+"</br>";
 //				System.out.println(message);
-				ray.execute();
+                String jobID = ray.jobID();
+
+                long threadId = Thread.currentThread().getId();
+                //launch service to run every N seconds
+                ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
+                WebServerRunnable runnable = new WebServerRunnable();
+                runnable.set_threadID(threadId);
+                exec.scheduleAtFixedRate(runnable, STATIC_VALUES.NUMBER_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC, STATIC_VALUES.NUMBER_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC, TimeUnit.SECONDS);
+
+
+                ray.execute();
                 String ip = "http://"+IpFinder.getMyIp() + ":"+port+"/";
                 String localhost =  "http://localhost:"+port+"/";
-				message += "<b>Amazon AWS context: </b><a href=\""+ip+ray.outputFileName()+"\">"+ip+ray.outputFileName()+"</a></br></br></br></br></br></br>";
-				message += "      <b>Home context: </b><a href=\""+localhost +ray.outputFileName()+"\">"+localhost +ray.outputFileName()+"</a></pre>";
+                message += "<b>Amazon AWS context: </b><a href=\""+ip+ray.outputFileName()+"\">"+ip+ray.outputFileName()+"</a></br></br></br></br></br></br>";
+                message += "      <b>Home context: </b><a href=\""+localhost +ray.outputFileName()+"\">"+localhost +ray.outputFileName()+"</a></pre>";
                 requestStatus = 200;
 
                 DataContainer data = ContainerManager.getInstance(Thread.currentThread().getId());
@@ -80,7 +92,6 @@ public class WebServer {
 
                         "</pre>";
 
-                  String jobID = ray.jobID();
 //                System.out.println("instructions: " + data.instructions);
 //                System.out.println("bb_blocks: " + data.bb_blocks);
 //                System.out.println("methods: " + data.methods);
