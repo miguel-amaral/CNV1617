@@ -146,16 +146,8 @@ public class storageWebServer extends Thread{
             int requestStatus = 0;
 
             try {
-
-
                 requestStatus = 200;
-
-
                 _app.insertNewItem(query);
-
-
-
-
             } catch (Throwable e) {
                 e.printStackTrace();
                 message = "Error: " + e.getMessage();

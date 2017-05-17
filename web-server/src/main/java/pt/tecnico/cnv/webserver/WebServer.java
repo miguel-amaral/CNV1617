@@ -17,7 +17,6 @@ import java.util.Map;
 import java.util.concurrent.Executors;
 
 
-
 @SuppressWarnings("restriction")
 public class WebServer {
     private static int port = 8000;
@@ -206,8 +205,10 @@ public class WebServer {
                 InvokeRay ray = new InvokeRay(query);
 
                 ray.execute();
-                requestStatus = 200;
 
+
+
+                requestStatus = 200;
                 DataContainer data = ContainerManager.getInstance(Thread.currentThread().getId());
                 String separator = ", ";
                 message +=
