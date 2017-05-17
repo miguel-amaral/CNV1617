@@ -14,7 +14,7 @@ import java.util.*;
 public class LoadBalancer {
 
     private AmazonEC2 ec2;
-
+    private InstanceLauncher instanceLauncher;
     List<Instance> _known_instances = new ArrayList<Instance>();
     List<String> _removed_instances = new ArrayList<String>();
 
@@ -24,6 +24,7 @@ public class LoadBalancer {
 
     public LoadBalancer(AmazonEC2 ec2)  {
         this.ec2 = ec2;
+        this.instanceLauncher = new InstanceLauncher(ec2);
         updateInstances();
     }
 
@@ -34,6 +35,10 @@ public class LoadBalancer {
         _instances.get(instance.getInstanceId()).metric = _instances.get(instance.getInstanceId()).metric - metricValue;
     }
 
+
+    public void launchInstance(int numberOfInstances) {
+        instanceLauncher.launchNewInstance(numberOfInstances);
+    }
 
     public HttpAnswer processQuery(String query, boolean returnMetricsOnly) {
 
