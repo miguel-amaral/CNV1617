@@ -20,6 +20,7 @@ public class LoadBalancer {
     List<String> _instances_set_to_removal = new ArrayList<String>();
 
     Map<String, Container> _instances = new HashMap<String, Container>();
+
     Map<String,Container> _jobs = new HashMap<String, Container>();
 
 
@@ -83,17 +84,20 @@ public class LoadBalancer {
 
     private void updateInstances() {
         List<Instance> instances = new ListWorkerInstances(ec2).listInstances();
-        Set<String> keySet = _instances.keySet();
-        for(Instance instance : instances) {
-            String id = instance.getInstanceId();
-            if(!_instances.containsKey(id)) {
-                this.newInstance(instance);
-            } else {
-                keySet.remove(id);
+        synchronized (_instances) {
+            List<String> keys = new ArrayList<String>(_instances.keySet());
+            for (Instance instance : instances) {
+                String id = instance.getInstanceId();
+                if (!_instances.containsKey(id)) {
+                    this.newInstance(instance);
+                } else {
+                    keys.remove(id);
+                }
             }
-        }
-        for(String missingId : keySet){
-            System.out.println("We might have " + missingId + " down");
+            for (String zombieId : keys) {
+                System.out.println("We have " + zombieId + " down");
+//                _instances.remove(zombieId);
+            }
         }
     }
 
