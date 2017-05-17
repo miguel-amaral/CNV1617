@@ -40,6 +40,10 @@ public class LoadBalancer {
         instanceLauncher.launchNewInstance(numberOfInstances);
     }
 
+    public void terminateInstance(String instanceId) {
+        instanceLauncher.destroyInstances(instanceId);
+    }
+
     public HttpAnswer processQuery(String query, boolean returnMetricsOnly) {
 
         //update all instances ??

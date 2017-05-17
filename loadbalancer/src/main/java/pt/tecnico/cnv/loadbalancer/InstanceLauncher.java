@@ -3,6 +3,11 @@ package pt.tecnico.cnv.loadbalancer;
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.RunInstancesRequest;
 import com.amazonaws.services.ec2.model.RunInstancesResult;
+import com.amazonaws.services.ec2.model.TerminateInstancesRequest;
+import com.amazonaws.services.ec2.model.TerminateInstancesResult;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by miguel on 17/05/17.
@@ -26,5 +31,15 @@ public class InstanceLauncher {
                 .withMaxCount(numberOfInstance)
                 .withSecurityGroups(SECURITY_GROUP);
         RunInstancesResult result = ec2.runInstances(runInstancesRequest);
+    }
+
+    public void destroyInstances(String instances_ids) {
+        TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest();
+        List<String> ids = new ArrayList<String>();
+        ids.add(instances_ids);
+
+        terminateInstancesRequest.setInstanceIds(ids);
+
+        TerminateInstancesResult result = ec2.terminateInstances(terminateInstancesRequest);
     }
 }

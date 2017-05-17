@@ -45,6 +45,7 @@ public class WebServer {
         server.createContext("/r.html", new GenericHandler(new ProccessQueryStrategy()));
         server.createContext("/metrics", new GenericHandler(new GetMetricsStrategy()));
         server.createContext("/launch", new GenericHandler(new LaunchInstanceStrategy()));
+        server.createContext("/terminate", new GenericHandler(new TerminateInstanceStrategy()));
 
         server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
         server.start();
@@ -122,6 +123,13 @@ public class WebServer {
         public HttpAnswer process(String query) throws Exception {
             String[] arg = query.split("=");
             _proccesser.launchInstance(Integer.parseInt(arg[1]));
+            return new HttpAnswer(200,"all good son");
+        }
+    }
+    private static class TerminateInstanceStrategy extends HttpStrategy {
+        public HttpAnswer process(String query) throws Exception {
+            String[] arg = query.split("=");
+            _proccesser.terminateInstance(arg[1]);
             return new HttpAnswer(200,"all good son");
         }
     }
