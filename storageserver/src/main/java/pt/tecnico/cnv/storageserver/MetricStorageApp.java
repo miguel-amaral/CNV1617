@@ -93,7 +93,6 @@ public class MetricStorageApp {
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
 
 
-
         } catch (AmazonServiceException ase) {
             System.out.println("Caught an AmazonServiceException, which means your request made it "
                     + "to AWS, but was rejected with an error response for some reason.");
@@ -161,7 +160,7 @@ public class MetricStorageApp {
 
         } catch (IndexOutOfBoundsException e) {
 
-            message = false + STATIC_VALUES.SEPARATOR_STORAGE_METRIC_REQUEST + Integer.toString(guessMetric(query));
+            message = false + STATIC_VALUES.SEPARATOR_STORAGE_METRIC_REQUEST + guessMetric(query);
 
 
         } catch (AmazonServiceException ase) {
@@ -183,6 +182,217 @@ public class MetricStorageApp {
         return message;
     }
 
+
+
+    private static Map<String, AttributeValue> newItem(String query) {
+
+        InstQueryParser parser = null;
+        try {
+            parser = new InstQueryParser(query);
+        } catch (InvalidArgumentsException e) {
+            e.printStackTrace();
+        }
+
+        Map<String, String> resultMap = new HashMap<>();
+        resultMap = parser.queryToMap(query);
+
+
+
+
+        System.out.println("THIS IS THE ORIGINAL QUERY: " + query + "\n");
+
+        int index = query.indexOf("jobID");
+        String query_for_key = query.substring(0,index-1);
+
+        System.out.println("THIS IS THE MAP: \n" + parser.toString() + "\n");
+
+        Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
+
+
+        System.out.println("INSERTING  " + query_for_key + "\n");
+
+        item.put("query", new AttributeValue(query_for_key));
+
+
+        long metric = computeMetric(resultMap);
+
+        System.out.println("INSERTING THIS QUERY:" + query_for_key + "WITH METRIC: " + Long.toString(metric) + "\n");
+
+        /*for (Map.Entry<String, String> entry : result.entrySet()){
+
+            switch (entry.getKey()) {
+                case "f":
+                    item.put("file", new AttributeValue(entry.getValue()));
+                    break;
+                case "instructions":
+                    item.put("instructions", new AttributeValue().withN(entry.getValue()));
+                    break;
+                case "bb_blocks":
+                    item.put("bb_blocks", new AttributeValue().withN(entry.getValue()));
+                    break;
+                case "methods":
+                    item.put("methods", new AttributeValue().withN(entry.getValue()));
+                    break;
+                case "branch_fail":
+                    item.put("branch_fail", new AttributeValue().withN(entry.getValue()));
+                    break;
+                case "branch_success":
+                    item.put("branch_success", new AttributeValue().withN(entry.getValue()));
+                    break;
+                case "sc":
+                    item.put("metric", new AttributeValue().withN(entry.getValue()));
+                    break;
+                default:
+                    break;
+            }
+
+        }*/
+        item.put("metric", new AttributeValue().withN(Long.toString(metric)));
+
+        return item;
+    }
+
+    private static long computeMetric(Map<String, String> result) {
+
+
+        long blocks = 0, meths = 0, b_fail = 0;
+
+
+        for (Map.Entry<String, String> entry : result.entrySet()){
+
+            switch (entry.getKey()) {
+
+                case "bb_blocks":
+                    blocks = Long.parseLong(entry.getValue());
+                    break;
+                case "methods":
+                    meths = Long.parseLong(entry.getValue());
+                    break;
+                case "branch_fail":
+                    b_fail = Long.parseLong(entry.getValue());
+                    break;
+                default:
+                    break;
+            }
+
+        }
+        return MetricCalculation.calculate(blocks,meths,b_fail);
+
+    }
+
+    private static long guessMetric(String query) {
+
+
+        long metric;
+
+        //CHECK HOW QUERY IS INSERTED
+        if((_cache.containsKey(query))) {
+            metric = Long.parseLong(_cache.get(query));
+            return metric;
+        }
+
+
+
+        long sc = 0, sr = 0;
+
+        QueryParser parser = null;
+        try {
+            parser = new QueryParser(query);
+        } catch (InvalidArgumentsException e) {
+            e.printStackTrace();
+        }
+
+        Map<String, String> result = new HashMap<>();
+        result = parser.queryToMap(query);
+
+
+        for (Map.Entry<String, String> entry : result.entrySet()){
+
+            switch (entry.getKey()) {
+
+                case "sc":
+                    sc = Integer.parseInt(entry.getValue());
+                    break;
+                case "sr":
+                    sr = Integer.parseInt(entry.getValue());
+                    break;
+                default:
+                    break;
+            }
+
+        }
+
+
+        System.out.println("GUESSING METRIC WITH SC = : " + sc + " AND " +
+                "WITH SR = : " + sr+ "\n");
+        return sc * sr;
+    }
+
+
+    public static String updateItemAttributes(String query) {
+
+
+        String message = "";
+        String error = "";
+
+        try {
+
+            HashMap<String, AttributeValue> key = new HashMap<String, AttributeValue>();
+            key.put("query", new AttributeValue().withS(query));
+
+
+            Map<String, AttributeValue> expressionAttributeValues = new HashMap<String, AttributeValue>();
+            expressionAttributeValues.put(":val", new AttributeValue().withN(Integer.toString(10)));
+
+            ReturnValue returnValues = ReturnValue.ALL_NEW;
+
+            UpdateItemRequest updateItemRequest = new UpdateItemRequest()
+                    .withTableName(defaultTableName)
+                    .withKey(key)
+                    .withUpdateExpression(" set instructions=:val")
+                    .withExpressionAttributeValues(expressionAttributeValues)
+                    .withReturnValues(returnValues);
+
+            UpdateItemResult result = _dynamoDB.updateItem(updateItemRequest);
+
+
+
+        }   catch (AmazonServiceException ase) {
+
+            error += ase.getMessage();
+        }
+
+        return message + error;
+    }
+
+
+    public static void deleteDefaultTable() {
+
+        System.out.println("Request for deletion on: " + defaultTableName + "is being handled...\n");
+
+        DeleteTableRequest deleteRequest = new DeleteTableRequest().withTableName(defaultTableName);
+        // Deletes if table exists
+        TableUtils.deleteTableIfExists(_dynamoDB, deleteRequest);
+        System.out.println("Deletion complete!!\n");
+
+    }
+
+    private static String getTableInformation() {
+
+        System.out.println("Describing " + defaultTableName);
+
+        DescribeTableRequest describeTableRequest = new DescribeTableRequest().withTableName(defaultTableName);
+        TableDescription tableDescription = _dynamoDB.describeTable(describeTableRequest).getTable();
+
+        String message = String.format(
+                "Name: %s\n" + "Status: %s \n" + "Provisioned Throughput (read capacity units/sec): %d \n"
+                        + "Provisioned Throughput (write capacity units/sec): %d \n",
+                tableDescription.getTableName(), tableDescription.getTableStatus(),
+                tableDescription.getProvisionedThroughput().getReadCapacityUnits(),
+                tableDescription.getProvisionedThroughput().getWriteCapacityUnits());
+
+        return message;
+    }
 
     public static String insertNewItemTest(String query){
 
@@ -357,238 +567,4 @@ public class MetricStorageApp {
 
         return message;
     }
-
-
-    private static Map<String, AttributeValue> newItem(String query) {
-
-        InstQueryParser parser = null;
-        try {
-            parser = new InstQueryParser(query);
-        } catch (InvalidArgumentsException e) {
-            e.printStackTrace();
-        }
-
-        Map<String, String> resultMap = new HashMap<>();
-        resultMap = parser.queryToMap(query);
-
-
-
-
-        System.out.println("THIS IS THE ORIGINAL QUERY: " + query + "\n");
-
-        int index = query.indexOf("jobID");
-        String query_for_key = query.substring(0,index-1);
-
-
-
-        System.out.println("THIS IS THE PROCESSED QUERY: " + query_for_key + "\n");
-        System.out.println("THIS IS THE MAP: \n" + parser.toString() + "\n");
-
-        Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
-
-
-        System.out.println("INSERTING THIS QUERY: " + query_for_key + "\n");
-
-        item.put("query", new AttributeValue(query_for_key));
-
-
-        long metric = computeMetric(resultMap);
-
-        System.out.println("INSERTING WITH METRIC: " + Long.toString(metric) + "\n");
-
-        /*for (Map.Entry<String, String> entry : result.entrySet()){
-
-            switch (entry.getKey()) {
-                case "f":
-                    item.put("file", new AttributeValue(entry.getValue()));
-                    break;
-                case "instructions":
-                    item.put("instructions", new AttributeValue().withN(entry.getValue()));
-                    break;
-                case "bb_blocks":
-                    item.put("bb_blocks", new AttributeValue().withN(entry.getValue()));
-                    break;
-                case "methods":
-                    item.put("methods", new AttributeValue().withN(entry.getValue()));
-                    break;
-                case "branch_fail":
-                    item.put("branch_fail", new AttributeValue().withN(entry.getValue()));
-                    break;
-                case "branch_success":
-                    item.put("branch_success", new AttributeValue().withN(entry.getValue()));
-                    break;
-                case "sc":
-                    item.put("metric", new AttributeValue().withN(entry.getValue()));
-                    break;
-                default:
-                    break;
-            }
-
-        }*/
-        item.put("metric", new AttributeValue().withN(Long.toString(metric)));
-
-        return item;
-    }
-
-    private static long computeMetric(Map<String, String> result) {
-
-
-        long insts = 0, blocks = 0, meths = 0, b_fail = 0, b_success;
-
-
-        for (Map.Entry<String, String> entry : result.entrySet()){
-
-            switch (entry.getKey()) {
-
-                case "instructions":
-                    insts = Long.parseLong(entry.getValue());
-                    break;
-                case "bb_blocks":
-                    blocks = Long.parseLong(entry.getValue());
-                    break;
-                case "methods":
-                    meths = Long.parseLong(entry.getValue());
-                    break;
-                case "branch_fail":
-                    b_fail = Long.parseLong(entry.getValue());
-                    break;
-                case "branch_success":
-                    b_success = Long.parseLong(entry.getValue());
-                    break;
-                default:
-                    break;
-            }
-
-        }
-        return MetricCalculation.calculate(blocks,meths,b_fail);
-
-    }
-
-    private static int guessMetric(String query) {
-
-
-        int metric;
-
-        //CHECK HOW QUERY IS INSERTED
-        if((_cache.containsKey(query))) {
-            metric = Integer.parseInt(_cache.get(query));
-            return metric;
-        }
-
-
-
-        int sc = 0, sr = 0, wc = 0, wr = 0, coff = 0, roff = 0;
-
-        QueryParser parser = null;
-        try {
-            parser = new QueryParser(query);
-        } catch (InvalidArgumentsException e) {
-            e.printStackTrace();
-        }
-
-        Map<String, String> result = new HashMap<>();
-        result = parser.queryToMap(query);
-
-
-        for (Map.Entry<String, String> entry : result.entrySet()){
-
-            switch (entry.getKey()) {
-
-                case "sc":
-                    sc = Integer.parseInt(entry.getValue());
-                    break;
-                case "sr":
-                    sr = Integer.parseInt(entry.getValue());
-                    break;
-                case "wc":
-                    wc = Integer.parseInt(entry.getValue());
-                    break;
-                case "wr":
-                    wr = Integer.parseInt(entry.getValue());
-                    break;
-                case "coff":
-                    coff = Integer.parseInt(entry.getValue());
-                    break;
-                case "roff":
-                    roff = Integer.parseInt(entry.getValue());
-                    break;
-                default:
-                    break;
-            }
-
-        }
-
-
-        System.out.println("GUESSING METRIC WITH SC = : " + Integer.toString(sc) + " AND " +
-                "WITH SR = : " + Integer.toString(sr)+ "\n");
-        return sc * sr;
-    }
-
-
-    public static String updateItemAttributes(String query) {
-
-
-        String message = "";
-        String error = "";
-
-        try {
-
-            HashMap<String, AttributeValue> key = new HashMap<String, AttributeValue>();
-            key.put("query", new AttributeValue().withS(query));
-
-
-            Map<String, AttributeValue> expressionAttributeValues = new HashMap<String, AttributeValue>();
-            expressionAttributeValues.put(":val", new AttributeValue().withN(Integer.toString(10)));
-
-            ReturnValue returnValues = ReturnValue.ALL_NEW;
-
-            UpdateItemRequest updateItemRequest = new UpdateItemRequest()
-                    .withTableName(defaultTableName)
-                    .withKey(key)
-                    .withUpdateExpression(" set instructions=:val")
-                    .withExpressionAttributeValues(expressionAttributeValues)
-                    .withReturnValues(returnValues);
-
-            UpdateItemResult result = _dynamoDB.updateItem(updateItemRequest);
-
-
-
-        }   catch (AmazonServiceException ase) {
-
-            error += ase.getMessage();
-        }
-
-        return message + error;
-    }
-
-
-    public static void deleteDefaultTable() {
-
-        System.out.println("Request for deletion on: " + defaultTableName + "is being handled...\n");
-
-        DeleteTableRequest deleteRequest = new DeleteTableRequest().withTableName(defaultTableName);
-        // Deletes if table exists
-        TableUtils.deleteTableIfExists(_dynamoDB, deleteRequest);
-        System.out.println("Deletion complete!!\n");
-
-    }
-
-
-    private static String getTableInformation() {
-
-        System.out.println("Describing " + defaultTableName);
-
-        DescribeTableRequest describeTableRequest = new DescribeTableRequest().withTableName(defaultTableName);
-        TableDescription tableDescription = _dynamoDB.describeTable(describeTableRequest).getTable();
-
-        String message = String.format(
-                "Name: %s\n" + "Status: %s \n" + "Provisioned Throughput (read capacity units/sec): %d \n"
-                        + "Provisioned Throughput (write capacity units/sec): %d \n",
-                tableDescription.getTableName(), tableDescription.getTableStatus(),
-                tableDescription.getProvisionedThroughput().getReadCapacityUnits(),
-                tableDescription.getProvisionedThroughput().getWriteCapacityUnits());
-
-        return message;
-    }
-
 }
