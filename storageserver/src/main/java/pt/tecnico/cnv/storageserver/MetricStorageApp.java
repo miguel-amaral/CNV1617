@@ -216,7 +216,7 @@ public class MetricStorageApp {
 
         long metric = computeMetric(resultMap);
 
-        System.out.println("INSERTING THIS QUERY:" + query_for_key + "WITH METRIC: " + Long.toString(metric) + "\n");
+        System.out.println("INSERTING THIS QUERY:" + query_for_key + "\nWITH METRIC: " + Long.toString(metric) + "\n");
 
         /*for (Map.Entry<String, String> entry : result.entrySet()){
 
