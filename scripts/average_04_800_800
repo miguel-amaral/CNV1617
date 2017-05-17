@@ -1,0 +1,32 @@
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+REQUESTS ALL DONE
+
+
+
+result: 55.196
+result: 54.021
+result: 55.324
+result: 55.122
+result: 54.475
+result: 55.25
+result: 55.184
+result: 55.497
+result: 55.188
+result: 54.992
+
+
+
+repetitions 10
+sum 550.249
+avg 55.02490000000000000000
+min 54.021
+max 54.992

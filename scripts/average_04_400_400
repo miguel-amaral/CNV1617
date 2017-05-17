@@ -1,0 +1,32 @@
+1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+REQUESTS ALL DONE
+
+
+
+result: 13.724
+result: 13.844
+result: 13.871
+result: 13.816
+result: 13.831
+result: 13.627
+result: 13.86
+result: 13.92
+result: 13.883
+result: 13.644
+
+
+
+repetitions 10
+sum 138.020
+avg 13.80200000000000000000
+min 13.627
+max 13.644
