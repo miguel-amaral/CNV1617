@@ -130,17 +130,14 @@ public class MetricStorageApp {
         int index = query.indexOf("jobID");
         String query_for_key = query.substring(0,index-1);
 
-
-        item.put("query", new AttributeValue(query_for_key));
-
-
         int metric = computeMetric(resultMap);
 
 
-        item.put("metric", new AttributeValue().withN(Integer.toString(metric)));
-
+        resultMap.put("query", query_for_key);
+        resultMap.put("metric", Integer.toString(metric));
 
     }
+    
 
     public static String queryItemMetric(String query){
 
