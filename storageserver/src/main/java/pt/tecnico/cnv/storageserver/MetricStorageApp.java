@@ -117,23 +117,26 @@ public class MetricStorageApp {
         InstQueryParser parser = null;
         try {
             parser = new InstQueryParser(query);
+        
+
+            Map<String, String> resultMap = new HashMap<>();
+            resultMap = parser.queryToMap(query);
+    
+    
+            int index = query.indexOf("jobID");
+            String query_for_key = query.substring(0,index-1);
+    
+            int metric = computeMetric(resultMap);
+    
+    
+            resultMap.put(query_for_key, Integer.toString(metric));
+
         } catch (InvalidArgumentsException e) {
             e.printStackTrace();
         }
 
-        Map<String, String> resultMap = new HashMap<>();
-        resultMap = parser.queryToMap(query);
-
-
-        int index = query.indexOf("jobID");
-        String query_for_key = query.substring(0,index-1);
-
-        int metric = computeMetric(resultMap);
-
-
-        resultMap.put(query_for_key, Integer.toString(metric));
-
     }
+
 
 
     public static String queryItemMetric(String query){
@@ -436,7 +439,7 @@ public class MetricStorageApp {
     private static int computeMetric(Map<String, String> result) {
 
 
-        int insts = 0, blocks = 0, meths = 0, b_fail = 0, b_success = 0;
+        int insts = 0, blocks = 0, meths = 0, b_fail, b_success;
 
 
         for (Map.Entry<String, String> entry : result.entrySet()){
