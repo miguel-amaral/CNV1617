@@ -53,29 +53,31 @@ public class LoadBalancer {
     public HttpAnswer processQuery(String query, String letter) {
         while(true) {
             updateInstances();
-            Instance lowestInsance = getLightestMachine();
+            Instance lowestInstance = getLightestMachine();
 
             GetMetricValue requester = new GetMetricValue(query);
 
             long metricValue = requester.getMetric();
             boolean alreadyInstrumented = requester.isAlreadyIntrumented();
-            this.increaseMetric(lowestInsance, metricValue);
+            this.increaseMetric(lowestInstance, metricValue);
             String jobID = newJobID();
-            _jobs.put(jobID, new Container(lowestInsance, metricValue));
-
-            String ip = lowestInsance.getPublicIpAddress();
+            synchronized (_jobs) {
+                _jobs.put(jobID, new Container(lowestInstance, metricValue));
+            }
+            String ip = lowestInstance.getPublicIpAddress();
             if (STATIC_VALUES.DEBUG_LOAD_BALANCER_CHOSEN_MACHINE) {
                 System.out.println("ip: " + ip + " chosen for " + jobID);
             }
 
             //String letter = alreadyInstrumented ? "alreadyInstrumented" : "r" ;
-
-
             if (STATIC_VALUES.DEBUG_LOAD_BALANCER_JOB_ALREADY_INSTRUCTED) {
                 System.out.println("jobID: " + jobID + " already instrument: " + alreadyInstrumented);
             }
             HttpAnswer answer = HttpRequest.sendGet(ip + ":8000/" + letter + "?" + query + "&jobID=" + jobID, new HashMap<String, String>());
             if(answer.status() != 200) {
+                synchronized(_jobs) {
+                    _jobs.remove(jobID);
+                }
                 continue;
             } else {
                 return answer;
@@ -142,8 +144,10 @@ public class LoadBalancer {
         }
         toReturn.append(newLine);
         toReturn.append(newLine).append("Current Jobs:").append(newLine);
-        for(Map.Entry<String,Container> entry : _jobs.entrySet()){
-            toReturn.append(entry.getKey()).append(" : ").append(entry.getValue().instance.getPublicIpAddress()).append(newLine);
+        synchronized (_jobs) {
+            for (Map.Entry<String, Container> entry : _jobs.entrySet()) {
+                toReturn.append(entry.getKey()).append(" : ").append(entry.getValue().instance.getPublicIpAddress()).append(newLine);
+            }
         }
         return toReturn.toString();
     }
@@ -173,9 +177,11 @@ public class LoadBalancer {
     }
 
     public void jobDone(String jobId) {
-        Container job = _jobs.get(jobId);
-        this.decreaseMetric(job.instance,job.metric);
-        _jobs.remove(jobId);
+        synchronized(_jobs) {
+            Container job = _jobs.get(jobId);
+            this.decreaseMetric(job.instance, job.metric);
+            _jobs.remove(jobId);
+        }
     }
 
     class Container {

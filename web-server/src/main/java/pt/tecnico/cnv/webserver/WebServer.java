@@ -189,6 +189,11 @@ public class WebServer {
         }
     }
 
+    private static void sendMetricUpdate(String jobID,long metric){
+
+
+    }
+
     private static class onlyMetricsStrategy extends HttpStrategy {
         @Override
         public HttpAnswer process(String query) throws Exception {

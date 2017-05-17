@@ -3,10 +3,10 @@ package pt.tecnico.cnv.storageserver;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.services.dynamodbv2.AmazonDynamoDB;
-import com.amazonaws.services.dynamodbv2.document.Table;
 import com.amazonaws.services.dynamodbv2.model.*;
 import com.amazonaws.services.dynamodbv2.util.TableUtils;
 import pt.tecnico.cnv.common.InvalidArgumentsException;
+import pt.tecnico.cnv.common.MetricCalculation;
 import pt.tecnico.cnv.common.QueryParser;
 import pt.tecnico.cnv.common.STATIC_VALUES;
 
@@ -126,10 +126,10 @@ public class MetricStorageApp {
             int index = query.indexOf("jobID");
             String query_for_key = query.substring(0,index-1);
     
-            int metric = computeMetric(resultMap);
+            long metric = computeMetric(resultMap);
     
     
-            resultMap.put(query_for_key, Integer.toString(metric));
+            resultMap.put(query_for_key, Long.toString(metric));
 
         } catch (InvalidArgumentsException e) {
             e.printStackTrace();
@@ -142,12 +142,7 @@ public class MetricStorageApp {
     public static String queryItemMetric(String query){
 
         String message = "";
-
-
         try{
-
-
-
 
             HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
             Condition condition = new Condition()
@@ -397,9 +392,9 @@ public class MetricStorageApp {
         item.put("query", new AttributeValue(query_for_key));
 
 
-        int metric = computeMetric(resultMap);
+        long metric = computeMetric(resultMap);
 
-        System.out.println("INSERTING WITH METRIC: " + Integer.toString(metric) + "\n");
+        System.out.println("INSERTING WITH METRIC: " + Long.toString(metric) + "\n");
 
         /*for (Map.Entry<String, String> entry : result.entrySet()){
 
@@ -430,16 +425,15 @@ public class MetricStorageApp {
             }
 
         }*/
-
-        item.put("metric", new AttributeValue().withN(Integer.toString(metric)));
+        item.put("metric", new AttributeValue().withN(Long.toString(metric)));
 
         return item;
     }
 
-    private static int computeMetric(Map<String, String> result) {
+    private static long computeMetric(Map<String, String> result) {
 
 
-        int insts = 0, blocks = 0, meths = 0, b_fail, b_success;
+        long insts = 0, blocks = 0, meths = 0, b_fail = 0, b_success;
 
 
         for (Map.Entry<String, String> entry : result.entrySet()){
@@ -447,27 +441,27 @@ public class MetricStorageApp {
             switch (entry.getKey()) {
 
                 case "instructions":
-                    insts = Integer.parseInt(entry.getValue());
+                    insts = Long.parseLong(entry.getValue());
                     break;
                 case "bb_blocks":
-                    blocks = Integer.parseInt(entry.getValue());
+                    blocks = Long.parseLong(entry.getValue());
                     break;
                 case "methods":
-                    meths = Integer.parseInt(entry.getValue());
+                    meths = Long.parseLong(entry.getValue());
                     break;
                 case "branch_fail":
-                    b_fail = Integer.parseInt(entry.getValue());
+                    b_fail = Long.parseLong(entry.getValue());
                     break;
                 case "branch_success":
-                    b_success = Integer.parseInt(entry.getValue());
+                    b_success = Long.parseLong(entry.getValue());
                     break;
                 default:
                     break;
             }
 
         }
+        return MetricCalculation.calculate(blocks,meths,b_fail);
 
-        return (insts/blocks) * meths;
     }
 
     private static int guessMetric(String query) {
