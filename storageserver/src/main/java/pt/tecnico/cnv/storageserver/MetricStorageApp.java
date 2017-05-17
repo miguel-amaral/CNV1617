@@ -24,9 +24,12 @@ public class MetricStorageApp {
 
     private static String defaultTableName = "metrics_table";
 
+    private static Map<String, String> _cache;
+
     public MetricStorageApp(AmazonDynamoDB dynamoDB, boolean deleteOnInit){
 
         this._dynamoDB = dynamoDB;
+        this._cache = new HashMap<>();
         if(deleteOnInit){
             deleteDefaultTable();
         }
