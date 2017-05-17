@@ -30,6 +30,7 @@ public class MetricStorageApp {
 
         this._dynamoDB = dynamoDB;
         this._cache = new HashMap<>();
+
         if(deleteOnInit){
             deleteDefaultTable();
         }
@@ -58,7 +59,6 @@ public class MetricStorageApp {
             // wait for the table to move into ACTIVE state
             TableUtils.waitUntilActive(_dynamoDB, defaultTableName);
 
-            populateDB();
 
         } catch (AmazonServiceException ase) {
             System.out.println("Caught an AmazonServiceException, which means your request made it "
@@ -79,13 +79,6 @@ public class MetricStorageApp {
 
     }
 
-    private static void populateDB() {
-
-
-
-
-    }
-
 
     public static void insertNewItem(String query){
 
@@ -93,10 +86,12 @@ public class MetricStorageApp {
         try{
 
 
+            putItemInCache(query);
 
             Map<String, AttributeValue> item = newItem(query);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
             PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
+
 
 
 
@@ -115,6 +110,34 @@ public class MetricStorageApp {
                     + "such as not being able to access the network.");
             System.out.println("Error Message: " + ace.getMessage());
         }
+
+
+    }
+
+    private static void putItemInCache(String query) {
+
+        InstQueryParser parser = null;
+        try {
+            parser = new InstQueryParser(query);
+        } catch (InvalidArgumentsException e) {
+            e.printStackTrace();
+        }
+
+        Map<String, String> resultMap = new HashMap<>();
+        resultMap = parser.queryToMap(query);
+
+
+        int index = query.indexOf("jobID");
+        String query_for_key = query.substring(0,index-1);
+
+
+        item.put("query", new AttributeValue(query_for_key));
+
+
+        int metric = computeMetric(resultMap);
+
+
+        item.put("metric", new AttributeValue().withN(Integer.toString(metric)));
 
 
     }
@@ -147,9 +170,6 @@ public class MetricStorageApp {
         } catch (IndexOutOfBoundsException e) {
 
             message = false + STATIC_VALUES.SEPARATOR_STORAGE_METRIC_REQUEST + Integer.toString(guessMetric(query));
-            //TODO-FIXME
-            //inserir so metric
-            //guess metric & insert
 
 
         } catch (AmazonServiceException ase) {
@@ -542,9 +562,12 @@ public class MetricStorageApp {
 
     public static void deleteDefaultTable() {
 
+        System.out.println("Request for deletion on: " + defaultTableName + "is being handled...\n");
+
         DeleteTableRequest deleteRequest = new DeleteTableRequest().withTableName(defaultTableName);
         // Deletes if table exists
         TableUtils.deleteTableIfExists(_dynamoDB, deleteRequest);
+        System.out.println("Deletion complete!!\n");
 
     }
 
