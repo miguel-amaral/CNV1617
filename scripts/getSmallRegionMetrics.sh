@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-file="04"
 scene_width=2000
 scene_height=${scene_width}
 percentage=5
@@ -15,7 +14,7 @@ number_columns=$((scene_width / $small_width -1))
 counter=0
 subprocess=0
 limit_processes=70
-for file in 01 02 03 05
+for file in 01 02 03 04 05
 do
     for c in $(eval echo "{0..${number_columns}}")
     do

@@ -83,11 +83,17 @@ public class LoadBalancer {
 
     private void updateInstances() {
         List<Instance> instances = new ListWorkerInstances(ec2).listInstances();
+        Set<String> keySet = _instances.keySet();
         for(Instance instance : instances) {
             String id = instance.getInstanceId();
             if(!_instances.containsKey(id)) {
                 this.newInstance(instance);
+            } else {
+                keySet.remove(id);
             }
+        }
+        for(String missingId : keySet){
+            System.out.println("We might have " + missingId + " down");
         }
     }
 

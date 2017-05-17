@@ -45,8 +45,8 @@ public class WebServer {
         server.createContext("/status", new GenericHandler(new ProccesserStatusStrategy()));
         server.createContext("/r.html", new GenericHandler(new ProccessQueryStrategy()));
         server.createContext("/metrics", new GenericHandler(new GetMetricsStrategy()));
-        server.createContext("/launch", new GenericHandler(new LaunchInstanceStrategy()));
-        server.createContext("/terminate", new GenericHandler(new TerminateInstanceStrategy()));
+//        server.createContext("/launch", new GenericHandler(new LaunchInstanceStrategy()));
+//        server.createContext("/terminate", new GenericHandler(new TerminateInstanceStrategy()));
         server.createContext("/time", new GenericHandler(new GetElapsedTimeStrategy()));
 
         server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
