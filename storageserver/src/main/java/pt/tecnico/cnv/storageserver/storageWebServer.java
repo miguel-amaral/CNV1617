@@ -50,6 +50,7 @@ public class storageWebServer extends Thread{
             server.createContext("/data.html", new ReceiveDataHandler());
             server.createContext("/testmetric.html", new TestMetricHandler());
             server.createContext("/metric/value", new GenericHandler(new MetricValueStrategy()));
+            server.createContext("/deleteTable", new DeleteTableHandler());
             server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
             server.start();
         } catch (IOException e) {
@@ -68,6 +69,22 @@ public class storageWebServer extends Thread{
             OutputStream os = t.getResponseBody();
             String message = "ok";
             int requestStatus = 200;
+            t.sendResponseHeaders(requestStatus, message.length());
+            os.write(message.getBytes());
+            os.close();
+        }
+    }
+
+    static class DeleteTableHandler implements HttpHandler {
+        public void handle(HttpExchange t) throws IOException {
+
+            OutputStream os = t.getResponseBody();
+            String message = "Deleting metrics_table..\n";
+            int requestStatus = 200;
+
+            _app.deleteDefaultTable();
+
+            message += "Deletion successfull\n";
             t.sendResponseHeaders(requestStatus, message.length());
             os.write(message.getBytes());
             os.close();

@@ -29,6 +29,7 @@ public class WebServer {
         server.createContext("/r.html", new MyHandler());
         server.createContext("/images/", new GetImageHandler());
         server.createContext("/metrics", new GenericHandler(new onlyMetricsStrategy()));
+        server.createContext("/time", new GenericHandler(new ElapsedTimeStrategy()));
         server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
         server.start();
 		System.out.println("Server is now running");
@@ -242,6 +243,58 @@ public class WebServer {
 //                for (int i = 0; i < keys.size(); i++) {
 //                    finalEndpoint.append("&").append(keys.get(i)).append("=").append(values.get(i));
 //                }
+
+            } catch (InvalidArgumentsException e) {
+                e.printStackTrace();
+                message = "Error: InvalidArgumentsException";
+                requestStatus = 400;
+                System.err.println(message);
+            } catch (Throwable e) {
+                e.printStackTrace();
+                message = "Error: " + e.getMessage();
+                System.err.println(message);
+            }
+            return new HttpAnswer(requestStatus,message);
+        }
+    }
+
+    private static class ElapsedTimeStrategy extends HttpStrategy {
+        @Override
+        public HttpAnswer process(String query) throws Exception {
+            String message = "";
+            int requestStatus = 0;
+
+
+
+            try {
+                ContainerManager.clearInstance(Thread.currentThread().getId());
+                InvokeRay ray = new InvokeRay(query);
+
+                long start = System.currentTimeMillis();
+
+                ray.execute();
+                requestStatus = 200;
+
+                long elapsedTimeMillis = System.currentTimeMillis()-start;
+
+                // Get elapsed time in seconds
+                float elapsedTimeSec = elapsedTimeMillis/1000F;
+
+                // Get elapsed time in minutes
+                float elapsedTimeMin = elapsedTimeMillis/(60*1000F);
+
+                message = String.valueOf(elapsedTimeSec);
+
+                DataContainer data = ContainerManager.getInstance(Thread.currentThread().getId());
+
+
+                String jobID = ray.jobID();
+
+                Map<String, String> args = new HashMap<>();
+                args.put("jobID", jobID);
+
+                HttpRequest.sendGet("load-balancer-cnv.tk:8000/job/done", args);
+
 
             } catch (InvalidArgumentsException e) {
                 e.printStackTrace();

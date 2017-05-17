@@ -47,6 +47,7 @@ public class WebServer {
         server.createContext("/metrics", new GenericHandler(new GetMetricsStrategy()));
 //        server.createContext("/launch", new GenericHandler(new LaunchInstanceStrategy()));
 //        server.createContext("/terminate", new GenericHandler(new TerminateInstanceStrategy()));
+        server.createContext("/time", new GenericHandler(new GetElapsedTimeStrategy()));
 
         server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
         server.start();
@@ -88,12 +89,12 @@ public class WebServer {
 
     private static class ProccessQueryStrategy extends HttpStrategy {
         public HttpAnswer process(String query) throws Exception {
-            return _proccesser.processQuery(query,false);
+            return _proccesser.processQuery(query,"r.html");
         }
     }
     private static class GetMetricsStrategy extends HttpStrategy {
         public HttpAnswer process(String query) throws Exception {
-            return _proccesser.processQuery(query,true);
+            return _proccesser.processQuery(query,"metrics");
         }
     }
     private static class ListInstancesStrategy extends HttpStrategy {
@@ -132,6 +133,12 @@ public class WebServer {
             String[] arg = query.split("=");
             _proccesser.terminateInstance(arg[1]);
             return new HttpAnswer(200,"all good son");
+        }
+    }
+
+    private static class GetElapsedTimeStrategy extends HttpStrategy {
+        public HttpAnswer process(String query) throws Exception {
+            return _proccesser.processQuery(query,"time");
         }
     }
 }

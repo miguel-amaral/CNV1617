@@ -24,9 +24,12 @@ public class MetricStorageApp {
 
     private static String defaultTableName = "metrics_table";
 
+    private static Map<String, String> _cache;
+
     public MetricStorageApp(AmazonDynamoDB dynamoDB, boolean deleteOnInit){
 
         this._dynamoDB = dynamoDB;
+        this._cache = new HashMap<>();
         if(deleteOnInit){
             deleteDefaultTable();
         }
@@ -46,7 +49,7 @@ public class MetricStorageApp {
 
             CreateTableRequest newRequest = new CreateTableRequest().withTableName(defaultTableName).withKeySchema(keySchema)
                     .withAttributeDefinitions(attributeDefinitions).withProvisionedThroughput(
-                            new ProvisionedThroughput().withReadCapacityUnits(5L).withWriteCapacityUnits(5L));
+                            new ProvisionedThroughput().withReadCapacityUnits(1L).withWriteCapacityUnits(1L));
 
 
 
@@ -55,7 +58,7 @@ public class MetricStorageApp {
             // wait for the table to move into ACTIVE state
             TableUtils.waitUntilActive(_dynamoDB, defaultTableName);
 
-
+            populateDB();
 
         } catch (AmazonServiceException ase) {
             System.out.println("Caught an AmazonServiceException, which means your request made it "
@@ -73,6 +76,13 @@ public class MetricStorageApp {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
+    }
+
+    private static void populateDB() {
+
+
+
 
     }
 
@@ -370,9 +380,6 @@ public class MetricStorageApp {
         item.put("query", new AttributeValue(query_for_key));
 
 
-
-
-
         int metric = computeMetric(resultMap);
 
         System.out.println("INSERTING WITH METRIC: " + Integer.toString(metric) + "\n");
@@ -533,7 +540,7 @@ public class MetricStorageApp {
     }
 
 
-    private static void deleteDefaultTable() {
+    public static void deleteDefaultTable() {
 
         DeleteTableRequest deleteRequest = new DeleteTableRequest().withTableName(defaultTableName);
         // Deletes if table exists
