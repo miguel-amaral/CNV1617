@@ -110,7 +110,7 @@ public class InstTool {
 
     public static synchronized void dynInstrCount(int incr) {
         DataContainer data = ContainerManager.getInstance(Thread.currentThread().getId());
-        data.instructions += incr;
+//        data.instructions += incr;
         data.bb_blocks++;
     }
 
@@ -160,11 +160,10 @@ public class InstTool {
 
 
         if (br_outcome == 0) {
-
             data.branch_fail++;
-        } else {
+        } /*else {
             data.branch_success++;
-        }
+        }*/
     }
 
 
