@@ -15,8 +15,9 @@ public class LoadBalancer {
 
     private AmazonEC2 ec2;
     private InstanceLauncher instanceLauncher;
+    private int _counterOfBootingInstances = 0;
     List<Instance> _known_instances = new ArrayList<Instance>();
-    List<String> _removed_instances = new ArrayList<String>();
+    List<String> _instances_set_to_removal = new ArrayList<String>();
 
     Map<String, Container> _instances = new HashMap<String, Container>();
     Map<String,Container> _jobs = new HashMap<String, Container>();
@@ -28,11 +29,15 @@ public class LoadBalancer {
         updateInstances();
     }
 
-    private synchronized void increaseMetric(Instance instance, long metricValue) {
-        _instances.get(instance.getInstanceId()).metric = _instances.get(instance.getInstanceId()).metric + metricValue;
+    private void increaseMetric(Instance instance, long metricValue) {
+        synchronized (_instances) {
+            _instances.get(instance.getInstanceId()).metric = _instances.get(instance.getInstanceId()).metric + metricValue;
+        }
     }
-    private synchronized void decreaseMetric(Instance instance, long metricValue) {
-        _instances.get(instance.getInstanceId()).metric = _instances.get(instance.getInstanceId()).metric - metricValue;
+    private void decreaseMetric(Instance instance, long metricValue) {
+        synchronized (_instances) {
+            _instances.get(instance.getInstanceId()).metric = _instances.get(instance.getInstanceId()).metric - metricValue;
+        }
     }
 
 
@@ -46,7 +51,6 @@ public class LoadBalancer {
 
     public HttpAnswer processQuery(String query, boolean returnMetricsOnly) {
 
-        //update all instances ??
         updateInstances();
         Instance lowestInsance = getLightestMachine();
 
@@ -90,12 +94,14 @@ public class LoadBalancer {
 
     private void newInstance(Instance instance) {
         String id = instance.getInstanceId();
-        if(_removed_instances.contains(id)) {
+        if(_instances_set_to_removal.contains(id)) {
             //it is shutting down ..
             return;
         }
         if(this.instanceIsReady(instance)){
-            _instances.put(id,new Container(instance,0));
+            synchronized (_instances) {
+                _instances.put(id,new Container(instance,0));
+            }
         }
     }
 
@@ -111,11 +117,13 @@ public class LoadBalancer {
     public String toString() {
         String newLine = "\n";
         StringBuilder toReturn = new StringBuilder("Instances:" + newLine);
-        for(Map.Entry<String,Container> entry : _instances.entrySet()){
-            toReturn.append(entry.getKey()).append(" : ").append(entry.getValue().metric).append(newLine);
+        synchronized (_instances) {
+            for (Map.Entry<String, Container> entry : _instances.entrySet()) {
+                toReturn.append(entry.getKey()).append(" : ").append(entry.getValue().metric).append(newLine);
+            }
         }
         toReturn.append(newLine).append("Removed:").append(newLine);
-        for (String id : _removed_instances) {
+        for (String id : _instances_set_to_removal) {
             toReturn.append(id).append(newLine);
         }
         toReturn.append(newLine);
@@ -130,13 +138,15 @@ public class LoadBalancer {
         long min = Long.MAX_VALUE; //max int
 
         List<Instance> minInstance = null;
-        for(Map.Entry<String,Container> entry : _instances.entrySet()){
-            if(entry.getValue().metric < min || minInstance == null) {
-                minInstance = new ArrayList<Instance>();
-                minInstance.add(entry.getValue().instance);
-                min = entry.getValue().metric;
-            } else if(entry.getValue().metric == min) {
-                minInstance.add(entry.getValue().instance);
+        synchronized (_instances) {
+            for (Map.Entry<String, Container> entry : _instances.entrySet()) {
+                if (entry.getValue().metric < min || minInstance == null) {
+                    minInstance = new ArrayList<Instance>();
+                    minInstance.add(entry.getValue().instance);
+                    min = entry.getValue().metric;
+                } else if (entry.getValue().metric == min) {
+                    minInstance.add(entry.getValue().instance);
+                }
             }
         }
         int index = 0;
@@ -161,4 +171,5 @@ public class LoadBalancer {
             this.instance = instance;
             this.metric = metric;
         }
-    }}
+    }
+}

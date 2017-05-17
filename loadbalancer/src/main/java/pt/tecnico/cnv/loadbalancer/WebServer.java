@@ -25,6 +25,7 @@ public class WebServer {
     private static LoadBalancer _proccesser;
     private static AmazonCloudWatch cloudWatch;
 
+
 	public static void main(String[] args) throws Exception {
 		System.out.println("Booting server");
 		try {
