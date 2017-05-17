@@ -94,8 +94,6 @@ public class MetricStorageApp {
 
 
 
-
-
         } catch (AmazonServiceException ase) {
             System.out.println("Caught an AmazonServiceException, which means your request made it "
                     + "to AWS, but was rejected with an error response for some reason.");
@@ -133,11 +131,10 @@ public class MetricStorageApp {
         int metric = computeMetric(resultMap);
 
 
-        resultMap.put("query", query_for_key);
-        resultMap.put("metric", Integer.toString(metric));
+        resultMap.put(query_for_key, Integer.toString(metric));
 
     }
-    
+
 
     public static String queryItemMetric(String query){
 
@@ -471,6 +468,17 @@ public class MetricStorageApp {
     }
 
     private static int guessMetric(String query) {
+
+
+        int metric;
+
+        //CHECK HOW QUERY IS INSERTED
+        if((_cache.containsKey(query))) {
+            metric = Integer.parseInt(_cache.get(query));
+            return metric;
+        }
+
+
 
         int sc = 0, sr = 0, wc = 0, wr = 0, coff = 0, roff = 0;
 
