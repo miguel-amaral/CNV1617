@@ -49,7 +49,7 @@ public class LoadBalancer {
         instanceLauncher.destroyInstances(instanceId);
     }
 
-    public HttpAnswer processQuery(String query, boolean returnMetricsOnly) {
+    public HttpAnswer processQuery(String query, String letter) {
 
         updateInstances();
         Instance lowestInsance = getLightestMachine();
@@ -69,12 +69,11 @@ public class LoadBalancer {
 
         //String letter = alreadyInstrumented ? "alreadyInstrumented" : "r" ;
 
-        String letter = returnMetricsOnly ? "metrics" : "r" ;
 
         if(STATIC_VALUES.DEBUG_LOAD_BALANCER_JOB_ALREADY_INSTRUCTED ) {
             System.out.println("jobID: "  + jobID + " already instrument: " + alreadyInstrumented);
         }
-        HttpAnswer answer = HttpRequest.sendGet(ip+":8000/"+letter+".html?"+query+"&jobID="+jobID,new HashMap<String, String>());
+        HttpAnswer answer = HttpRequest.sendGet(ip+":8000/"+letter+"?"+query+"&jobID="+jobID,new HashMap<String, String>());
         return answer;
     }
 
