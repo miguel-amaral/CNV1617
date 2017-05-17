@@ -79,12 +79,13 @@ public class storageWebServer extends Thread{
         public void handle(HttpExchange t) throws IOException {
 
             OutputStream os = t.getResponseBody();
-            String message = "Deleting metrics_table..\n";
+            String message = "Forwarding request for deletion..\n";
+
             int requestStatus = 200;
 
             _app.deleteDefaultTable();
 
-            message += "Deletion successfull\n";
+
             t.sendResponseHeaders(requestStatus, message.length());
             os.write(message.getBytes());
             os.close();
