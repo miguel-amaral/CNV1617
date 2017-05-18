@@ -246,7 +246,7 @@ public class LoadBalancer {
 
         @Override
         public String toString() {
-            return instance.getPublicIpAddress() + (guess? "" : " GUESS " )+ " " + passed_metric + " out of " + final_metric;
+            return instance.getPublicIpAddress() + (guess? " GUESS " : "")+ " " + passed_metric + " out of " + final_metric;
         }
     }
 }
