@@ -63,11 +63,14 @@ public class WebServer {
                 String jobID = ray.jobID();
 
                 long threadId = Thread.currentThread().getId();
-                
+
                 //launch service to run every N seconds
+                Timer timer = new Timer();
                 WebServerTimerTask task = new WebServerTimerTask();
                 task.set_threadID(threadId);
-                task.execute();
+                timer.scheduleAtFixedRate(task, STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC, STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC);
+
+
 
                 ray.execute();
                 String ip = "http://"+IpFinder.getMyIp() + ":"+port+"/";
