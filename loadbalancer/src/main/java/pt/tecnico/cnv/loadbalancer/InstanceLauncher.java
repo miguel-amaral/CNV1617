@@ -2,6 +2,7 @@ package pt.tecnico.cnv.loadbalancer;
 
 import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.model.*;
+import pt.tecnico.cnv.common.STATIC_VALUES;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,8 +12,8 @@ import java.util.List;
  */
 public class InstanceLauncher {
 
-    private static final String ami_id = "ami-48b2a62c";
-    private static final String instance_type = "t2.micro";
+    private static final String AMI_ID = STATIC_VALUES.AMI_ID ;
+    private static final String INSTANCE_TYPE = "t2.micro";
     private static final String SECURITY_GROUP = "SecurityGroup1";
     private final AmazonEC2 ec2;
 
@@ -24,8 +25,8 @@ public class InstanceLauncher {
     //Returns the number of launched instances
     public void launchNewInstance(int numberOfInstance) {
         RunInstancesRequest runInstancesRequest = new RunInstancesRequest();
-        runInstancesRequest.withImageId(ami_id)
-                .withInstanceType(instance_type)
+        runInstancesRequest.withImageId(AMI_ID)
+                .withInstanceType(INSTANCE_TYPE)
                 .withMinCount(numberOfInstance)
                 .withMaxCount(numberOfInstance)
                 .withSecurityGroups(SECURITY_GROUP);

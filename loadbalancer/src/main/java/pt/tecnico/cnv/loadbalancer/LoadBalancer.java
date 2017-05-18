@@ -134,7 +134,9 @@ public class LoadBalancer {
     public String toString() {
 
         String newLine = "\n";
-        StringBuilder toReturn = new StringBuilder("Instances:" + newLine);
+        StringBuilder toReturn = new StringBuilder("Lower threshold:" + STATIC_VALUES.LOWER_THRESHOLD+ newLine);
+        toReturn.append("Upper threshold:" + STATIC_VALUES.UPPER_THRESHOLD+ newLine +newLine+newLine+newLine);
+        toReturn.append("Instances:" + newLine);
         synchronized (_instances) {
             for (Map.Entry<String, Container> entry : _instances.entrySet()) {
                 toReturn.append(entry.getKey()).append(" : ").append(entry.getValue().metric).append(newLine);

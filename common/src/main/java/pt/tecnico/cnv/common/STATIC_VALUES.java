@@ -34,4 +34,5 @@ public class STATIC_VALUES {
     public final static long LOWER_THRESHOLD = 0;
     public final static long UPPER_THRESHOLD = 0;
 
+    public final static String AMI_ID = "ami-48b2a62c";
 }
