@@ -31,5 +31,7 @@ public class STATIC_VALUES {
     public final static int NUMBER_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC = 5;
     public final static int NUMBER_MILI_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC = NUMBER_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC*1000;
 
+    public final static long LOWER_THRESHOLD = 0;
+    public final static long UPPER_THRESHOLD = 0;
 
 }

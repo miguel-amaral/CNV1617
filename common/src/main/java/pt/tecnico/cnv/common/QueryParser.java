@@ -41,7 +41,7 @@ public class QueryParser {
 
 
 
-    public Map<String, String> queryToMap(String query){
+    public static Map<String, String> queryToMap(String query){
         Map<String, String> result = new HashMap<String, String>();
         for (String param : query.split("&")) {
             String pair[] = param.split("=");

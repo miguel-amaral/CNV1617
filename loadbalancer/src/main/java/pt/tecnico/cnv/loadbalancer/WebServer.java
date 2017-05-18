@@ -10,12 +10,11 @@ import com.amazonaws.services.ec2.AmazonEC2;
 import com.amazonaws.services.ec2.AmazonEC2ClientBuilder;
 import com.amazonaws.services.ec2.model.Instance;
 import com.sun.net.httpserver.HttpServer;
-import pt.tecnico.cnv.common.GenericHandler;
-import pt.tecnico.cnv.common.HttpAnswer;
-import pt.tecnico.cnv.common.HttpStrategy;
+import pt.tecnico.cnv.common.*;
 
 import java.net.InetSocketAddress;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executors;
 
 @SuppressWarnings("restriction")
@@ -45,6 +44,7 @@ public class WebServer {
         server.createContext("/status", new GenericHandler(new ProccesserStatusStrategy()));
         server.createContext("/r.html", new GenericHandler(new ProccessQueryStrategy()));
         server.createContext("/metrics", new GenericHandler(new GetMetricsStrategy()));
+        server.createContext("/job/update", new GenericHandler(new UpdateMetricsStrategy()));
 //        server.createContext("/launch", new GenericHandler(new LaunchInstanceStrategy()));
 //        server.createContext("/terminate", new GenericHandler(new TerminateInstanceStrategy()));
         server.createContext("/time", new GenericHandler(new GetElapsedTimeStrategy()));
@@ -125,20 +125,31 @@ public class WebServer {
         public HttpAnswer process(String query) throws Exception {
             String[] arg = query.split("=");
             _proccesser.launchInstance(Integer.parseInt(arg[1]));
-            return new HttpAnswer(200,"all good son");
+            return new HttpAnswer(200,"request received");
         }
     }
     private static class TerminateInstanceStrategy extends HttpStrategy {
         public HttpAnswer process(String query) throws Exception {
             String[] arg = query.split("=");
             _proccesser.terminateInstance(arg[1]);
-            return new HttpAnswer(200,"all good son");
+            return new HttpAnswer(200,"request received");
         }
     }
 
     private static class GetElapsedTimeStrategy extends HttpStrategy {
         public HttpAnswer process(String query) throws Exception {
             return _proccesser.processQuery(query,"time");
+        }
+    }
+
+    private static class UpdateMetricsStrategy extends HttpStrategy {
+        public HttpAnswer process(String query) throws Exception {
+            Map<String, String> arguments = QueryParser.queryToMap(query);
+            String jobID = arguments.get("jobID");
+            long metric = Long.parseLong(arguments.get("currentMetric"));
+            if(STATIC_VALUES.DEBUG){ System.out.println("JOB UPDATE: " + jobID + " " + metric); }
+            _proccesser.updateJob(jobID,metric);
+            return new HttpAnswer(200,"request received");
         }
     }
 }

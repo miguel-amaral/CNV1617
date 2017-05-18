@@ -19,9 +19,9 @@ public class LoadBalancer {
     List<Instance> _known_instances = new ArrayList<Instance>();
     List<String> _instances_set_to_removal = new ArrayList<String>();
 
-    Map<String, Container> _instances = new HashMap<String, Container>();
+    final Map<String, Container> _instances = new HashMap<String, Container>();
 
-    Map<String,Container> _jobs = new HashMap<String, Container>();
+    Map<String,JobContainer> _jobs = new HashMap<String, JobContainer>();
 
 
     public LoadBalancer(AmazonEC2 ec2)  {
@@ -59,10 +59,11 @@ public class LoadBalancer {
 
             long metricValue = requester.getMetric();
             boolean alreadyInstrumented = requester.isAlreadyIntrumented();
+            boolean guess = !alreadyInstrumented;
             this.increaseMetric(lowestInstance, metricValue);
             String jobID = newJobID();
             synchronized (_jobs) {
-                _jobs.put(jobID, new Container(lowestInstance, metricValue));
+                _jobs.put(jobID, new JobContainer(lowestInstance, metricValue,guess));
             }
             String ip = lowestInstance.getPublicIpAddress();
             if (STATIC_VALUES.DEBUG_LOAD_BALANCER_CHOSEN_MACHINE) {
@@ -131,6 +132,7 @@ public class LoadBalancer {
     }
 
     public String toString() {
+
         String newLine = "\n";
         StringBuilder toReturn = new StringBuilder("Instances:" + newLine);
         synchronized (_instances) {
@@ -145,8 +147,8 @@ public class LoadBalancer {
         toReturn.append(newLine);
         toReturn.append(newLine).append("Current Jobs:").append(newLine);
         synchronized (_jobs) {
-            for (Map.Entry<String, Container> entry : _jobs.entrySet()) {
-                toReturn.append(entry.getKey()).append(" : ").append(entry.getValue().instance.getPublicIpAddress()).append(newLine);
+            for (Map.Entry<String, JobContainer> entry : _jobs.entrySet()) {
+                toReturn.append(entry.getKey()).append(" : ").append(entry.getValue().instance.getPublicIpAddress()).append(" : ").append(entry.getValue().passed_metric).append(" out of ").append(entry.getValue().final_metric).append(newLine);
             }
         }
         return toReturn.toString();
@@ -178,10 +180,25 @@ public class LoadBalancer {
 
     public void jobDone(String jobId) {
         synchronized(_jobs) {
-            Container job = _jobs.get(jobId);
-            this.decreaseMetric(job.instance, job.metric);
+            JobContainer job = _jobs.get(jobId);
+            this.decreaseMetric(job.instance, job.missingMetric());
             _jobs.remove(jobId);
         }
+    }
+
+    public void updateJob(String jobID, long metric) {
+        JobContainer job;
+        synchronized (_jobs) {
+            job = _jobs.get(jobID);
+        }
+        if(job == null) {
+            //job is done already, we can ignore update
+            return;
+        }
+
+        long difference = job.getMetricDifference(metric);
+        job.passed_metric = metric;
+        if(difference != 0) { decreaseMetric(job.instance,difference); }
     }
 
     class Container {
@@ -190,6 +207,39 @@ public class LoadBalancer {
         Container(Instance instance, long metric) {
             this.instance = instance;
             this.metric = metric;
+        }
+    }
+
+    class JobContainer {
+        Instance instance;
+        boolean guess;
+        long final_metric;
+        long passed_metric = 0;
+
+
+
+        JobContainer(Instance instance, long metric, boolean guess) {
+            this.instance = instance;
+            this.final_metric = metric;
+            this.guess = guess;
+            this.passed_metric = 0;
+        }
+
+        long getMetricDifference(long metric) {
+            //dont overflow..
+            long difference = metric-passed_metric;
+            if(!guess) {return difference;}
+
+            long jobMissingMetric = final_metric - passed_metric;
+            if(difference > jobMissingMetric) {
+                return 0;
+            } else {
+                return difference;
+            }
+        }
+
+        public long missingMetric() {
+            return final_metric-passed_metric;
         }
     }
 }

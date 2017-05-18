@@ -68,6 +68,7 @@ public class WebServer {
                 Timer timer = new Timer();
                 WebServerTimerTask task = new WebServerTimerTask();
                 task.set_threadID(threadId);
+                task.set_jobID(jobID);
                 timer.scheduleAtFixedRate(task, STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC, STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC);
 
 
