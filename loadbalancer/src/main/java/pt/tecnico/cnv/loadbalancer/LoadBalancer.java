@@ -112,7 +112,7 @@ public class LoadBalancer extends TimerTask {
     }
     private long getMetric(Instance instance) {
         synchronized (_instances) {
-            return _instances.get(instance.getInstanceId()).metric
+            return _instances.get(instance.getInstanceId()).metric;
         }
     }
 
