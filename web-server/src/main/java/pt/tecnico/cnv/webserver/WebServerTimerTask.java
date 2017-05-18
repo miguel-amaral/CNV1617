@@ -21,7 +21,7 @@ public class WebServerTimerTask extends TimerTask {
     public void run() {
         DataContainer data = ContainerManager.getInstance(_threadID);
         long metric = MetricCalculation.calculate(data.bb_blocks,data.methods,data.branch_fail);
-        System.out.println(_threadID + " : +" + STATIC_VALUES.NUMBER_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC+ " seconds : metric : " + metric);
+        if(STATIC_VALUES.DEBUG_LOAD_BALANCER_JOB_UPDATE) {System.out.println(_threadID + " : +" + STATIC_VALUES.NUMBER_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC+ " seconds : metric : " + metric); }
 
         Map<String,String> args =new HashMap<>();
         args.put("jobID",_jobID);
