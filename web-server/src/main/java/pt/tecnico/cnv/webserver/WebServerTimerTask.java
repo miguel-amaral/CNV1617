@@ -17,7 +17,7 @@ public class WebServerTimerTask extends TimerTask {
     public void run() {
         DataContainer data = ContainerManager.getInstance(_threadID);
         long metric = MetricCalculation.calculate(data.bb_blocks,data.methods,data.branch_fail);
-        System.out.println(STATIC_VALUES.NUMBER_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC+ " seconds have passed : metric gone: " + metric);
+        System.out.println(_threadID + " : +" + STATIC_VALUES.NUMBER_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC+ " seconds : metric : " + metric);
 
         //do stuff
     }

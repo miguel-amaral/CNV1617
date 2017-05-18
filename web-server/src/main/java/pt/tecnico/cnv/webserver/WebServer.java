@@ -73,6 +73,9 @@ public class WebServer {
 
 
                 ray.execute();
+
+                //no need to keep spamming..
+                timer.cancel();
                 String ip = "http://"+IpFinder.getMyIp() + ":"+port+"/";
                 String localhost =  "http://localhost:"+port+"/";
                 message += "<b>Amazon AWS context: </b><a href=\""+ip+ray.outputFileName()+"\">"+ip+ray.outputFileName()+"</a></br></br></br></br></br></br>";
