@@ -11,23 +11,93 @@ import java.util.*;
 /**
  * Created by miguel on 10/05/17.
  */
-public class LoadBalancer {
+public class LoadBalancer extends TimerTask {
 
     private AmazonEC2 ec2;
     private InstanceLauncher instanceLauncher;
     private int _counterOfBootingInstances = 0;
-    List<Instance> _known_instances = new ArrayList<Instance>();
-    List<String> _instances_set_to_removal = new ArrayList<String>();
+    private List<Instance> _known_instances = new ArrayList<Instance>();
+    private List<String> _instances_set_to_removal = new ArrayList<String>();
+    private Map<String,Long> _metricsProccessedSinceLastTick = new HashMap<String, Long>();
+    private final Map<String, Container> _instances = new HashMap<String, Container>();
 
-    final Map<String, Container> _instances = new HashMap<String, Container>();
-
-    Map<String,JobContainer> _jobs = new HashMap<String, JobContainer>();
-
+    private Map<String,JobContainer> _jobs = new HashMap<String, JobContainer>();
+    private Timer timer;
+    private Map<String, Long> _snapshots = new HashMap<String, Long>();
+    private List<String> _wentToZeroInstances = new ArrayList<String>();
+    //whenever a new instance pops up a new key is created
+    private final Map<String,EvictingQueueContainer> _speeds = new HashMap<String, EvictingQueueContainer>();
 
     public LoadBalancer(AmazonEC2 ec2)  {
         this.ec2 = ec2;
         this.instanceLauncher = new InstanceLauncher(ec2);
         updateInstances();
+        startService();
+    }
+
+    private void startService() {
+        timer = new Timer();
+        timer.scheduleAtFixedRate(this, STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_LOAD_BALANCER_CHECKS_SPEED_WORKERS, STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_LOAD_BALANCER_CHECKS_SPEED_WORKERS);
+    }
+
+    private Map<String,Long> makeSnapshotInstancesMetrics(){
+        Map<String,Long> snapshot = new HashMap<String, Long>();
+        //create base for next
+        synchronized (_instances){
+            for (Map.Entry<String, Container> entry : _instances.entrySet()) {
+                String id = entry.getKey();
+                long metric = entry.getValue().metric;
+                snapshot.put(id,metric);
+            }
+        }
+        return snapshot;
+    }
+
+
+    // syncronize _metricsProccessedSinceLastTick then _speeds
+    public void run() {
+        synchronized (_metricsProccessedSinceLastTick) {
+            //Register new Speed
+            for(Map.Entry<String, Long> entry : _snapshots.entrySet()) {
+                String id = entry.getKey();
+                if (_wentToZeroInstances.contains(id)) {
+                   System.out.println("Went to zero, ignoring");
+                   addRegisteredSpeed(id,null);
+                   continue;
+                }
+                Long processed = _metricsProccessedSinceLastTick.get(entry.getKey());
+                if(processed == null) {processed = Long.valueOf(0);}
+                long metric = processed;
+                Long baselineObject = entry.getValue();
+                if(baselineObject == null) {
+                    System.out.println("Baseline was null, ignoring");
+                    addRegisteredSpeed(id,null);
+                    continue;
+                }
+                long baseline = baselineObject;
+                if( baseline == 0 ) {
+                    //need to ignore, we dont know if it was sleeping
+                    System.out.println("Did not had enough at start");
+                    addRegisteredSpeed(id,null);
+                    continue;
+                }
+
+                //add speed to list
+                synchronized (_speeds) {
+                    addRegisteredSpeed(entry.getKey(), metric);
+                }
+            }
+            //Reset the list
+            _metricsProccessedSinceLastTick = new HashMap<String, Long>();
+        }
+        _snapshots = makeSnapshotInstancesMetrics();
+    }
+
+    private void addRegisteredSpeed(String key, Long metric) {
+        synchronized (_speeds) {
+            EvictingQueueContainer queue = _speeds.get(key);
+            queue.addElement(metric);
+        }
     }
 
     private void increaseMetric(Instance instance, long metricValue) {
@@ -38,6 +108,11 @@ public class LoadBalancer {
     private void decreaseMetric(Instance instance, long metricValue) {
         synchronized (_instances) {
             _instances.get(instance.getInstanceId()).metric = _instances.get(instance.getInstanceId()).metric - metricValue;
+        }
+    }
+    private long getMetric(Instance instance) {
+        synchronized (_instances) {
+            return _instances.get(instance.getInstanceId()).metric
         }
     }
 
@@ -134,11 +209,14 @@ public class LoadBalancer {
 
         String newLine = "\n";
         StringBuilder toReturn = new StringBuilder("Lower threshold:" + STATIC_VALUES.LOWER_THRESHOLD+ newLine);
-        toReturn.append("Upper threshold:" + STATIC_VALUES.UPPER_THRESHOLD+ newLine +newLine+newLine+newLine);
-        toReturn.append("Instances:" + newLine);
+        toReturn.append("Upper threshold:" + STATIC_VALUES.UPPER_THRESHOLD).append(newLine).append(newLine).append(newLine).append(newLine);
+        toReturn.append("avg : last : Instances:").append(newLine);
         synchronized (_instances) {
             for (Map.Entry<String, Container> entry : _instances.entrySet()) {
-                toReturn.append(entry.getKey()).append(" : ").append(entry.getValue().metric).append(newLine);
+                String instanceID = entry.getKey();
+                Long avgSpeed = getAvgSpeed(instanceID);
+                Long lastSpeed = getLastSpeed(instanceID);
+                toReturn.append(avgSpeed).append(" : ").append(lastSpeed).append(" : ").append(instanceID).append(" : ").append(entry.getValue().metric).append(newLine);
             }
         }
         toReturn.append(newLine).append("Removed:").append(newLine);
@@ -148,12 +226,24 @@ public class LoadBalancer {
         toReturn.append(newLine);
         toReturn.append(newLine).append("Current Jobs:");
         synchronized (_jobs) {
-            toReturn.append(" " + _jobs.size()).append(newLine);
+            toReturn.append(" ").append(_jobs.size()).append(newLine);
             for (Map.Entry<String, JobContainer> entry : _jobs.entrySet()) {
                 toReturn.append(entry.getKey()).append(" : ").append(entry.getValue()).append(newLine);
             }
         }
         return toReturn.toString();
+    }
+
+    private Long getLastSpeed(String instanceID) {
+        synchronized (_speeds){
+            return _speeds.get(instanceID).lastInserted();
+        }
+    }
+
+    private Long getAvgSpeed(String instanceID) {
+        synchronized (_speeds){
+            return _speeds.get(instanceID).speed;
+        }
     }
 
     public Instance getLightestMachine() {
@@ -181,11 +271,11 @@ public class LoadBalancer {
     }
 
     public void jobDone(String jobId) {
+        JobContainer job;
         synchronized(_jobs) {
-            JobContainer job = _jobs.get(jobId);
-            this.decreaseMetric(job.instance, job.missingMetric());
-            _jobs.remove(jobId);
+            job = _jobs.get(jobId);
         }
+        updateJob(jobId,job.missingMetric());
     }
 
     public void updateJob(String jobID, long metric) {
@@ -193,14 +283,21 @@ public class LoadBalancer {
         synchronized (_jobs) {
             job = _jobs.get(jobID);
         }
-        if(job == null) {
-            //job is done already, we can ignore update
-            return;
-        }
 
         long difference = job.getMetricDifference(metric);
         job.passed_metric = metric;
         if(difference != 0) { decreaseMetric(job.instance,difference); }
+        long current_metric = getMetric(job.instance);
+
+        String instance_id = job.instance.getInstanceId();
+        synchronized (_metricsProccessedSinceLastTick) {
+            if (current_metric == 0) {
+                _wentToZeroInstances.add(instance_id);
+            }
+            Long alreadyProcessed = _metricsProccessedSinceLastTick.get(instance_id);
+            if(alreadyProcessed == null) { alreadyProcessed = 0L; }
+            _metricsProccessedSinceLastTick.put(instance_id,alreadyProcessed+metric);
+        }
     }
 
     class Container {
@@ -217,8 +314,6 @@ public class LoadBalancer {
         boolean guess;
         long final_metric;
         long passed_metric = 0;
-
-
 
         JobContainer(Instance instance, long metric, boolean guess) {
             this.instance = instance;
@@ -240,13 +335,54 @@ public class LoadBalancer {
             }
         }
 
+        long getRawMetricDifference(long metric) {
+            return metric-passed_metric;
+        }
+
         public long missingMetric() {
             return final_metric-passed_metric;
         }
 
         @Override
         public String toString() {
-            return instance.getPublicIpAddress() + (guess? " GUESS " : "")+ " " + passed_metric + " out of " + final_metric;
+            return instance.getPublicIpAddress() + (guess? " GUESS " : "") + " " + passed_metric + " out of " + final_metric;
+        }
+    }
+
+    class EvictingQueueContainer {
+        private int numberInserted;
+        ArrayDeque<Long> queue;
+        int numberValid;
+        long current_sum;
+        long speed;
+
+        EvictingQueueContainer() {
+            queue = new ArrayDeque<Long>(STATIC_VALUES.NUMBER_ELEMENTS_QUEUE_SPEEDS);
+            numberInserted = 0;
+            numberValid = 0;
+            current_sum = 0;
+        }
+
+        void addElement(Long metric) {
+            if(numberInserted == STATIC_VALUES.NUMBER_ELEMENTS_QUEUE_SPEEDS) {
+                Long last = queue.removeFirst();
+                if(last != null) {
+                    numberValid--;
+                    current_sum -= metric;
+                }
+            } else {
+                numberInserted++;
+            }
+            if(metric != null) {
+                current_sum += metric;
+                numberValid++;
+            }
+            queue.addFirst(metric);
+            speed = current_sum / numberValid;
+        }
+
+        Long lastInserted() {
+            return queue.peekFirst();
         }
     }
 }
