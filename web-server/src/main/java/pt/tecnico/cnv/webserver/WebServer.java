@@ -10,13 +10,8 @@ import tool.DataContainer;
 
 import java.io.*;
 import java.net.InetSocketAddress;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 
 @SuppressWarnings("restriction")
@@ -68,12 +63,11 @@ public class WebServer {
                 String jobID = ray.jobID();
 
                 long threadId = Thread.currentThread().getId();
+                
                 //launch service to run every N seconds
-                ScheduledExecutorService exec = Executors.newSingleThreadScheduledExecutor();
-                WebServerRunnable runnable = new WebServerRunnable();
-                runnable.set_threadID(threadId);
-                exec.scheduleAtFixedRate(runnable, STATIC_VALUES.NUMBER_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC, STATIC_VALUES.NUMBER_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC, TimeUnit.SECONDS);
-
+                WebServerTimerTask task = new WebServerTimerTask();
+                task.set_threadID(threadId);
+                task.execute();
 
                 ray.execute();
                 String ip = "http://"+IpFinder.getMyIp() + ":"+port+"/";
