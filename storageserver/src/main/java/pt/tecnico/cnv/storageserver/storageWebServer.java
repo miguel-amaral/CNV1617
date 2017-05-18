@@ -179,7 +179,7 @@ public class storageWebServer extends Thread{
                             "location (~/.aws/credentials), and is in valid format.",
                     e);
         }
-        dynamoDB = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.US_WEST_2).withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
+        dynamoDB = AmazonDynamoDBClientBuilder.standard().withRegion(Regions.EU_WEST_2).withCredentials(new AWSStaticCredentialsProvider(credentials)).build();
         _app = new MetricStorageApp(dynamoDB, deleteOnInit);
 
         return true;
