@@ -88,6 +88,7 @@ public class LoadBalancer extends TimerTask {
                 }
             }
             //Reset the list
+            _wentToZeroInstances = new ArrayList<String>();
             _metricsProccessedSinceLastTick = new HashMap<String, Long>();
         }
         _snapshots = makeSnapshotInstancesMetrics();
@@ -190,6 +191,7 @@ public class LoadBalancer extends TimerTask {
             return;
         }
         if(this.instanceIsReady(instance)){
+            _speeds.put(id,new EvictingQueueContainer());
             synchronized (_instances) {
                 _instances.put(id,new Container(instance,0));
             }
