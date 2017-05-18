@@ -146,7 +146,7 @@ public class WebServer {
         public HttpAnswer process(String query) throws Exception {
             Map<String, String> arguments = QueryParser.queryToMap(query);
             String jobID = arguments.get("jobID");
-            long metric = Long.parseLong(arguments.get("currentMetric"));
+            long metric = Long.parseLong(arguments.get("metric"));
             if(STATIC_VALUES.DEBUG){ System.out.println("JOB UPDATE: " + jobID + " " + metric); }
             _proccesser.updateJob(jobID,metric);
             return new HttpAnswer(200,"request received");
