@@ -198,18 +198,12 @@ public class MetricStorageApp {
 
 
 
-
-        System.out.println("THIS IS THE ORIGINAL QUERY: " + query + "\n");
-
         int index = query.indexOf("jobID");
         String query_for_key = query.substring(0,index-1);
 
-        System.out.println("THIS IS THE MAP: \n" + parser.toString() + "\n");
+        System.out.println("\n\nPARAMS: \n" + parser.toString() + "\n");
 
         Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
-
-
-        System.out.println("INSERTING  " + query_for_key + "\n");
 
         item.put("query", new AttributeValue(query_for_key));
 

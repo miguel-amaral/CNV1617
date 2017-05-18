@@ -140,9 +140,10 @@ public class storageWebServer extends Thread{
         public void handle(HttpExchange t) throws IOException {
 
             String query = t.getRequestURI().getQuery();
-            System.out.println("PUT QUERY: "  + query);
+            System.out.println("########################################################\n\n" +
+                    "PUT QUERY: "  + query);
             OutputStream os = t.getResponseBody();
-            String message = "PUT QUERY: "  + query + "\n\n\n";
+            String message =  "PUT QUERY: "  + query + "\n\n\n";
             int requestStatus = 0;
 
             try {
@@ -153,6 +154,8 @@ public class storageWebServer extends Thread{
                 message = "Error: " + e.getMessage();
                 System.err.println(message);
             }
+
+            System.out.println("########################################################\n\n");
             t.sendResponseHeaders(requestStatus, message.length());
             os.write(message.getBytes());
 
