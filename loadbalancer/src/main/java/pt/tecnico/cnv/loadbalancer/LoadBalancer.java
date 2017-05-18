@@ -148,7 +148,7 @@ public class LoadBalancer {
         toReturn.append(newLine).append("Current Jobs:").append(newLine);
         synchronized (_jobs) {
             for (Map.Entry<String, JobContainer> entry : _jobs.entrySet()) {
-                toReturn.append(entry.getKey()).append(" : ").append(entry.getValue().instance.getPublicIpAddress()).append(" : ").append(entry.getValue().passed_metric).append(" out of ").append(entry.getValue().final_metric).append(newLine);
+                toReturn.append(entry.getKey()).append(" : ").append(entry.getValue()).append(newLine);
             }
         }
         return toReturn.toString();
@@ -240,6 +240,11 @@ public class LoadBalancer {
 
         public long missingMetric() {
             return final_metric-passed_metric;
+        }
+
+        @Override
+        public String toString() {
+            return instance.getPublicIpAddress() + (guess? "" : " GUESS " )+ " " + passed_metric + " out of " + final_metric;
         }
     }
 }
