@@ -41,7 +41,6 @@ public class LoadBalancer {
         }
     }
 
-
     public void launchInstance(int numberOfInstances) {
         instanceLauncher.launchNewInstance(numberOfInstances);
     }
@@ -147,8 +146,9 @@ public class LoadBalancer {
             toReturn.append(id).append(newLine);
         }
         toReturn.append(newLine);
-        toReturn.append(newLine).append("Current Jobs:").append(newLine);
+        toReturn.append(newLine).append("Current Jobs:");
         synchronized (_jobs) {
+            toReturn.append(" " + _jobs.size()).append(newLine);
             for (Map.Entry<String, JobContainer> entry : _jobs.entrySet()) {
                 toReturn.append(entry.getKey()).append(" : ").append(entry.getValue()).append(newLine);
             }

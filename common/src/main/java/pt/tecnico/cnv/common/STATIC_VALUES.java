@@ -16,10 +16,12 @@ public class STATIC_VALUES {
     //----------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------
     public final static boolean DEBUG_HTTP_REQUEST = DEBUG && false;
-    public final static boolean DEBUG_LOAD_BALANCER_CHOSEN_MACHINE = DEBUG && true;
+    public final static boolean DEBUG_LOAD_BALANCER_CHOSEN_MACHINE = DEBUG && false;
     public final static boolean DEBUG_LOAD_BALANCER_WEB_SERVER_READY = DEBUG && true;
     public final static boolean DEBUG_LOAD_BALANCER_JOB_ALREADY_INSTRUCTED = DEBUG && false;
     public final static boolean DEBUG_LOAD_BALANCER_JOB_UPDATE = DEBUG && false;
+
+
     //----------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------
     //----------------------------------------------------------------------------------

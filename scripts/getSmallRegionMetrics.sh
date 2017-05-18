@@ -22,8 +22,16 @@ do
         for r in $(eval echo "{0..${number_rows}}")
         do
             rows_offset=$((r*small_height))
-            endpoint="http://load-balancer-cnv.tk:8000/metrics?f=test${file}.txt&sc=${scene_width}&sr=${scene_height}&wc=${small_width}&wr=${small_height}&coff=${collum_offset}&roff=${rows_offset}"
-            { wget ${endpoint} -O "results/${file}_${scene_width}_${scene_height}_${small_width}_${small_height}_${collum_offset}_${rows_offset}" -o /dev/null ; } &
+            if [ ${store_result} -ne 0 ]
+            then
+                save_file="results/${file}_${scene_width}_${scene_height}_${small_width}_${small_height}_${collum_offset}_${rows_offset}"
+                letter="metrics"
+            else
+                save_file="/dev/null"
+                letter="r.html"
+            fi
+            endpoint="http://load-balancer-cnv.tk:8000/${letter}?f=test${file}.txt&sc=${scene_width}&sr=${scene_height}&wc=${small_width}&wr=${small_height}&coff=${collum_offset}&roff=${rows_offset}"
+            { wget ${endpoint} -O "$save_file" -o /dev/null  } &
             usleep 100
             echo "${c} : ${r} : ${endpoint}"
             counter=$((counter +1))
