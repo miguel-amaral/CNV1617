@@ -93,6 +93,7 @@ public class LoadBalancer extends TimerTask {
             _metricsProccessedSinceLastTick = new HashMap<String, Long>();
         }
         _snapshots = makeSnapshotInstancesMetrics();
+        System.out.println("Exiting");
     }
 
     private void addRegisteredSpeed(String key, Long metric) {
