@@ -56,6 +56,7 @@ public class LoadBalancer extends TimerTask {
 
     // syncronize _metricsProccessedSinceLastTick then _speeds
     public void run() {
+        System.out.println("Another " + STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_LOAD_BALANCER_CHECKS_SPEED_WORKERS+ " have gone by");
         synchronized (_metricsProccessedSinceLastTick) {
             //Register new Speed
             for(Map.Entry<String, Long> entry : _snapshots.entrySet()) {
