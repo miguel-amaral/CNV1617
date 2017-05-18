@@ -68,7 +68,6 @@ public class LoadBalancer extends TimerTask {
                    System.out.println("Went to zero, ignoring");
                    addRegisteredSpeed(id,null);
                    System.out.println("Speed registered");
-
                    continue;
                 }
                 Long processed = _metricsProccessedSinceLastTick.get(entry.getKey());
@@ -116,9 +115,13 @@ public class LoadBalancer extends TimerTask {
     }
 
     private void addRegisteredSpeed(String key, Long metric) {
+        System.out.println("addRegisteredSpeed");
         synchronized (_speeds) {
+            System.out.println("got lock addRegisteredSpeed");
             EvictingQueueContainer queue = _speeds.get(key);
+            System.out.println("got queue");
             queue.addElement(metric);
+            System.out.println("element added");
         }
     }
 
