@@ -59,39 +59,58 @@ public class LoadBalancer extends TimerTask {
         System.out.println("Another " + STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_LOAD_BALANCER_CHECKS_SPEED_WORKERS+ " have gone by");
         synchronized (_metricsProccessedSinceLastTick) {
             //Register new Speed
+            System.out.println("Got lock");
             for(Map.Entry<String, Long> entry : _snapshots.entrySet()) {
+                System.out.println("1 for");
                 String id = entry.getKey();
+                System.out.println("2 for");
                 if (_wentToZeroInstances.contains(id)) {
                    System.out.println("Went to zero, ignoring");
                    addRegisteredSpeed(id,null);
+                   System.out.println("Speed registered");
+
                    continue;
                 }
                 Long processed = _metricsProccessedSinceLastTick.get(entry.getKey());
-                if(processed == null) {processed = Long.valueOf(0);}
+                System.out.println("2");
+                if(processed == null) {processed = 0L;}
+                System.out.println("3");
                 long metric = processed;
+                System.out.println("4");
                 Long baselineObject = entry.getValue();
+                System.out.println("5");
                 if(baselineObject == null) {
                     System.out.println("Baseline was null, ignoring");
                     addRegisteredSpeed(id,null);
+                    System.out.println("Registered");
                     continue;
                 }
+                System.out.println("6");
                 long baseline = baselineObject;
+                System.out.println("7");
                 if( baseline == 0 ) {
                     //need to ignore, we dont know if it was sleeping
                     System.out.println("Did not had enough at start");
                     addRegisteredSpeed(id,null);
+                    System.out.println("registered");
                     continue;
                 }
 
                 //add speed to list
                 synchronized (_speeds) {
+                    System.out.println("got lock speeds");
                     addRegisteredSpeed(entry.getKey(), metric);
+                    System.out.println("registered");
                 }
             }
             //Reset the list
+            System.out.println("reseting");
             _wentToZeroInstances = new ArrayList<String>();
+            System.out.println("zeros");
             _metricsProccessedSinceLastTick = new HashMap<String, Long>();
+            System.out.println("all");
         }
+        System.out.println("pre snapshot");
         _snapshots = makeSnapshotInstancesMetrics();
         System.out.println("Exiting");
     }
