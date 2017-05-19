@@ -256,9 +256,16 @@ public class MetricStorageApp {
         }
 
         double row_percent_start = (roff / sr)*100;
+        if(row_percent_start>100.0) row_percent_start = 100.0;
+
         double row_percent_end = ((roff + wr) / sr)*100;
+        if(row_percent_end>100.0) row_percent_start = 100.0;
+
         double column_percent_start = (coff / sc)*100;
+        if(column_percent_start>100.0) row_percent_start = 100.0;
+
         double column_percent_end = ((coff + wc) / sr)*100;
+        if(column_percent_end>100.0) row_percent_start = 100.0;
 
         item.put("row_percent_start", new AttributeValue().withN(Integer.toString((int)row_percent_start)));
         item.put("row_percent_end", new AttributeValue().withN(Integer.toString((int)row_percent_end)));
@@ -317,9 +324,6 @@ public class MetricStorageApp {
         }
 
 
-
-        long sc = 0, sr = 0;
-
         QueryParser parser = null;
         try {
             parser = new QueryParser(query);
@@ -330,29 +334,13 @@ public class MetricStorageApp {
         Map<String, String> result = new HashMap<>();
         result = parser.queryToMap(query);
 
+        metric = queryItemWithCoords(query);
 
-        for (Map.Entry<String, String> entry : result.entrySet()){
+        if(metric == 0)
+            metric = 1;
 
-            switch (entry.getKey()) {
+        return metric;
 
-                case "sc":
-                    sc = Integer.parseInt(entry.getValue());
-                    break;
-                case "sr":
-                    sr = Integer.parseInt(entry.getValue());
-                    break;
-                default:
-                    break;
-            }
-
-        }
-
-
-
-
-        System.out.println("GUESSING METRIC WITH SC = : " + sc + " AND " +
-                "WITH SR = : " + sr+ "\n");
-        return sc * sr;
     }
 
 
@@ -579,10 +567,10 @@ public class MetricStorageApp {
             }
             for(Map<String, AttributeValue> item : scanResult.getItems()) {
 
-               System.out.println("\nrow_percent_start: " + item.get("row_percent_start").getN());
-               System.out.println("\nrow_percent_end: " + item.get("row_percent_end").getN());
-               System.out.println("\ncolumn_percent_start: " + item.get("column_percent_start").getN());
-               System.out.println("\ncolumn_percent_end: " + item.get("column_percent_end").getN());
+               System.out.print("\nrow_percent_start: " + item.get("row_percent_start").getN());
+               System.out.print("row_percent_end: " + item.get("row_percent_end").getN());
+               System.out.print("column_percent_start: " + item.get("column_percent_start").getN());
+               System.out.print("column_percent_end: " + item.get("column_percent_end").getN());
 
             }
 
@@ -606,5 +594,112 @@ public class MetricStorageApp {
 
 
         return message;
+    }
+
+    public static Long queryItemWithCoords(String query){
+
+        String message = "";
+
+        long metric_sum = 0;
+
+        try{
+
+            QueryParser parser = null;
+            try {
+                parser = new QueryParser(query);
+            } catch (InvalidArgumentsException e) {
+                e.printStackTrace();
+            }
+
+            Map<String, String> result = new HashMap<>();
+            result = parser.queryToMap(query);
+
+
+            ScanRequest scanRequest = new ScanRequest(defaultTableName);
+            scanRequest.setConditionalOperator(ConditionalOperator.AND);
+
+            Map<String, Condition> scanFilter = new HashMap<String, Condition>();
+
+
+            for (Map.Entry<String, String> entry : result.entrySet()) {
+
+                switch (entry.getKey()) {
+                    case "f":
+                        scanFilter.put("f", new Condition()
+                                .withAttributeValueList(new AttributeValue().withS(entry.getValue()))
+                                .withComparisonOperator(ComparisonOperator.EQ.toString()));
+                        break;
+                    case "wc":
+                        int wc = Integer.parseInt(entry.getValue()) + (int)(Integer.parseInt(entry.getValue())*0.10);
+                        scanFilter.put("wc", new Condition()
+                                .withAttributeValueList(new AttributeValue().withN(Integer.toString(wc)))
+                                .withComparisonOperator(ComparisonOperator.GT.toString()));
+                        break;
+                    case "wr":
+                        int wr = Integer.parseInt(entry.getValue()) + (int)(Integer.parseInt(entry.getValue())*0.10);
+                        scanFilter.put("wr", new Condition()
+                                .withAttributeValueList(new AttributeValue().withN(Integer.toString(wr)))
+                                .withComparisonOperator(ComparisonOperator.GT.toString()));
+                        break;
+                    case "coff":
+                        int coff = Integer.parseInt(entry.getValue()) - (int)(Integer.parseInt(entry.getValue())*0.05);
+                        scanFilter.put("coff", new Condition()
+                                .withAttributeValueList(new AttributeValue().withN(Integer.toString(coff)))
+                                .withComparisonOperator(ComparisonOperator.GT.toString()));
+                        break;
+                    case "roff":
+                        int roff = Integer.parseInt(entry.getValue()) - (int)(Integer.parseInt(entry.getValue())*0.05);
+                        scanFilter.put("roff", new Condition()
+                                .withAttributeValueList(new AttributeValue().withN(Integer.toString(roff)))
+                                .withComparisonOperator(ComparisonOperator.GT.toString()));
+                        break;
+                    default:
+                        break;
+                }
+
+            }
+
+
+
+
+            scanRequest.setScanFilter(scanFilter);
+            ScanResult scanResult = _dynamoDB.scan(scanRequest);
+
+            System.out.println("Printing items..");
+
+
+
+            if(scanResult.getCount() == 0){
+
+                System.out.println("\nNo items matched..");
+            }
+
+            for(Map<String, AttributeValue> item : scanResult.getItems()) {
+
+                metric_sum += Long.parseLong(item.get("metric").getN());
+                System.out.println("\nimage query: " + item.get("query").getS());
+
+            }
+
+
+
+
+        } catch (AmazonServiceException ase) {
+            System.out.println("Caught an AmazonServiceException, which means your request made it "
+                    + "to AWS, but was rejected with an error response for some reason.");
+            System.out.println("Error Message:    " + ase.getMessage());
+            System.out.println("HTTP Status Code: " + ase.getStatusCode());
+            System.out.println("AWS Error Code:   " + ase.getErrorCode());
+            System.out.println("Error Type:       " + ase.getErrorType());
+            System.out.println("Request ID:       " + ase.getRequestId());
+        } catch (AmazonClientException ace) {
+            System.out.println("Caught an AmazonClientException, which means the client encountered "
+                    + "a serious internal problem while trying to communicate with AWS, "
+                    + "such as not being able to access the network.");
+            System.out.println("Error Message: " + ace.getMessage());
+        }
+
+
+        return metric_sum;
     }
 }
