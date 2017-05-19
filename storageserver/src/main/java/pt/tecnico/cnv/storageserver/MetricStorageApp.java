@@ -640,7 +640,7 @@ public class MetricStorageApp {
                         System.out.println("wc: " + Integer.toString(wc));
 
                         scanFilter.put("wc", new Condition()
-                                .withAttributeValueList(new AttributeValue().withN("0"))
+                                .withAttributeValueList(new AttributeValue("0"))
                                 .withComparisonOperator(ComparisonOperator.GT.toString()));
                         break;
                     /*case "wr":
