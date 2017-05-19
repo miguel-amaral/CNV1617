@@ -260,10 +260,10 @@ public class MetricStorageApp {
         double column_percent_start = (coff / sc)*100;
         double column_percent_end = ((coff + wc) / sr)*100;
 
-        item.put("row_percent_start", new AttributeValue().withN(Double.toString(row_percent_start)));
-        item.put("row_percent_end", new AttributeValue().withN(Double.toString(row_percent_end)));
-        item.put("column_percent_start", new AttributeValue().withN(Double.toString(column_percent_start)));
-        item.put("column_percent_end", new AttributeValue().withN(Double.toString(column_percent_end)));
+        item.put("row_percent_start", new AttributeValue().withN(Integer.toString((int)row_percent_start)));
+        item.put("row_percent_end", new AttributeValue().withN(Integer.toString((int)row_percent_end)));
+        item.put("column_percent_start", new AttributeValue().withN(Integer.toString((int)column_percent_start)));
+        item.put("column_percent_end", new AttributeValue().withN(Integer.toString((int)column_percent_end)));
 
         System.out.println("row_percent_start:" + Double.toString(row_percent_start));
         System.out.println("row_percent_end:" + Double.toString(row_percent_end));
@@ -558,13 +558,13 @@ public class MetricStorageApp {
 
             Map<String, Condition> scanFilter = new HashMap<String, Condition>();
             scanFilter.put("row_percent_start", new Condition()
-                    .withAttributeValueList(new AttributeValue("5.0")).withComparisonOperator(ComparisonOperator.GT.toString()));
+                    .withAttributeValueList(new AttributeValue().withN("5")).withComparisonOperator(ComparisonOperator.GT.toString()));
             scanFilter.put("row_percent_end", new Condition()
-                    .withAttributeValueList(new AttributeValue("95.0")).withComparisonOperator(ComparisonOperator.LT.toString()));
+                    .withAttributeValueList(new AttributeValue().withN("95")).withComparisonOperator(ComparisonOperator.LT.toString()));
             scanFilter.put("column_percent_start", new Condition()
-                    .withAttributeValueList(new AttributeValue("5.0")).withComparisonOperator(ComparisonOperator.GT.toString()));
+                    .withAttributeValueList(new AttributeValue().withN("5")).withComparisonOperator(ComparisonOperator.GT.toString()));
             scanFilter.put("column_percent_end", new Condition()
-                    .withAttributeValueList(new AttributeValue("95.0")).withComparisonOperator(ComparisonOperator.LT.toString()));
+                    .withAttributeValueList(new AttributeValue().withN("95")).withComparisonOperator(ComparisonOperator.LT.toString()));
 
 
             scanRequest.setScanFilter(scanFilter);
