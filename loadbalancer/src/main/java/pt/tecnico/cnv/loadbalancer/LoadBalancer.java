@@ -444,10 +444,10 @@ public class LoadBalancer extends TimerTask {
             job = _jobs.get(jobID);
         }
 
-        long difference = job.getMetricDifference(metric);
-        job.passed_metric = metric;
+        long rawProcessed = job.getRawMetricDifference(metric);
+        long difference = job.getMetricDifferenceAndUpdate(metric);
         if(difference != 0) { decreaseMetric(job.instance,difference); }
-        processUpdate(job,metric);
+        processUpdate(job,rawProcessed);
     }
 
     class Container {
@@ -475,28 +475,37 @@ public class LoadBalancer extends TimerTask {
         long final_metric;
         long passed_metric = 0;
 
+        long last_registered_raw ;
+
         JobContainer(Instance instance, long metric, boolean guess) {
             this.instance = instance;
             this.final_metric = metric;
             this.guess = guess;
             this.passed_metric = 0;
+            this.last_registered_raw = 0;
         }
 
-        long getMetricDifference(long metric) {
+        long getMetricDifferenceAndUpdate(long metric) {
             //dont overflow..
             long difference = metric-passed_metric;
-            if(!guess) {return difference;}
+            if(!guess) {
+                passed_metric=metric;
+                last_registered_raw=metric;
+                return difference;
+            }
 
             long jobMissingMetric = final_metric - passed_metric;
+            last_registered_raw = metric;
             if(difference > jobMissingMetric) {
                 return 0;
             } else {
+                passed_metric = metric;
                 return difference;
             }
         }
 
         long getRawMetricDifference(long metric) {
-            return metric-passed_metric;
+            return metric-last_registered_raw;
         }
 
         public long missingMetric() {
