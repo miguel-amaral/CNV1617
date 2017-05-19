@@ -10,10 +10,7 @@ import pt.tecnico.cnv.common.MetricCalculation;
 import pt.tecnico.cnv.common.QueryParser;
 import pt.tecnico.cnv.common.STATIC_VALUES;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by rafa32 on 11-05-2017.
@@ -221,27 +218,27 @@ public class MetricStorageApp {
                     break;
                 case "sc":
                     item.put("sc", new AttributeValue().withN(entry.getValue()));
-                    sc = Long.parseLong(entry.getValue());
+                    sc = Double.parseDouble(entry.getValue());
                     break;
                 case "sr":
                     item.put("sr", new AttributeValue().withN(entry.getValue()));
-                    sr = Long.parseLong(entry.getValue());
+                    sr = Double.parseDouble(entry.getValue());
                     break;
                 case "wc":
                     item.put("wc", new AttributeValue().withN(entry.getValue()));
-                    wc = Long.parseLong(entry.getValue());
+                    wc = Double.parseDouble(entry.getValue());
                     break;
                 case "wr":
                     item.put("wr", new AttributeValue().withN(entry.getValue()));
-                    wr = Long.parseLong(entry.getValue());
+                    wr = Double.parseDouble(entry.getValue());
                     break;
                 case "coff":
                     item.put("coff", new AttributeValue().withN(entry.getValue()));
-                    coff = Long.parseLong(entry.getValue());
+                    coff = Double.parseDouble(entry.getValue());
                     break;
                 case "roff":
                     item.put("roff", new AttributeValue().withN(entry.getValue()));
-                    roff = Long.parseLong(entry.getValue());
+                    roff = Double.parseDouble(entry.getValue());
                     break;
                 case "instructions":
                     item.put("instructions", new AttributeValue().withN(entry.getValue()));
@@ -260,18 +257,18 @@ public class MetricStorageApp {
 
         double row_percent_start = (roff / sr)*100;
         double row_percent_end = ((roff + wr) / sr)*100;
-        double column_percent_end = ((coff + wc) / sr)*100;
         double column_percent_start = (coff / sc)*100;
+        double column_percent_end = ((coff + wc) / sr)*100;
 
         item.put("row_percent_start", new AttributeValue().withN(Double.toString(row_percent_start)));
         item.put("row_percent_end", new AttributeValue().withN(Double.toString(row_percent_end)));
-        item.put("column_percent_end", new AttributeValue().withN(Double.toString(column_percent_end)));
         item.put("column_percent_start", new AttributeValue().withN(Double.toString(column_percent_start)));
+        item.put("column_percent_end", new AttributeValue().withN(Double.toString(column_percent_end)));
 
-        System.out.println("row_percent_start:" + Double.toString(row_percent_start) + "\n");
-        System.out.println("row_percent_end:" + Double.toString(row_percent_end) + "\n");
-        System.out.println("column_percent_end:" + Double.toString(column_percent_end) + "\n");
-        System.out.println("column_percent_start:" + Double.toString(column_percent_start) + "\n");
+        System.out.println("row_percent_start:" + Double.toString(row_percent_start));
+        System.out.println("row_percent_end:" + Double.toString(row_percent_end));
+        System.out.println("column_percent_start:" + Double.toString(column_percent_start));
+        System.out.println("column_percent_end:" + Double.toString(column_percent_end));
 
 
 
@@ -546,7 +543,7 @@ public class MetricStorageApp {
         return message + error;
     }
 
-    public static String queryItemFullTest(String query){
+    public static String queryItemFullTest(){
 
         String message = "";
 
@@ -554,28 +551,28 @@ public class MetricStorageApp {
         try{
 
 
-            int index = query.indexOf("instructions");
-            String query_for_key = query.substring(0,index-1);
 
 
-            HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
-            Condition condition = new Condition()
-                    .withComparisonOperator(ComparisonOperator.EQ.toString())
-                    .withAttributeValueList(new AttributeValue(query_for_key));
-            scanFilter.put("query", condition);
-            ScanRequest scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
+            ScanRequest scanRequest = new ScanRequest(defaultTableName);
+            scanRequest.setConditionalOperator(ConditionalOperator.AND);
+
+            Map<String, Condition> scanFilter = new HashMap<String, Condition>();
+            scanFilter.put("row_percent_start", new Condition()
+                    .withAttributeValueList(new AttributeValue("5.0")).withComparisonOperator(ComparisonOperator.GT.toString()));
+            scanFilter.put("row_percent_end", new Condition()
+                    .withAttributeValueList(new AttributeValue("95.0")).withComparisonOperator(ComparisonOperator.LT.toString()));
+            scanFilter.put("column_percent_start", new Condition()
+                    .withAttributeValueList(new AttributeValue("5.0")).withComparisonOperator(ComparisonOperator.GT.toString()));
+            scanFilter.put("column_percent_end", new Condition()
+                    .withAttributeValueList(new AttributeValue("95.0")).withComparisonOperator(ComparisonOperator.LT.toString()));
+
+
+            scanRequest.setScanFilter(scanFilter);
             ScanResult scanResult = _dynamoDB.scan(scanRequest);
 
-            message += "\n\nResult of equality: " + scanResult;
-            message += "\n\nFilename: " + scanResult.getItems().get(0).get("file").getS();
-
-            int insts = Integer.parseInt(scanResult.getItems().get(0).get("instructions").getN());
-
-            int metric = Integer.parseInt(scanResult.getItems().get(0).get("metric").getN());
-
-
-            message += "\n\n# of Instructions: " + Integer.toString(insts);
-            message += "\nMetric: " + Integer.toString(metric);
+            for(Map<String, AttributeValue> item : scanResult.getItems()) {
+                System.out.println(item);
+            }
 
 
 
