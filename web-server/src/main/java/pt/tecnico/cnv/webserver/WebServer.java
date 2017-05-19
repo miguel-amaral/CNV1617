@@ -171,8 +171,6 @@ public class WebServer {
 				System.err.println(message);
 				t.sendResponseHeaders(requestStatus, message.getBytes().length);
 				os.write(message.getBytes(), 0, message.getBytes().length);
-
-
 			}
 			os.close();
 		}
