@@ -43,25 +43,20 @@ public class GenericHandler implements HttpHandler {
         }
         int requestStatus = answer.status();
         String message = answer.response();
-        System.out.println(message);
 
 
-        try {
-            OutputStream os = httpExchange.getResponseBody();
-            httpExchange.sendResponseHeaders(requestStatus, 0);
+
+        OutputStream os = httpExchange.getResponseBody();
+        httpExchange.sendResponseHeaders(requestStatus, 0);
 //            ByteArrayInputStream bis = new ByteArrayInputStream(message.getBytes());
 //            byte [] buffer = new byte [BUFFER_SIZE];
 //            int count ;
 //            while ((count = bis.read(buffer)) != -1) {
 //                os.write(buffer, 0, count);
 //            }
-            os.write(message.getBytes());
+        os.write(message.getBytes());
 
 
-            os.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw e;
-        }
+        os.close();
     }
 }
