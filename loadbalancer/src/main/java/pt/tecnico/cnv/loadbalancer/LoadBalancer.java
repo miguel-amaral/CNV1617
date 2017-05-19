@@ -268,7 +268,7 @@ public class LoadBalancer extends TimerTask {
         synchronized (_speeds) {
             for (Map.Entry<String, EvictingQueueContainer> entry : _speeds.entrySet()) {
                 Long avg_current = entry.getValue().speed;
-                if(avg_current != -1L ) {
+                if(avg_current != null && avg_current != -1L ) {
                     avg_sum += avg_current;
                     avg_valid++;
                 }
@@ -286,7 +286,7 @@ public class LoadBalancer extends TimerTask {
         synchronized (_speeds) {
             for (Map.Entry<String, EvictingQueueContainer> entry : _speeds.entrySet()) {
                 Long last_current = entry.getValue().lastInserted();
-                if(last_current != -1L && last_current != null) {
+                if(last_current != null && last_current != -1L ) {
                     last_sum += last_current;
                     last_valid++;
                 }
