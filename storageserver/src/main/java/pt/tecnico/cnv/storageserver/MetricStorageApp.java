@@ -632,6 +632,9 @@ public class MetricStorageApp {
             System.out.println("################################");
 
 
+            System.out.println(result.toString());
+
+
             metric_sum = compareMaps(result);
 
 
