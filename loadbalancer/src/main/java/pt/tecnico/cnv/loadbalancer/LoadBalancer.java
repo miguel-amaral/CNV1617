@@ -111,10 +111,10 @@ public class LoadBalancer extends TimerTask {
         if(systemCapacity == 0) {
             //We have no data :(
             //nothing has been running for a while
+            System.out.println("Exiting auto scale");
             return;
         }
 
-//        STATIC_VALUES.NUMBER_PERIODS_JOB_TOO_BIG_TRESHOLD
 
         long period = toCompute / systemCapacity;
         if(period > STATIC_VALUES.UPPER_THRESHOLD) {
@@ -125,13 +125,13 @@ public class LoadBalancer extends TimerTask {
             //Consider more machines
             //maybe depending on how much more we have to work
         } else if (period < STATIC_VALUES.LOWER_THRESHOLD) {
-            if(_instances.size()>1) {
+            if(_instances.size() - _instances_set_to_removal.size() > 1 ) {
                 deleteOneMachine();
             }
             //consider less machines
         }
 
-        if(_instances.size()>1) {
+        if(_instances.size() - _instances_set_to_removal.size() > 1 ) {
             lookForSlowMachines();
             for (Map.Entry<String, Integer> entry : _slowMachines.entrySet()) {
                 if (entry.getValue() > 5) {
@@ -142,6 +142,8 @@ public class LoadBalancer extends TimerTask {
                 }
             }
         }
+        System.out.println("Exiting auto scale");
+
     }
 
     private void lookForSlowMachines() {
@@ -201,6 +203,8 @@ public class LoadBalancer extends TimerTask {
 
     private long getSystemCapacity() {
         long capacity = 0;
+        capacity = (long) (_counterOfBootingInstances * (maxLast*.8));
+
         synchronized (_speeds) {
             for (Map.Entry<String, EvictingQueueContainer> entry : _speeds.entrySet()) {
                 long machineSpeed = entry.getValue().getBestGuessOfSpeed();
