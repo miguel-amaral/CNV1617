@@ -567,11 +567,11 @@ public class MetricStorageApp {
             }
             for(Map<String, AttributeValue> item : scanResult.getItems()) {
 
-               System.out.println("\nimage query: " + item.get("query").getS());
-               System.out.print("\nrow_percent_start: " + item.get("row_percent_start").getN());
-               System.out.print("row_percent_end: " + item.get("row_percent_end").getN());
-               System.out.print("column_percent_start: " + item.get("column_percent_start").getN());
-               System.out.print("column_percent_end: " + item.get("column_percent_end").getN());
+               System.out.println("image query: " + item.get("query").getS());
+               System.out.println("row_percent_start: " + item.get("row_percent_start").getN());
+               System.out.println("row_percent_end: " + item.get("row_percent_end").getN());
+               System.out.println("column_percent_start: " + item.get("column_percent_start").getN());
+               System.out.println("column_percent_end: " + item.get("column_percent_end").getN());
 
             }
 
@@ -631,25 +631,25 @@ public class MetricStorageApp {
                                 .withComparisonOperator(ComparisonOperator.EQ.toString()));
                         break;
                     case "wc":
-                        int wc = Integer.parseInt(entry.getValue()) + (int)(Integer.parseInt(entry.getValue())*0.10);
+                        int wc = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
                         scanFilter.put("wc", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(wc)))
                                 .withComparisonOperator(ComparisonOperator.LT.toString()));
                         break;
                     case "wr":
-                        int wr = Integer.parseInt(entry.getValue()) + (int)(Integer.parseInt(entry.getValue())*0.10);
+                        int wr = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
                         scanFilter.put("wr", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(wr)))
                                 .withComparisonOperator(ComparisonOperator.LT.toString()));
                         break;
                     case "coff":
-                        int coff = Integer.parseInt(entry.getValue()) - (int)(Integer.parseInt(entry.getValue())*0.05);
+                        int coff = Integer.parseInt(entry.getValue()); //- (int)(Integer.parseInt(entry.getValue())*0.05);
                         scanFilter.put("coff", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(coff)))
                                 .withComparisonOperator(ComparisonOperator.GT.toString()));
                         break;
                     case "roff":
-                        int roff = Integer.parseInt(entry.getValue()) - (int)(Integer.parseInt(entry.getValue())*0.05);
+                        int roff = Integer.parseInt(entry.getValue()); //- (int)(Integer.parseInt(entry.getValue())*0.05);
                         scanFilter.put("roff", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(roff)))
                                 .withComparisonOperator(ComparisonOperator.GT.toString()));
