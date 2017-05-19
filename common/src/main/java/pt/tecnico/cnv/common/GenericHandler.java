@@ -46,8 +46,13 @@ public class GenericHandler implements HttpHandler {
 
 
         OutputStream os = httpExchange.getResponseBody();
-        httpExchange.sendResponseHeaders(requestStatus, message.length());
-        os.write(message.getBytes());
-        os.close();
+        try {
+            httpExchange.sendResponseHeaders(requestStatus, message.length());
+            os.write(message.getBytes());
+            os.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 }
