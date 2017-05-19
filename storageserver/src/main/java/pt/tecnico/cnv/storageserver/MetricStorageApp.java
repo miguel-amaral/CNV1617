@@ -21,7 +21,7 @@ public class MetricStorageApp {
 
     private static String defaultTableName = "metrics_table";
 
-    private static Map<String, String> _cache;
+    private static Map<String, Map<String, String>> _cache;
 
     public MetricStorageApp(AmazonDynamoDB dynamoDB, boolean deleteOnInit){
 
@@ -112,6 +112,11 @@ public class MetricStorageApp {
 
         InstQueryParser parser = null;
         try {
+
+            if((_cache.containsKey(query))) {
+                return;
+            }
+
             parser = new InstQueryParser(query);
         
 
@@ -123,9 +128,10 @@ public class MetricStorageApp {
             String query_for_key = query.substring(0,index-1);
     
             long metric = computeMetric(resultMap);
+
+            resultMap.put("metric",Long.toString(metric));
     
-    
-            resultMap.put(query_for_key, Long.toString(metric));
+            _cache.put(query_for_key, resultMap);
 
         } catch (InvalidArgumentsException e) {
             e.printStackTrace();
@@ -206,7 +212,10 @@ public class MetricStorageApp {
         double sc = 0, sr = 0, wc = 0, wr = 0, coff = 0, roff = 0;
 
 
-        long metric = computeMetric(resultMap);
+        //long metric = computeMetric(resultMap);
+        long metric = guessMetric(query);
+
+
 
         System.out.println("INSERTING THIS QUERY:" + query_for_key + "\nWITH METRIC: " + Long.toString(metric) + "\n");
 
@@ -316,10 +325,13 @@ public class MetricStorageApp {
 
 
         long metric;
+        Map<String, String> map = new HashMap<>();
 
         //CHECK HOW QUERY IS INSERTED
         if((_cache.containsKey(query))) {
-            metric = Long.parseLong(_cache.get(query));
+
+            map = _cache.get(query);
+            metric = Long.parseLong(map.get("metric"));
             return metric;
         }
 
@@ -616,17 +628,24 @@ public class MetricStorageApp {
             result = parser.queryToMap(query);
 
 
-            ScanRequest scanRequest = new ScanRequest(defaultTableName);
-            //scanRequest.setConditionalOperator(ConditionalOperator.AND);
+            /*ScanRequest scanRequest = new ScanRequest(defaultTableName);
+            scanRequest.setConditionalOperator(ConditionalOperator.AND);
 
-            Map<String, Condition> scanFilter = new HashMap<String, Condition>();
+            Map<String, Condition> scanFilter = new HashMap<String, Condition>();*/
 
 
             System.out.println("################################");
 
 
+            System.out.println(result.toString());
 
-            for (Map.Entry<String, String> entry : result.entrySet()) {
+
+            metric_sum = compareMaps(result);
+
+
+
+
+           /* for (Map.Entry<String, String> entry : result.entrySet()) {
 
                 switch (entry.getKey()) {
                     case "f":
@@ -635,15 +654,15 @@ public class MetricStorageApp {
                                 .withAttributeValueList(new AttributeValue().withS(entry.getValue()))
                                 .withComparisonOperator(ComparisonOperator.EQ.toString()));
                         break;
-                    /*case "wc":
+                    case "wc":
                         int wc = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
                         System.out.println("wc: " + Integer.toString(wc));
 
                         scanFilter.put("wc", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(wc)))
                                 .withComparisonOperator(ComparisonOperator.GE.toString()));
-                        break;*/
-                    /*case "wr":
+                        break;
+                    case "wr":
                         int wr = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
 
                         System.out.println("wr: " + Integer.toString(wr));
@@ -666,7 +685,7 @@ public class MetricStorageApp {
                         scanFilter.put("roff", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(roff)))
                                 .withComparisonOperator(ComparisonOperator.GT.toString()));
-                        break;*/
+                        break;
                     default:
                         break;
                 }
@@ -677,13 +696,13 @@ public class MetricStorageApp {
 
 
             scanRequest.setScanFilter(scanFilter);
-            ScanResult scanResult = _dynamoDB.scan(scanRequest);
+            ScanResult scanResult = _dynamoDB.scan(scanRequest);*/
 
             System.out.println("Printing items..");
 
 
 
-            if(scanResult.getCount() == 0){
+            /*if(scanResult.getCount() == 0){
 
                 System.out.println("\nNo items matched..");
             }
@@ -693,7 +712,7 @@ public class MetricStorageApp {
                 metric_sum += Long.parseLong(item.get("metric").getN());
                 System.out.println("\nimage query: " + item.get("query").getS());
 
-            }
+            }*/
 
 
 
@@ -715,5 +734,59 @@ public class MetricStorageApp {
 
 
         return metric_sum;
+    }
+
+    private static long compareMaps(Map<String, String> result) {
+
+
+        long metric_sum = 0;
+
+
+        for(Map<String, String> cacheMap: _cache.values()){
+
+            if(!(cacheMap.get("f").equals(result.get("f"))))
+                continue;
+
+            double sc_cache = Double.parseDouble(cacheMap.get("sc"));
+            double sr_cache = Double.parseDouble(cacheMap.get("sr"));
+            double wc_cache = Double.parseDouble(cacheMap.get("wc"));
+            double wr_cache = Double.parseDouble(cacheMap.get("wr"));
+            double roff_cache = Double.parseDouble(cacheMap.get("roff"));
+            double coff_cache = Double.parseDouble(cacheMap.get("coff"));
+
+            double sc_result = Double.parseDouble(result.get("sc"));
+            double sr_result = Double.parseDouble(result.get("sr"));
+            double wc_result = Double.parseDouble(result.get("wc"));
+            double wr_result = Double.parseDouble(result.get("wr"));
+            double roff_result = Double.parseDouble(result.get("roff"));
+            double coff_result = Double.parseDouble(result.get("coff"));
+
+
+            if( sc_cache == 2000 && sr_cache == 2000 && wc_cache == 200 && wr_cache == 200){
+
+
+                if( (roff_cache/sr_cache) < ( (roff_result/sr_result) - (roff_result/sr_result)*0.05) )
+                    continue;
+
+                if( (roff_cache + wr_cache/sr_cache) > ( (roff_result + wr_result/sr_result) + (roff_result/sr_result)*0.05) )
+                    continue;
+
+                if( (coff_cache/sc_cache) < ( (coff_result/sc_result) - (coff_result/sr_result)*0.05) )
+                    continue;
+
+                if( (coff_cache + wc_cache/sc_cache) > ( (coff_result + wc_result/sc_result) + (coff_result/sc_result)*0.05) )
+                    continue;
+
+                metric_sum += Integer.parseInt(result.get("metric"));
+
+
+            }
+
+
+
+        }
+
+        return metric_sum;
+
     }
 }
