@@ -570,8 +570,20 @@ public class MetricStorageApp {
             scanRequest.setScanFilter(scanFilter);
             ScanResult scanResult = _dynamoDB.scan(scanRequest);
 
+            System.out.println("Printing items..");
+
+
+            if(scanResult.getCount() == 0){
+
+                System.out.println("\nNo items matched..");
+            }
             for(Map<String, AttributeValue> item : scanResult.getItems()) {
-                System.out.println(item);
+
+               System.out.println("\nrow_percent_start: " + item.get("row_percent_start").getN());
+               System.out.println("\nrow_percent_end: " + item.get("row_percent_end").getN());
+               System.out.println("\ncolumn_percent_start: " + item.get("column_percent_start").getN());
+               System.out.println("\ncolumn_percent_end: " + item.get("column_percent_end").getN());
+
             }
 
 

@@ -149,7 +149,7 @@ public class storageWebServer extends Thread{
 
 
 
-               _app.queryItemFullTest();
+               message = _app.queryItemFullTest();
 
 
             } catch (Throwable e) {
