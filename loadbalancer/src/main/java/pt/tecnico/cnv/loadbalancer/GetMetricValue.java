@@ -18,7 +18,7 @@ public class GetMetricValue {
     private boolean alreadyIntrumented;
 
     public GetMetricValue(String query) {
-        metric = 2;
+        metric = 10000;
         alreadyIntrumented = false;
 
         HttpAnswer answer = HttpRequest.sendGet("storage-server-cnv.tk:8000/metric/value?"+query,new HashMap<String, String>());
@@ -28,9 +28,12 @@ public class GetMetricValue {
         } else {
             String message = answer.response();
             String[] params = message.split(STATIC_VALUES.SEPARATOR_STORAGE_METRIC_REQUEST);
-
-            alreadyIntrumented = Boolean.parseBoolean(params[0]);
-            metric = Long.parseLong(params[1]);
+            if(params.length == 2) {
+                alreadyIntrumented = Boolean.parseBoolean(params[0]);
+                metric = Long.parseLong(params[1]);
+            }else {
+                System.out.println("StorageServer Answer: " + message);
+            }
         }
     }
 
