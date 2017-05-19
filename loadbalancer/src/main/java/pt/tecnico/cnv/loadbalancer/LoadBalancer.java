@@ -399,36 +399,36 @@ public class LoadBalancer extends TimerTask {
 
         void addElement(Long metric) {
             if(metric == null) metric = -1L;
-            System.out.println("add element");
+//            System.out.println("add element");
             if(numberInserted == STATIC_VALUES.NUMBER_ELEMENTS_QUEUE_SPEEDS) {
-                System.out.println("first equal");
+//                System.out.println("first equal");
                 Long last = queue.removeFirst();
-                System.out.println("removed");
+//                System.out.println("removed");
                 if(last != -1L) {
                     numberValid--;
                     current_sum -= metric;
                 }
             } else {
-                System.out.println("else");
+//                System.out.println("else");
                 numberInserted++;
             }
             if(metric != -1L) {
-                System.out.println("metric not null");
+//                System.out.println("metric not null");
                 current_sum += metric;
                 numberValid++;
             }
-            System.out.println("add last");
+//            System.out.println("add last");
             queue.addLast(metric);
-            System.out.println("just added");
+//            System.out.println("just added");
             if(numberValid == 0) {
-                System.out.println("not valid");
+//                System.out.println("not valid");
                 speed = -1;
             } else {
-                System.out.println("number valid");
+//                System.out.println("number valid");
                 speed = current_sum / numberValid;
             }
             System.out.println(speed+"");
-            System.out.println("exiting addElement");
+//            System.out.println("exiting addElement");
         }
 
         Long lastInserted() {
