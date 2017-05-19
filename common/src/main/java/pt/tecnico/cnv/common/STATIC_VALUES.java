@@ -34,8 +34,9 @@ public class STATIC_VALUES {
     public final static int NUMBER_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC = 5;
     public final static int NUMBER_MILI_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC = NUMBER_SECONDS_INTERVAL_WEB_SERVER_CHECKS_METRIC*1000;
 
-    public final static long LOWER_THRESHOLD = 0;
-    public final static long UPPER_THRESHOLD = 0;
+    public final static long LOWER_THRESHOLD = 2;
+    public final static long UPPER_THRESHOLD = 10;
+    public final static int NUMBER_PERIODS_JOB_TOO_BIG_TRESHOLD = 0;
 
     public final static String AMI_ID = "ami-48b2a62c";
     public final static int NUMBER_SECONDS_INTERVAL_LOAD_BALANCER_CHECKS_SPEED_WORKERS = 20;
@@ -43,4 +44,6 @@ public class STATIC_VALUES {
     public final static int NUMBER_MINUTES_SPEED_WINDOW = 5;
     public final static int NUMBER_SECONDS_SPEED_WINDOW = NUMBER_MINUTES_SPEED_WINDOW*60;
     public final static int NUMBER_ELEMENTS_QUEUE_SPEEDS = NUMBER_SECONDS_SPEED_WINDOW / NUMBER_SECONDS_INTERVAL_LOAD_BALANCER_CHECKS_SPEED_WORKERS ;
+    public final static int PERIOD_SECONDS_AUTO_SCALE_RUNS = 60;
+    public final static int PERIOD_MILI_SECONDS_AUTO_SCALE_RUNS = PERIOD_SECONDS_AUTO_SCALE_RUNS*1000;
 }
