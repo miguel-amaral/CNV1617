@@ -1,12 +1,13 @@
 #!/usr/bin/env bash
 users=16
 number=200
-tmux kill-session -t my_session
+session_name="my_session_2"
+tmux kill-session -t ${session_name}
 endpoint="load-balancer-cnv.tk:8000/r.html?f=test04.txt&sc=${number}&sr=${number}&wc=${number}&wr=${number}&coff=0&roff=0"
 script="while true ; do wget \"$endpoint\" -o /dev/null -O /dev/null ;echo \"tick\"; done"
 echo ${script}
-tmux new-session -d -s my_session ${script}
-tmux select-window -t my_session:0
+tmux new-session -d -s ${session_name} ${script}
+tmux select-window -t ${session_name}:0
 tmux split-window -h ${script}
 tmux split-window -v -t 0 ${script}
 tmux split-window -v -t 1 ${script}
@@ -41,7 +42,7 @@ then
     echo "not supported yet"
 fi
 #16
-tmux -2 attach-session -t my_session
+tmux -2 attach-session -t ${session_name}
 
 
 

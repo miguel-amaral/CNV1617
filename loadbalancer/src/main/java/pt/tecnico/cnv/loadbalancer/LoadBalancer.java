@@ -28,6 +28,8 @@ public class LoadBalancer extends TimerTask {
 
     private long minAvg = Long.MAX_VALUE;
     private long maxAvg = 0;
+    private long minAvgLast = Long.MAX_VALUE;
+    private long maxAvgLast = 0;
     private long minLast = Long.MAX_VALUE;
     private long maxLast = 0;
     private List<Long> historicAvg = new ArrayList<Long>();
@@ -76,8 +78,17 @@ public class LoadBalancer extends TimerTask {
         if(last != -1){
             synchronized (historicLast) {
                 historicLast.add(last);
-                if (minLast > last) minLast = last;
-                if (maxLast < last) maxLast = last;
+                if (minAvgLast > last) minAvgLast = last;
+                if (maxAvgLast < last) maxAvgLast = last;
+            }
+        }
+        synchronized (_speeds) {
+            for (Map.Entry<String, EvictingQueueContainer> entry : _speeds.entrySet()) {
+                Long last_current = entry.getValue().lastInserted();
+                if(last_current != null && last_current != -1L ) {
+                    if (minLast > last_current) minLast = last_current;
+                    if (maxLast < last_current) maxLast = last_current;
+                }
             }
         }
     }
@@ -303,7 +314,7 @@ public class LoadBalancer extends TimerTask {
 
         String newLine = "\n";
         StringBuilder toReturn = new StringBuilder("Lower threshold:" + STATIC_VALUES.LOWER_THRESHOLD+ newLine);
-        toReturn.append("Upper threshold:" + STATIC_VALUES.UPPER_THRESHOLD).append(newLine).append(newLine).append(newLine).append(newLine);
+        toReturn.append("Upper threshold:" + STATIC_VALUES.UPPER_THRESHOLD).append(newLine).append(newLine);
         toReturn.append("Average average: ").append(getAvgSpeedAll()).append(newLine);
         synchronized (historicAvg) {
             toReturn.append("Min average: ").append(minAvg).append(newLine);
@@ -311,11 +322,16 @@ public class LoadBalancer extends TimerTask {
         }
         toReturn.append("Last    average: ").append(getLastSpeedAll()).append(newLine);
         synchronized (historicLast) {
+            toReturn.append("Min AvgLast: ").append(minAvgLast).append(newLine);
+            toReturn.append("Max AvgLast: ").append(maxAvgLast).append(newLine);
+        }
+        toReturn.append(newLine);
+        synchronized (_speeds){
             toReturn.append("Min Last: ").append(minLast).append(newLine);
             toReturn.append("Max Last: ").append(maxLast).append(newLine);
         }
 
-        toReturn.append("avg : last : Instances : metric_missing : minutes already").append(newLine);
+        toReturn.append(newLine).append(newLine).append("  avg  :  last  :       Instances     : missing : minutes").append(newLine);
         synchronized (_instances) {
             for (Map.Entry<String, Container> entry : _instances.entrySet()) {
                 String instanceID = entry.getKey();
