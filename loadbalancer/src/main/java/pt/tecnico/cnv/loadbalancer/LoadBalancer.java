@@ -100,6 +100,7 @@ public class LoadBalancer extends TimerTask {
     }
 
     public void autoScaleAnalisis(){
+        System.out.println("LoadBalancer.autoScaleAnalisis");
 
         //ignoring Those who are already requested to shutdown
         //system still has to compute
