@@ -49,7 +49,7 @@ public class GenericHandler implements HttpHandler {
 
         try {
             OutputStream os = httpExchange.getResponseBody();
-            httpExchange.sendResponseHeaders(requestStatus, message.length());
+            httpExchange.sendResponseHeaders(requestStatus, 0);
             ByteArrayInputStream bis = new ByteArrayInputStream(message.getBytes());
             byte [] buffer = new byte [BUFFER_SIZE];
             int count ;
