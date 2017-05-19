@@ -212,8 +212,8 @@ public class MetricStorageApp {
         double sc = 0, sr = 0, wc = 0, wr = 0, coff = 0, roff = 0;
 
 
-        //long metric = computeMetric(resultMap);
-        long metric = guessMetric(query);
+        long metric = computeMetric(resultMap);
+        //long metric = guessMetric(query);
 
 
 
