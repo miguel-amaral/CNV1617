@@ -256,9 +256,16 @@ public class MetricStorageApp {
         }
 
         double row_percent_start = (roff / sr)*100;
+        if(row_percent_start>100.0) row_percent_start = 100.0;
+
         double row_percent_end = ((roff + wr) / sr)*100;
+        if(row_percent_end>100.0) row_percent_start = 100.0;
+
         double column_percent_start = (coff / sc)*100;
+        if(column_percent_start>100.0) row_percent_start = 100.0;
+
         double column_percent_end = ((coff + wc) / sr)*100;
+        if(column_percent_end>100.0) row_percent_start = 100.0;
 
         item.put("row_percent_start", new AttributeValue().withN(Integer.toString((int)row_percent_start)));
         item.put("row_percent_end", new AttributeValue().withN(Integer.toString((int)row_percent_end)));
@@ -560,10 +567,10 @@ public class MetricStorageApp {
             }
             for(Map<String, AttributeValue> item : scanResult.getItems()) {
 
-               System.out.println("\nrow_percent_start: " + item.get("row_percent_start").getN());
-               System.out.println("row_percent_end: " + item.get("row_percent_end").getN());
-               System.out.println("column_percent_start: " + item.get("column_percent_start").getN());
-               System.out.println("column_percent_end: " + item.get("column_percent_end").getN());
+               System.out.print("\nrow_percent_start: " + item.get("row_percent_start").getN());
+               System.out.print("row_percent_end: " + item.get("row_percent_end").getN());
+               System.out.print("column_percent_start: " + item.get("column_percent_start").getN());
+               System.out.print("column_percent_end: " + item.get("column_percent_end").getN());
 
             }
 
