@@ -542,7 +542,7 @@ public class LoadBalancer extends TimerTask {
 //                System.out.println("removed");
                 if(last != -1L) {
                     numberValid--;
-                    current_sum -= metric;
+                    current_sum -= last;
                 }
             } else {
 //                System.out.println("else");
