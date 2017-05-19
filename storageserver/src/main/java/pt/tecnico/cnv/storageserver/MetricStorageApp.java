@@ -617,7 +617,7 @@ public class MetricStorageApp {
 
 
             ScanRequest scanRequest = new ScanRequest(defaultTableName);
-            scanRequest.setConditionalOperator(ConditionalOperator.AND);
+            //scanRequest.setConditionalOperator(ConditionalOperator.AND);
 
             Map<String, Condition> scanFilter = new HashMap<String, Condition>();
 
@@ -635,14 +635,14 @@ public class MetricStorageApp {
                                 .withAttributeValueList(new AttributeValue().withS(entry.getValue()))
                                 .withComparisonOperator(ComparisonOperator.EQ.toString()));
                         break;
-                    case "wc":
+                    /*case "wc":
                         int wc = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
                         System.out.println("wc: " + Integer.toString(wc));
 
                         scanFilter.put("wc", new Condition()
-                                .withAttributeValueList(new AttributeValue("0"))
-                                .withComparisonOperator(ComparisonOperator.GT.toString()));
-                        break;
+                                .withAttributeValueList(new AttributeValue().withN(Integer.toString(wc)))
+                                .withComparisonOperator(ComparisonOperator.GE.toString()));
+                        break;*/
                     /*case "wr":
                         int wr = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
 
