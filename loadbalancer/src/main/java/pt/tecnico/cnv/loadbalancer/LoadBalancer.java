@@ -12,6 +12,9 @@ import java.util.*;
  * Created by miguel on 10/05/17.
  */
 public class LoadBalancer extends TimerTask {
+//_metricsProccessedSinceLastTick has speed
+//_instance has speed
+
 
     private AmazonEC2 ec2;
     private InstanceLauncher instanceLauncher;
@@ -192,11 +195,13 @@ public class LoadBalancer extends TimerTask {
     public HttpAnswer processQuery(String query, String letter) {
         while(true) {
             updateInstances();
-            Instance lowestInstance = getLightestMachine();
+
 
             GetMetricValue requester = new GetMetricValue(query);
-
             long metricValue = requester.getMetric();
+            Instance lowestInstance = getLightestMachine(metricValue);
+
+
             boolean alreadyInstrumented = requester.isAlreadyIntrumented();
             boolean guess = !alreadyInstrumented;
             this.increaseMetric(lowestInstance, metricValue);
@@ -388,28 +393,49 @@ public class LoadBalancer extends TimerTask {
         }
     }
 
-    public Instance getLightestMachine() {
+
+    private long calculateRankInstance(long missingToProcess,long incomingRequestMetric, String instanceID ) {
+        //getSpeed
+        Long speed = getLastSpeed(instanceID);
+        if (speed == null || speed == -1L) {
+            speed = getAvgSpeed(instanceID);
+        }
+        if (speed == null || speed == -1L) {
+            speed = getLastSpeedAll();
+        }
+        if (speed == null || speed == -1L) {
+            speed = getAvgSpeedAll();
+        }
+        if (speed == null || speed == -1L) {
+            speed = 1L;
+        }
+        long total = missingToProcess + incomingRequestMetric;
+        long timeUnitsToCompute = total / speed;
+        return timeUnitsToCompute;
+    }
+
+    public Instance getLightestMachine(long metricValue) {
         long min = Long.MAX_VALUE; //max int
 
-        List<Instance> minInstance = null;
+        Instance minInstance = null;
         synchronized (_instances) {
             for (Map.Entry<String, Container> entry : _instances.entrySet()) {
-                if (entry.getValue().metric < min || minInstance == null) {
-                    minInstance = new ArrayList<Instance>();
-                    minInstance.add(entry.getValue().instance);
-                    min = entry.getValue().metric;
-                } else if (entry.getValue().metric == min) {
-                    minInstance.add(entry.getValue().instance);
+                long rank = calculateRankInstance(entry.getValue().metric,metricValue,entry.getKey());
+                if (rank < min || minInstance == null) {
+                    minInstance=entry.getValue().instance;
+                    min = rank;
                 }
             }
         }
-        int index = 0;
-        int size = minInstance.size();
-        if(size > 1) {
-            Random rn = new Random();
-            index = rn.nextInt(size);
-        }
-        return minInstance.get(index);
+        System.out.println(min);
+//        int index = 0;
+//        int size = minInstance.size();
+//        if(size > 1) {
+//            Random rn = new Random();
+//            index = rn.nextInt(size);
+//        }
+//        return minInstance.get(index);
+        return minInstance;
     }
 
     public void jobDone(String jobId) {
