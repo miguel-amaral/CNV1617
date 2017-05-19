@@ -640,10 +640,10 @@ public class MetricStorageApp {
                         System.out.println("wc: " + Integer.toString(wc));
 
                         scanFilter.put("wc", new Condition()
-                                .withAttributeValueList(new AttributeValue().withN(Integer.toString(wc)))
-                                .withComparisonOperator(ComparisonOperator.LT.toString()));
+                                .withAttributeValueList(new AttributeValue("0"))
+                                .withComparisonOperator(ComparisonOperator.GT.toString()));
                         break;
-                    case "wr":
+                    /*case "wr":
                         int wr = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
 
                         System.out.println("wr: " + Integer.toString(wr));
@@ -666,7 +666,7 @@ public class MetricStorageApp {
                         scanFilter.put("roff", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(roff)))
                                 .withComparisonOperator(ComparisonOperator.GT.toString()));
-                        break;
+                        break;*/
                     default:
                         break;
                 }
