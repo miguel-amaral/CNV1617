@@ -632,8 +632,6 @@ public class MetricStorageApp {
             Map<String, Condition> scanFilter = new HashMap<String, Condition>();*/
 
 
-            System.out.println("################################");
-
 
             metric_sum = compareMaps(result);
 
@@ -692,10 +690,7 @@ public class MetricStorageApp {
 
             scanRequest.setScanFilter(scanFilter);
             ScanResult scanResult = _dynamoDB.scan(scanRequest);*/
-
-            System.out.println("Printing items..");
-
-
+            
 
             /*if(scanResult.getCount() == 0){
 
