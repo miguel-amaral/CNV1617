@@ -567,6 +567,7 @@ public class MetricStorageApp {
             }
             for(Map<String, AttributeValue> item : scanResult.getItems()) {
 
+               System.out.println("\nimage query: " + item.get("query").getS());
                System.out.print("\nrow_percent_start: " + item.get("row_percent_start").getN());
                System.out.print("row_percent_end: " + item.get("row_percent_end").getN());
                System.out.print("column_percent_start: " + item.get("column_percent_start").getN());
