@@ -635,7 +635,7 @@ public class MetricStorageApp {
                                 .withAttributeValueList(new AttributeValue().withS(entry.getValue()))
                                 .withComparisonOperator(ComparisonOperator.EQ.toString()));
                         break;
-                    case "wc":
+                    /*case "wc":
                         int wc = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
                         System.out.println("wc: " + Integer.toString(wc));
 
@@ -666,7 +666,7 @@ public class MetricStorageApp {
                         scanFilter.put("roff", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(roff)))
                                 .withComparisonOperator(ComparisonOperator.GT.toString()));
-                        break;
+                        break;*/
                     default:
                         break;
                 }
