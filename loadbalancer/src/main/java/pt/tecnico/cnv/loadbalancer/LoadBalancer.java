@@ -241,9 +241,9 @@ public class LoadBalancer extends TimerTask {
         int avg_valid = 0;
         synchronized (_speeds) {
             for (Map.Entry<String, EvictingQueueContainer> entry : _speeds.entrySet()) {
-                long avg_current = entry.getValue().speed;
-                if(avg_current != -1) {
-                    avg_sum += entry.getValue().speed;
+                Long avg_current = entry.getValue().speed;
+                if(avg_current != -1L ) {
+                    avg_sum += avg_current;
                     avg_valid++;
                 }
             }
@@ -259,9 +259,9 @@ public class LoadBalancer extends TimerTask {
         int last_valid = 0;
         synchronized (_speeds) {
             for (Map.Entry<String, EvictingQueueContainer> entry : _speeds.entrySet()) {
-                long last_current = entry.getValue().lastInserted();
-                if(last_current != -1) {
-                    last_sum += entry.getValue().speed;
+                Long last_current = entry.getValue().lastInserted();
+                if(last_current != -1L && last_current != null) {
+                    last_sum += last_current;
                     last_valid++;
                 }
             }
@@ -278,10 +278,10 @@ public class LoadBalancer extends TimerTask {
         String newLine = "\n";
         StringBuilder toReturn = new StringBuilder("Lower threshold:" + STATIC_VALUES.LOWER_THRESHOLD+ newLine);
         toReturn.append("Upper threshold:" + STATIC_VALUES.UPPER_THRESHOLD).append(newLine).append(newLine).append(newLine).append(newLine);
-        toReturn.append("Last    average: ").append(getLastSpeedAll()).append(newLine);
         toReturn.append("Average average: ").append(getAvgSpeedAll()).append(newLine);
+        toReturn.append("Last    average: ").append(getLastSpeedAll()).append(newLine);
 
-        toReturn.append("avg : last : Instances:").append(newLine);
+        toReturn.append("avg : last : Instances : metric_missing : minutes already").append(newLine);
         synchronized (_instances) {
             for (Map.Entry<String, Container> entry : _instances.entrySet()) {
                 String instanceID = entry.getKey();
