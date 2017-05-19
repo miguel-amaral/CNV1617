@@ -85,9 +85,9 @@ public class MetricStorageApp {
 
             putItemInCache(query);
 
-            Map<String, AttributeValue> item = newItem(query);
+            /*Map<String, AttributeValue> item = newItem(query);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
-            PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
+            PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);*/
 
 
         } catch (AmazonServiceException ase) {
@@ -204,8 +204,6 @@ public class MetricStorageApp {
         int index = query.indexOf("jobID");
         String query_for_key = query.substring(0,index-1);
 
-        System.out.println("\n\nPARAMS: \n" + parser.toString() + "\n");
-
         Map<String, AttributeValue> item = new HashMap<String, AttributeValue>();
 
         item.put("query", new AttributeValue(query_for_key));
@@ -218,8 +216,6 @@ public class MetricStorageApp {
         long metric = guessMetric(query);
 
 
-
-        System.out.println("INSERTING THIS QUERY:" + query_for_key + "\nWITH METRIC: " + Long.toString(metric) + "\n");
 
         for (Map.Entry<String, String> entry : resultMap.entrySet()) {
 
@@ -283,10 +279,10 @@ public class MetricStorageApp {
         item.put("column_percent_start", new AttributeValue().withN(Integer.toString((int)column_percent_start)));
         item.put("column_percent_end", new AttributeValue().withN(Integer.toString((int)column_percent_end)));
 
-        System.out.println("row_percent_start:" + Double.toString(row_percent_start));
+        /*System.out.println("row_percent_start:" + Double.toString(row_percent_start));
         System.out.println("row_percent_end:" + Double.toString(row_percent_end));
         System.out.println("column_percent_start:" + Double.toString(column_percent_start));
-        System.out.println("column_percent_end:" + Double.toString(column_percent_end));
+        System.out.println("column_percent_end:" + Double.toString(column_percent_end));*/
 
 
 
@@ -637,7 +633,7 @@ public class MetricStorageApp {
 
 
             System.out.println("################################");
-            
+
 
             metric_sum = compareMaps(result);
 
