@@ -268,6 +268,12 @@ public class MetricStorageApp {
         item.put("column_percent_end", new AttributeValue().withN(Long.toString(column_percent_end)));
         item.put("column_percent_start", new AttributeValue().withN(Long.toString(column_percent_start)));
 
+        System.out.println("row_percent_start:" + Long.toString(row_percent_start) + "\n");
+        System.out.println("row_percent_end:" + Long.toString(row_percent_end) + "\n");
+        System.out.println("column_percent_end:" + Long.toString(column_percent_end) + "\n");
+        System.out.println("column_percent_start:" + Long.toString(column_percent_start) + "\n");
+
+
 
         item.put("metric", new AttributeValue().withN(Long.toString(metric)));
 
