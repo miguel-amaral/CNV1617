@@ -4,7 +4,6 @@ import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
@@ -50,13 +49,13 @@ public class GenericHandler implements HttpHandler {
         try {
             OutputStream os = httpExchange.getResponseBody();
             httpExchange.sendResponseHeaders(requestStatus, 0);
-            ByteArrayInputStream bis = new ByteArrayInputStream(message.getBytes());
-            byte [] buffer = new byte [BUFFER_SIZE];
-            int count ;
-            while ((count = bis.read(buffer)) != -1) {
-                os.write(buffer, 0, count);
-            }
-
+//            ByteArrayInputStream bis = new ByteArrayInputStream(message.getBytes());
+//            byte [] buffer = new byte [BUFFER_SIZE];
+//            int count ;
+//            while ((count = bis.read(buffer)) != -1) {
+//                os.write(buffer, 0, count);
+//            }
+            os.write(message.getBytes());
 
 
             os.close();
