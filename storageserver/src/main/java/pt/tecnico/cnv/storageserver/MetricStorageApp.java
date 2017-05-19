@@ -629,20 +629,20 @@ public class MetricStorageApp {
             for (Map.Entry<String, String> entry : result.entrySet()) {
 
                 switch (entry.getKey()) {
-                    /*case "f":
+                    case "f":
                         System.out.println("file to scan: " + entry.getValue());
                         scanFilter.put("f", new Condition()
                                 .withAttributeValueList(new AttributeValue().withS(entry.getValue()))
                                 .withComparisonOperator(ComparisonOperator.EQ.toString()));
-                        break;*/
-                    case "wc":
+                        break;
+                    /*case "wc":
                         int wc = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
                         System.out.println("wc: " + Integer.toString(wc));
 
                         scanFilter.put("wc", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(wc)))
                                 .withComparisonOperator(ComparisonOperator.GE.toString()));
-                        break;
+                        break;*/
                     /*case "wr":
                         int wr = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
 
