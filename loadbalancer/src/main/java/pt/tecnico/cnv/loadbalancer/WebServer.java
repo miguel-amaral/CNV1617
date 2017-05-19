@@ -12,6 +12,7 @@ import com.amazonaws.services.ec2.model.Instance;
 import com.sun.net.httpserver.HttpServer;
 import pt.tecnico.cnv.common.*;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Map;
@@ -25,7 +26,7 @@ public class WebServer {
     private static AmazonCloudWatch cloudWatch;
 
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 		System.out.println("Booting server");
 		try {
             boolean success = init();
@@ -36,7 +37,12 @@ public class WebServer {
 
         }
 
-        HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
+        HttpServer server = null;
+        try {
+            server = HttpServer.create(new InetSocketAddress(port), 0);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 //        server.createContext("/r.html", new ImageRequestHandler());
         server.createContext("/instances/list", new GenericHandler(new ListInstancesStrategy()));
         server.createContext("/job/done", new GenericHandler(new JobDone()));

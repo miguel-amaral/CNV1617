@@ -377,10 +377,10 @@ public class LoadBalancer extends TimerTask {
 
     class EvictingQueueContainer {
         private int numberInserted;
-        ArrayDeque<Long> queue;
-        int numberValid;
-        long current_sum;
-        long speed;
+        private ArrayDeque<Long> queue;
+        private int numberValid;
+        private long current_sum;
+        private long speed;
 
         EvictingQueueContainer() {
             queue = new ArrayDeque<Long>(STATIC_VALUES.NUMBER_ELEMENTS_QUEUE_SPEEDS);
@@ -390,12 +390,13 @@ public class LoadBalancer extends TimerTask {
         }
 
         void addElement(Long metric) {
+            if(metric == null) metric = -1L;
             System.out.println("add element");
             if(numberInserted == STATIC_VALUES.NUMBER_ELEMENTS_QUEUE_SPEEDS) {
                 System.out.println("first equal");
                 Long last = queue.removeFirst();
                 System.out.println("removed");
-                if(last != null) {
+                if(last != -1L) {
                     numberValid--;
                     current_sum -= metric;
                 }
@@ -403,7 +404,7 @@ public class LoadBalancer extends TimerTask {
                 System.out.println("else");
                 numberInserted++;
             }
-            if(metric != null) {
+            if(metric != -1L) {
                 System.out.println("metric not null");
                 current_sum += metric;
                 numberValid++;
@@ -411,11 +412,15 @@ public class LoadBalancer extends TimerTask {
             System.out.println("add last");
             queue.addLast(metric);
             System.out.println("just added");
-            if(numberValid != 0) {
-                speed = current_sum / numberValid;
-            } else {
+            if(numberValid == 0) {
+                System.out.println("not valid");
                 speed = -1;
+            } else {
+                System.out.println("number valid");
+                speed = current_sum / numberValid;
             }
+            System.out.println(speed+"");
+            System.out.println("exiting addElement");
         }
 
         Long lastInserted() {
