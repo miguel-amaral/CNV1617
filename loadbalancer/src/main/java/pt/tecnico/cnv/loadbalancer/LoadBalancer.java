@@ -84,9 +84,9 @@ public class LoadBalancer extends TimerTask {
 //                    System.out.println("Registered");
                     continue;
                 }
-                System.out.println("6");
+//                System.out.println("6");
                 long baseline = baselineObject;
-                System.out.println("7");
+//                System.out.println("7");
                 if( baseline == 0 ) {
                     //need to ignore, we dont know if it was sleeping
                     System.out.println("Did not had enough at start");
@@ -243,6 +243,7 @@ public class LoadBalancer extends TimerTask {
                 Long avgSpeed = getAvgSpeed(instanceID);
                 Long lastSpeed = getLastSpeed(instanceID);
                 toReturn.append(avgSpeed).append(" : ").append(lastSpeed).append(" : ").append(instanceID).append(" : ").append(entry.getValue().metric).append(newLine);
+                toReturn.append(instanceRecordedSpeeds(instanceID)).append(newLine).append(newLine);
             }
         }
         toReturn.append(newLine).append("Removed:").append(newLine);
@@ -258,6 +259,12 @@ public class LoadBalancer extends TimerTask {
             }
         }
         return toReturn.toString();
+    }
+
+    private String instanceRecordedSpeeds(String instanceID) {
+        synchronized (_speeds){
+            return _speeds.get(instanceID).printSpeeds();
+        }
     }
 
     private Long getLastSpeed(String instanceID) {
@@ -433,6 +440,13 @@ public class LoadBalancer extends TimerTask {
 
         Long lastInserted() {
             return queue.peekLast();
+        }
+
+        public String printSpeeds() {
+            StringBuilder toReturn = new StringBuilder();
+            for(Long speed : queue) {
+                toReturn.append(speed).append(" : ");
+            }
         }
     }
 }
