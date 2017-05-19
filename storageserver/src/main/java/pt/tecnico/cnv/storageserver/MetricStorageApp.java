@@ -85,9 +85,9 @@ public class MetricStorageApp {
 
             putItemInCache(query);
 
-            /*Map<String, AttributeValue> item = newItem(query);
+            Map<String, AttributeValue> item = newItem(query);
             PutItemRequest putItemRequest = new PutItemRequest(defaultTableName, item);
-            PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);*/
+            PutItemResult putItemResult = _dynamoDB.putItem(putItemRequest);
 
 
         } catch (AmazonServiceException ase) {
@@ -344,11 +344,14 @@ public class MetricStorageApp {
         Map<String, String> result = new HashMap<>();
         result = parser.queryToMap(query);
 
-        metric = queryItemWithCoords(query);
+        long wr = Long.parseLong(result.get("wr"));
+        long wc = Long.parseLong(result.get("wc"));
+
+        //metric = queryItemWithCoords(query);
 
 
 
-        return metric;
+        return wr*wc*2;
 
     }
 
