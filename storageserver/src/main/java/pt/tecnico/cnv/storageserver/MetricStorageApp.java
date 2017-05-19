@@ -258,20 +258,20 @@ public class MetricStorageApp {
 
         }
 
-        long row_percent_start = (roff / sr)*100;
-        long row_percent_end = ((roff + wr) / sr)*100;
-        long column_percent_end = ((coff + wc) / sr)*100;
-        long column_percent_start = (coff / sc)*100;
+        double row_percent_start = (roff / sr)*100;
+        double row_percent_end = ((roff + wr) / sr)*100;
+        double column_percent_end = ((coff + wc) / sr)*100;
+        double column_percent_start = (coff / sc)*100;
 
-        item.put("row_percent_start", new AttributeValue().withN(Long.toString(row_percent_start)));
-        item.put("row_percent_end", new AttributeValue().withN(Long.toString(row_percent_end)));
-        item.put("column_percent_end", new AttributeValue().withN(Long.toString(column_percent_end)));
-        item.put("column_percent_start", new AttributeValue().withN(Long.toString(column_percent_start)));
+        item.put("row_percent_start", new AttributeValue().withN(Double.toString(row_percent_start)));
+        item.put("row_percent_end", new AttributeValue().withN(Double.toString(row_percent_end)));
+        item.put("column_percent_end", new AttributeValue().withN(Double.toString(column_percent_end)));
+        item.put("column_percent_start", new AttributeValue().withN(Double.toString(column_percent_start)));
 
-        System.out.println("row_percent_start:" + Long.toString(row_percent_start) + "\n");
-        System.out.println("row_percent_end:" + Long.toString(row_percent_end) + "\n");
-        System.out.println("column_percent_end:" + Long.toString(column_percent_end) + "\n");
-        System.out.println("column_percent_start:" + Long.toString(column_percent_start) + "\n");
+        System.out.println("row_percent_start:" + Double.toString(row_percent_start) + "\n");
+        System.out.println("row_percent_end:" + Double.toString(row_percent_end) + "\n");
+        System.out.println("column_percent_end:" + Double.toString(column_percent_end) + "\n");
+        System.out.println("column_percent_start:" + Double.toString(column_percent_start) + "\n");
 
 
 
