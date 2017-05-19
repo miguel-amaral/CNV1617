@@ -47,7 +47,7 @@ public class MetricStorageApp {
 
             CreateTableRequest newRequest = new CreateTableRequest().withTableName(defaultTableName).withKeySchema(keySchema)
                     .withAttributeDefinitions(attributeDefinitions).withProvisionedThroughput(
-                            new ProvisionedThroughput().withReadCapacityUnits(1L).withWriteCapacityUnits(1L));
+                            new ProvisionedThroughput().withReadCapacityUnits(25L).withWriteCapacityUnits(25L));
 
 
 
