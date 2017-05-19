@@ -100,51 +100,54 @@ public class LoadBalancer extends TimerTask {
     }
 
     public void autoScaleAnalisis(){
-        System.out.println("LoadBalancer.autoScaleAnalisis");
+        try {
+            System.out.println("LoadBalancer.autoScaleAnalisis");
 
-        //ignoring Those who are already requested to shutdown
-        //system still has to compute
-        long toCompute = getMissingLoad();
-        //system total capacity
-        long systemCapacity = getSystemCapacity();
+            //ignoring Those who are already requested to shutdown
+            //system still has to compute
+            long toCompute = getMissingLoad();
+            //system total capacity
+            long systemCapacity = getSystemCapacity();
 //        if(toCompute == 0) destroyAllButOne();
-        if(systemCapacity == 0) {
-            //We have no data :(
-            //nothing has been running for a while
-            System.out.println("Exiting auto scale");
-            return;
-        }
+            if (systemCapacity == 0) {
+                //We have no data :(
+                //nothing has been running for a while
+                System.out.println("Exiting auto scale");
+                return;
+            }
 
 
-        long period = toCompute / systemCapacity;
-        if(period > STATIC_VALUES.UPPER_THRESHOLD) {
-            //Consider case when one job is too big !!!
-            System.out.println("INCREASING!!!");
+            long period = toCompute / systemCapacity;
+            if (period > STATIC_VALUES.UPPER_THRESHOLD) {
+                //Consider case when one job is too big !!!
+                System.out.println("INCREASING!!!");
 //            launchInstance(1);
 
-            //Consider more machines
-            //maybe depending on how much more we have to work
-        } else if (period < STATIC_VALUES.LOWER_THRESHOLD) {
-            if(_instances.size() - _instances_set_to_removal.size() > 1 ) {
-                deleteOneMachine();
+                //Consider more machines
+                //maybe depending on how much more we have to work
+            } else if (period < STATIC_VALUES.LOWER_THRESHOLD) {
+                if (_instances.size() - _instances_set_to_removal.size() > 1) {
+                    deleteOneMachine();
+                }
+                //consider less machines
             }
-            //consider less machines
-        }
 
-        if(_instances.size() - _instances_set_to_removal.size() > 1 ) {
-            lookForSlowMachines();
-            for (Map.Entry<String, Integer> entry : _slowMachines.entrySet()) {
-                if (entry.getValue() > 5) {
-                    if (!_instances_set_to_removal.contains(entry.getKey())) {
-                        System.out.println("removing!!!!!!");
-                        _instances_set_to_removal.add(entry.getKey());
+            if (_instances.size() - _instances_set_to_removal.size() > 1) {
+                lookForSlowMachines();
+                for (Map.Entry<String, Integer> entry : _slowMachines.entrySet()) {
+                    if (entry.getValue() > 5) {
+                        if (!_instances_set_to_removal.contains(entry.getKey())) {
+                            System.out.println("removing!!!!!!");
+                            _instances_set_to_removal.add(entry.getKey());
+                        }
                     }
                 }
             }
+            deleteSetToRemoval();
+            System.out.println("Exiting auto scale");
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-        deleteSetToRemoval();
-        System.out.println("Exiting auto scale");
-
     }
 
     private void deleteSetToRemoval() {
