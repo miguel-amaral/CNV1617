@@ -119,9 +119,16 @@ public class LoadBalancer extends TimerTask {
 
             long period = toCompute / systemCapacity;
             if (period > STATIC_VALUES.UPPER_THRESHOLD) {
+
+                int numberMachines = (int) Math.max((toCompute / STATIC_VALUES.UPPER_THRESHOLD) / (maxLast*0.8),1);
+
+
                 //Consider case when one job is too big !!!
-                System.out.println("INCREASING!!!");
-//            launchInstance(1);
+                System.out.println("INCREASING!!!" + numberMachines);
+
+
+
+                launchInstance(numberMachines);
 
                 //Consider more machines
                 //maybe depending on how much more we have to work
