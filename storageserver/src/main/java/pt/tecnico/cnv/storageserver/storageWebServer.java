@@ -94,45 +94,7 @@ public class storageWebServer extends Thread{
     }
 
 
-    static class TestMetricHandler implements HttpHandler {
-        public void handle(HttpExchange t) throws IOException {
 
-            String query = t.getRequestURI().getQuery();
-
-            System.out.println("TEST QUERY: "  + query);
-            OutputStream os = t.getResponseBody();
-            String message = "";
-            int requestStatus = 0;
-
-
-            try {
-
-
-
-                message += "\nQuerying item with query: " + query + "\n\n\n";
-
-
-                message += "METRIC VALUE: " +_app.queryItemMetric(query);
-
-
-
-            /*} catch (InvalidArgumentsException e) {
-                e.printStackTrace();
-                message = "Error: InvalidArgumentsException";
-                requestStatus = 400;
-                System.err.println(message);
-            }*/} catch (Throwable e) {
-                e.printStackTrace();
-                message = "Error: " + e.getMessage();
-                System.err.println(message);
-            }
-            t.sendResponseHeaders(requestStatus, message.length());
-            os.write(message.getBytes());
-
-            os.close();
-        }
-
-    }
 
     static class TestItemHandler implements HttpHandler {
         public void handle(HttpExchange t) throws IOException {
@@ -150,6 +112,35 @@ public class storageWebServer extends Thread{
 
 
                message = _app.queryItemFullTest();
+
+
+            } catch (Throwable e) {
+                e.printStackTrace();
+                message = "Error: " + e.getMessage();
+                System.err.println(message);
+            }
+            t.sendResponseHeaders(requestStatus, message.length());
+            os.write(message.getBytes());
+
+            os.close();
+        }
+
+    }
+
+    static class TestMetricHandler implements HttpHandler {
+        public void handle(HttpExchange t) throws IOException {
+
+            String query = t.getRequestURI().getQuery();
+
+
+            OutputStream os = t.getResponseBody();
+            String message = "";
+            int requestStatus = 0;
+
+
+            try {
+
+                _app.queryItemWithCoords(query);
 
 
             } catch (Throwable e) {
@@ -196,6 +187,46 @@ public class storageWebServer extends Thread{
 
         }
     }
+
+    /*    static class TestMetricHandler implements HttpHandler {
+        public void handle(HttpExchange t) throws IOException {
+
+            String query = t.getRequestURI().getQuery();
+
+            System.out.println("TEST QUERY: "  + query);
+            OutputStream os = t.getResponseBody();
+            String message = "";
+            int requestStatus = 0;
+
+
+            try {
+
+
+
+                message += "\nQuerying item with query: " + query + "\n\n\n";
+
+
+                message += "METRIC VALUE: " +_app.queryItemMetric(query);
+
+
+
+            *//*} catch (InvalidArgumentsException e) {
+                e.printStackTrace();
+                message = "Error: InvalidArgumentsException";
+                requestStatus = 400;
+                System.err.println(message);
+            }*//*} catch (Throwable e) {
+                e.printStackTrace();
+                message = "Error: " + e.getMessage();
+                System.err.println(message);
+            }
+            t.sendResponseHeaders(requestStatus, message.length());
+            os.write(message.getBytes());
+
+            os.close();
+        }
+
+    }*/
 
 
     private static boolean init(boolean deleteOnInit) {
