@@ -25,6 +25,9 @@ public class LoadBalancer extends TimerTask {
     private Timer timer;
     private Map<String, Long> _snapshots = new HashMap<String, Long>();
     private List<String> _wentToZeroInstances = new ArrayList<String>();
+
+
+
     //whenever a new instance pops up a new key is created
     private final Map<String,EvictingQueueContainer> _speeds = new HashMap<String, EvictingQueueContainer>();
 
@@ -215,7 +218,9 @@ public class LoadBalancer extends TimerTask {
             return;
         }
         if(this.instanceIsReady(instance)){
-            _speeds.put(id,new EvictingQueueContainer());
+            synchronized (_speeds) {
+                _speeds.put(id, new EvictingQueueContainer());
+            }
             synchronized (_instances) {
                 _instances.put(id,new Container(instance,0));
             }
@@ -231,11 +236,43 @@ public class LoadBalancer extends TimerTask {
         return answer.status() == 200;
     }
 
+    public long getAvgSpeedAll(){
+        long avg_sum = 0;
+        int avg_valid = 0;
+        synchronized (_speeds) {
+            for (Map.Entry<String, EvictingQueueContainer> entry : _speeds.entrySet()) {
+                long avg_current = entry.getValue().speed;
+                if(avg_current != -1) {
+                    avg_sum += entry.getValue().speed;
+                    avg_valid++;
+                }
+            }
+        }
+        return avg_sum / avg_valid;
+    }
+    public long getLastSpeedAll(){
+        long last_sum = 0;
+        int last_valid = 0;
+        synchronized (_speeds) {
+            for (Map.Entry<String, EvictingQueueContainer> entry : _speeds.entrySet()) {
+                long last_current = entry.getValue().lastInserted();
+                if(last_current != -1) {
+                    last_sum += entry.getValue().speed;
+                    last_valid++;
+                }
+            }
+        }
+        return last_sum / last_valid;
+    }
+
     public String toString() {
 
         String newLine = "\n";
         StringBuilder toReturn = new StringBuilder("Lower threshold:" + STATIC_VALUES.LOWER_THRESHOLD+ newLine);
         toReturn.append("Upper threshold:" + STATIC_VALUES.UPPER_THRESHOLD).append(newLine).append(newLine).append(newLine).append(newLine);
+        toReturn.append("Last    average: ").append(getLastSpeedAll()).append(newLine);
+        toReturn.append("Average average: ").append(getAvgSpeedAll()).append(newLine);
+
         toReturn.append("avg : last : Instances:").append(newLine);
         synchronized (_instances) {
             for (Map.Entry<String, Container> entry : _instances.entrySet()) {
@@ -412,6 +449,7 @@ public class LoadBalancer extends TimerTask {
             numberInserted = 0;
             numberValid = 0;
             current_sum = 0;
+            speed = -1;
         }
 
         void addElement(Long metric) {
