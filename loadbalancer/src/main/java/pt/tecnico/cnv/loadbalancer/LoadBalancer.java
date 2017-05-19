@@ -42,6 +42,7 @@ public class LoadBalancer extends TimerTask {
 
     //whenever a new instance pops up a new key is created
     private final Map<String,EvictingQueueContainer> _speeds = new HashMap<String, EvictingQueueContainer>();
+    private Map<String, Integer> _slowMachines = new HashMap<String, Integer>();
 
     public LoadBalancer(AmazonEC2 ec2)  {
         this.ec2 = ec2;
@@ -99,6 +100,7 @@ public class LoadBalancer extends TimerTask {
     }
 
     public void autoScaleAnalisis(){
+        System.out.println("LoadBalancer.autoScaleAnalisis");
 
         //ignoring Those who are already requested to shutdown
         //system still has to compute
@@ -109,21 +111,80 @@ public class LoadBalancer extends TimerTask {
         if(systemCapacity == 0) {
             //We have no data :(
             //nothing has been running for a while
+            System.out.println("Exiting auto scale");
             return;
         }
 
-//        STATIC_VALUES.NUMBER_PERIODS_JOB_TOO_BIG_TRESHOLD
 
         long period = toCompute / systemCapacity;
         if(period > STATIC_VALUES.UPPER_THRESHOLD) {
             //Consider case when one job is too big !!!
+            System.out.println("INCREASING!!!");
+//            launchInstance(1);
 
             //Consider more machines
             //maybe depending on how much more we have to work
         } else if (period < STATIC_VALUES.LOWER_THRESHOLD) {
+            if(_instances.size() - _instances_set_to_removal.size() > 1 ) {
+                deleteOneMachine();
+            }
             //consider less machines
         }
 
+        if(_instances.size() - _instances_set_to_removal.size() > 1 ) {
+            lookForSlowMachines();
+            for (Map.Entry<String, Integer> entry : _slowMachines.entrySet()) {
+                if (entry.getValue() > 5) {
+                    if (!_instances_set_to_removal.contains(entry.getKey())) {
+                        System.out.println("removing!!!!!!");
+                        _instances_set_to_removal.add(entry.getKey());
+                    }
+                }
+            }
+        }
+        System.out.println("Exiting auto scale");
+
+    }
+
+    private void lookForSlowMachines() {
+        synchronized (_speeds) {
+            for (Map.Entry<String, EvictingQueueContainer> entry : _speeds.entrySet()) {
+                long machineSpeed = entry.getValue().getBestGuessOfSpeed();
+                if (machineSpeed < 5000) {
+                    if(_slowMachines.get(entry.getKey()) != null) {
+                        _slowMachines.put(entry.getKey(),_slowMachines.get(entry.getKey())+1);
+                    } else {
+                        _slowMachines.put(entry.getKey(),1);
+                    }
+                } else {
+                    _slowMachines.remove(entry.getKey());
+                }
+            }
+        }
+    }
+
+    private void deleteOneMachine() {
+        String instanceID = getMachineLessRequests();
+        System.out.println("removing!!!!!!");
+        _instances_set_to_removal.add(instanceID);
+    }
+
+    private String getMachineLessRequests() {
+        String instanceID = "";
+        long minMetric = Long.MAX_VALUE;
+        synchronized (_instances){
+            for (Map.Entry<String, Container> entry : _instances.entrySet()) {
+                if(_instances_set_to_removal.contains(entry.getKey())){
+                    continue;
+                }
+                long entryMetric = entry.getValue().metric;
+                if(entryMetric < minMetric) {
+                    minMetric=entryMetric;
+                    instanceID = entry.getKey();
+                }
+            }
+        }
+        return instanceID;
     }
 
     private long getMissingLoad() {
@@ -142,6 +203,8 @@ public class LoadBalancer extends TimerTask {
 
     private long getSystemCapacity() {
         long capacity = 0;
+        capacity = (long) (_counterOfBootingInstances * (maxLast*.8));
+
         synchronized (_speeds) {
             for (Map.Entry<String, EvictingQueueContainer> entry : _speeds.entrySet()) {
                 long machineSpeed = entry.getValue().getBestGuessOfSpeed();
@@ -247,6 +310,7 @@ public class LoadBalancer extends TimerTask {
 
     public void launchInstance(int numberOfInstances) {
         instanceLauncher.launchNewInstance(numberOfInstances);
+        _counterOfBootingInstances += numberOfInstances;
     }
 
     public void terminateInstance(String instanceId) {
@@ -321,6 +385,7 @@ public class LoadBalancer extends TimerTask {
             return;
         }
         if(this.instanceIsReady(instance)){
+            _counterOfBootingInstances -= 1;
             synchronized (_speeds) {
                 _speeds.put(id, new EvictingQueueContainer());
             }
@@ -499,14 +564,7 @@ public class LoadBalancer extends TimerTask {
                 }
             }
         }
-        System.out.println(min);
-//        int index = 0;
-//        int size = minInstance.size();
-//        if(size > 1) {
-//            Random rn = new Random();
-//            index = rn.nextInt(size);
-//        }
-//        return minInstance.get(index);
+
         return minInstance;
     }
 
