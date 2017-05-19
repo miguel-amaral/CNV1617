@@ -248,7 +248,11 @@ public class LoadBalancer extends TimerTask {
                 }
             }
         }
-        return avg_sum / avg_valid;
+        if(avg_valid != 0) {
+             return avg_sum / avg_valid;
+        } else {
+            return -1;
+        }
     }
     public long getLastSpeedAll(){
         long last_sum = 0;
@@ -262,7 +266,11 @@ public class LoadBalancer extends TimerTask {
                 }
             }
         }
-        return last_sum / last_valid;
+        if(last_valid != 0) {
+            return last_sum / last_valid;
+        } else {
+            return -1;
+        }
     }
 
     public String toString() {
