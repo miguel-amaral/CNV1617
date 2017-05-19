@@ -26,6 +26,13 @@ public class LoadBalancer extends TimerTask {
     private Map<String, Long> _snapshots = new HashMap<String, Long>();
     private List<String> _wentToZeroInstances = new ArrayList<String>();
 
+    private long minAvg = Long.MAX_VALUE;
+    private long maxAvg = 0;
+    private long minLast = Long.MAX_VALUE;
+    private long maxLast = 0;
+    private List<Long> historicAvg = new ArrayList<Long>();
+    private List<Long> historicLast = new ArrayList<Long>();
+
 
 
     //whenever a new instance pops up a new key is created
@@ -56,6 +63,24 @@ public class LoadBalancer extends TimerTask {
         return snapshot;
     }
 
+    private void registerAvgAndLast(){
+        long avg = getAvgSpeedAll();
+        long last = getLastSpeedAll();
+        if(avg != -1){
+            synchronized (historicAvg) {
+                historicAvg.add(avg);
+                if (minAvg > avg) minAvg = avg;
+                if (maxAvg < avg) maxAvg = avg;
+            }
+        }
+        if(last != -1){
+            synchronized (historicLast) {
+                historicLast.add(last);
+                if (minLast > last) minLast = last;
+                if (maxLast < last) maxLast = last;
+            }
+        }
+    }
 
     // syncronize _metricsProccessedSinceLastTick then _speeds
     public void run() {
@@ -114,6 +139,7 @@ public class LoadBalancer extends TimerTask {
         }
 //        System.out.println("pre snapshot");
         _snapshots = makeSnapshotInstancesMetrics();
+        registerAvgAndLast();
         System.out.println("Exiting run()");
     }
 
@@ -279,7 +305,15 @@ public class LoadBalancer extends TimerTask {
         StringBuilder toReturn = new StringBuilder("Lower threshold:" + STATIC_VALUES.LOWER_THRESHOLD+ newLine);
         toReturn.append("Upper threshold:" + STATIC_VALUES.UPPER_THRESHOLD).append(newLine).append(newLine).append(newLine).append(newLine);
         toReturn.append("Average average: ").append(getAvgSpeedAll()).append(newLine);
+        synchronized (historicAvg) {
+            toReturn.append("Min average: ").append(minAvg).append(newLine);
+            toReturn.append("Max average: ").append(maxAvg).append(newLine);
+        }
         toReturn.append("Last    average: ").append(getLastSpeedAll()).append(newLine);
+        synchronized (historicLast) {
+            toReturn.append("Min Last: ").append(minLast).append(newLine);
+            toReturn.append("Max Last: ").append(maxLast).append(newLine);
+        }
 
         toReturn.append("avg : last : Instances : metric_missing : minutes already").append(newLine);
         synchronized (_instances) {
@@ -301,6 +335,20 @@ public class LoadBalancer extends TimerTask {
             toReturn.append(" ").append(_jobs.size()).append(newLine);
             for (Map.Entry<String, JobContainer> entry : _jobs.entrySet()) {
                 toReturn.append(entry.getKey()).append(" : ").append(entry.getValue()).append(newLine);
+            }
+        }
+        toReturn.append(newLine).append(newLine).append(newLine).append(newLine);
+        toReturn.append("historic avg").append(newLine);
+        synchronized (historicAvg) {
+            for(Long avg : historicAvg){
+                toReturn.append(avg + " : ");
+            }
+        }
+        toReturn.append(newLine);
+        toReturn.append("historic last").append(newLine);
+        synchronized (historicLast) {
+            for(Long avg : historicLast){
+                toReturn.append(avg + " : ");
             }
         }
         return toReturn.toString();
