@@ -346,8 +346,7 @@ public class MetricStorageApp {
 
         metric = queryItemWithCoords(query);
 
-        if(metric == 0)
-            metric = 1;
+
 
         return metric;
 
@@ -632,8 +631,6 @@ public class MetricStorageApp {
             Map<String, Condition> scanFilter = new HashMap<String, Condition>();*/
 
 
-            System.out.println("################################");
-
 
             metric_sum = compareMaps(result);
 
@@ -692,9 +689,6 @@ public class MetricStorageApp {
 
             scanRequest.setScanFilter(scanFilter);
             ScanResult scanResult = _dynamoDB.scan(scanRequest);*/
-
-            System.out.println("Printing items..");
-
 
 
             /*if(scanResult.getCount() == 0){
@@ -757,25 +751,40 @@ public class MetricStorageApp {
             double coff_result = Double.parseDouble(result.get("coff"));
 
 
-            if( sc_cache == 2000 && sr_cache == 2000 && wc_cache == 200 && wr_cache == 200){
 
 
-                if( (roff_cache/sr_cache) < ( (roff_result/sr_result) - (roff_result/sr_result)*0.05) )
-                    continue;
 
-                if( (roff_cache + wr_cache/sr_cache) > ( (roff_result + wr_result/sr_result) + (roff_result/sr_result)*0.05) )
-                    continue;
+            if( (roff_cache/sr_cache) < ( (roff_result/sr_result) - (roff_result/sr_result)*0.05) ){
 
-                if( (coff_cache/sc_cache) < ( (coff_result/sc_result) - (coff_result/sr_result)*0.05) )
-                    continue;
+                System.out.println("Failing in (roff_cache/sr_cache) < " +
+                        "with map: " + cacheMap);
+                continue;
+             }
+            if( ((roff_cache + wr_cache)/sr_cache) > ( ((roff_result + wr_result)/sr_result) + (roff_result/sr_result)*0.05) ){
 
-                if( (coff_cache + wc_cache/sc_cache) > ( (coff_result + wc_result/sc_result) + (coff_result/sc_result)*0.05) )
-                    continue;
+                System.out.println("Failing in (roff_cache + wr_cache/sr_cache) " +
+                        "with map: " + cacheMap);
+                continue;
+            }
 
-                metric_sum += Integer.parseInt(result.get("metric"));
+            if( (coff_cache/sc_cache) < ( (coff_result/sc_result) - (coff_result/sr_result)*0.05) ){
 
+                System.out.println("Failing in (coff_cache/sc_cache) <  " +
+                        "with map: " + cacheMap);
+                continue;
+            }
+            if( ((coff_cache + wc_cache)/sc_cache) > ( ((coff_result + wc_result)/sc_result) + (coff_result/sc_result)*0.05) ){
+
+                System.out.println("Failing in (coff_cache + wc_cache/sc_cache) > " +
+                        "with map: " + cacheMap);
+                continue;
 
             }
+
+            metric_sum += Integer.parseInt(result.get("metric"));
+
+
+
 
 
 
