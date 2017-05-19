@@ -130,6 +130,8 @@ public class MetricStorageApp {
             long metric = computeMetric(resultMap);
 
             resultMap.put("metric",Long.toString(metric));
+
+            System.out.println(resultMap.toString());
     
             _cache.put(query_for_key, resultMap);
 
@@ -635,10 +637,7 @@ public class MetricStorageApp {
 
 
             System.out.println("################################");
-
-
-            System.out.println(result.toString());
-
+            
 
             metric_sum = compareMaps(result);
 
