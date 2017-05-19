@@ -633,13 +633,13 @@ public class MetricStorageApp {
                         int wc = Integer.parseInt(entry.getValue()) + (int)(Integer.parseInt(entry.getValue())*0.10);
                         scanFilter.put("wc", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(wc)))
-                                .withComparisonOperator(ComparisonOperator.GT.toString()));
+                                .withComparisonOperator(ComparisonOperator.LT.toString()));
                         break;
                     case "wr":
                         int wr = Integer.parseInt(entry.getValue()) + (int)(Integer.parseInt(entry.getValue())*0.10);
                         scanFilter.put("wr", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(wr)))
-                                .withComparisonOperator(ComparisonOperator.GT.toString()));
+                                .withComparisonOperator(ComparisonOperator.LT.toString()));
                         break;
                     case "coff":
                         int coff = Integer.parseInt(entry.getValue()) - (int)(Integer.parseInt(entry.getValue())*0.05);
