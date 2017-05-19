@@ -53,6 +53,8 @@ public class LoadBalancer extends TimerTask {
     private void startService() {
         timer_process_speeds = new Timer();
         timer_process_speeds.scheduleAtFixedRate(this, STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_LOAD_BALANCER_CHECKS_SPEED_WORKERS, STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_LOAD_BALANCER_CHECKS_SPEED_WORKERS);
+        Timer auto_scale = new Timer();
+        auto_scale.schedule(new AutoScaleAnalistAux(this),STATIC_VALUES.PERIOD_MILI_SECONDS_AUTO_SCALE_RUNS,STATIC_VALUES.PERIOD_MILI_SECONDS_AUTO_SCALE_RUNS);
     }
 
     private Map<String,Long> makeSnapshotInstancesMetrics(){
@@ -96,7 +98,7 @@ public class LoadBalancer extends TimerTask {
         }
     }
 
-    private void autoScaleAnalisis(){
+    public void autoScaleAnalisis(){
 
         //ignoring Those who are already requested to shutdown
         //system still has to compute

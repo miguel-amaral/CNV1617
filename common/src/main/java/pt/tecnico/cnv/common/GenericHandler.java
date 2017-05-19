@@ -1,5 +1,6 @@
 package pt.tecnico.cnv.common;
 
+import com.sun.net.httpserver.Headers;
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 
@@ -12,14 +13,26 @@ import java.io.OutputStream;
 public class GenericHandler implements HttpHandler {
 
     private final HttpStrategy _strategy;
+    private boolean booleanSetHeaders = false;
+    private String header = "";
 
     public GenericHandler(HttpStrategy strategy) {
         _strategy = strategy;
     }
 
+    public GenericHandler(HttpStrategy strategy, String header){
+        this(strategy);
+        this.header = header;
+        this.booleanSetHeaders  = true;
+    }
+
     public void handle(HttpExchange httpExchange) throws IOException {
         String query = httpExchange.getRequestURI().getQuery();
 
+        if(booleanSetHeaders) {
+            Headers headers = httpExchange.getResponseHeaders();
+            headers.add("Content-Type", this.header);
+        }
         HttpAnswer answer = null;
         try {
             answer = _strategy.process(query);

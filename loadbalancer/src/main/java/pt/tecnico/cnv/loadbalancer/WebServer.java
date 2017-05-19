@@ -48,7 +48,7 @@ public class WebServer {
         server.createContext("/job/done", new GenericHandler(new JobDone()));
         server.createContext("/processer/status", new GenericHandler(new ProccesserStatusStrategy()));
         server.createContext("/status", new GenericHandler(new ProccesserStatusStrategy()));
-        server.createContext("/r.html", new GenericHandler(new ProccessQueryStrategy()));
+        server.createContext("/r.html", new GenericHandler(new ProccessQueryStrategy(),"image/bmp"));
         server.createContext("/metrics", new GenericHandler(new GetMetricsStrategy()));
         server.createContext("/job/update", new GenericHandler(new UpdateMetricsStrategy()));
 //        server.createContext("/launch", new GenericHandler(new LaunchInstanceStrategy()));
