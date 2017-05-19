@@ -42,6 +42,7 @@ public class GenericHandler implements HttpHandler {
         }
         int requestStatus = answer.status();
         String message = answer.response();
+        System.out.println(message);
 
 
         OutputStream os = httpExchange.getResponseBody();
