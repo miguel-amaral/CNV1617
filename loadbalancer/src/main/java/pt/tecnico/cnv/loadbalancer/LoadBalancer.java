@@ -242,7 +242,7 @@ public class LoadBalancer extends TimerTask {
                 String instanceID = entry.getKey();
                 Long avgSpeed = getAvgSpeed(instanceID);
                 Long lastSpeed = getLastSpeed(instanceID);
-                toReturn.append(avgSpeed).append(" : ").append(lastSpeed).append(" : ").append(instanceID).append(" : ").append(entry.getValue().metric).append(newLine);
+                toReturn.append(avgSpeed).append(" : ").append(lastSpeed).append(" : ").append(instanceID).append(" : ").append(entry.getValue().metric).append(" time: ").append(entry.getValue().updateMinutes()).append(newLine);
                 toReturn.append(instanceRecordedSpeeds(instanceID)).append(newLine).append(newLine);
             }
         }
@@ -344,9 +344,19 @@ public class LoadBalancer extends TimerTask {
     class Container {
         Instance instance;
         long metric;
+        Date launchTime;
+        int minutes;
         Container(Instance instance, long metric) {
             this.instance = instance;
             this.metric = metric;
+            launchTime = instance.getLaunchTime();
+        }
+
+        int updateMinutes(){
+            Date dt2 = new Date();
+            long diff = dt2.getTime() - launchTime.getTime();
+            this.minutes = (int) (diff / (60 * 1000) % 60);
+            return this.minutes;
         }
     }
 
