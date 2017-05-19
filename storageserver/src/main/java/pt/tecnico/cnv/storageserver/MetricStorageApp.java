@@ -760,7 +760,7 @@ public class MetricStorageApp {
                         "with map: " + cacheMap);
                 continue;
              }
-            if( (roff_cache + wr_cache/sr_cache) > ( (roff_result + wr_result/sr_result) + (roff_result/sr_result)*0.05) ){
+            if( ((roff_cache + wr_cache)/sr_cache) > ( ((roff_result + wr_result)/sr_result) + (roff_result/sr_result)*0.05) ){
 
                 System.out.println("Failing in (roff_cache + wr_cache/sr_cache) " +
                         "with map: " + cacheMap);
@@ -773,7 +773,7 @@ public class MetricStorageApp {
                         "with map: " + cacheMap);
                 continue;
             }
-            if( (coff_cache + wc_cache/sc_cache) > ( (coff_result + wc_result/sc_result) + (coff_result/sc_result)*0.05) ){
+            if( ((coff_cache + wc_cache)/sc_cache) > ( ((coff_result + wc_result)/sc_result) + (coff_result/sc_result)*0.05) ){
 
                 System.out.println("Failing in (coff_cache + wc_cache/sc_cache) > " +
                         "with map: " + cacheMap);
