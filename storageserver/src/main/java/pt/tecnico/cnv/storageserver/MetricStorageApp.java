@@ -635,15 +635,15 @@ public class MetricStorageApp {
                                 .withAttributeValueList(new AttributeValue().withS(entry.getValue()))
                                 .withComparisonOperator(ComparisonOperator.EQ.toString()));
                         break;
-                    /*case "wc":
+                    case "wc":
                         int wc = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
                         System.out.println("wc: " + Integer.toString(wc));
 
                         scanFilter.put("wc", new Condition()
-                                .withAttributeValueList(new AttributeValue().withN(Integer.toString(wc)))
-                                .withComparisonOperator(ComparisonOperator.LT.toString()));
+                                .withAttributeValueList(new AttributeValue().withN("0"))
+                                .withComparisonOperator(ComparisonOperator.GT.toString()));
                         break;
-                    case "wr":
+                    /*case "wr":
                         int wr = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
 
                         System.out.println("wr: " + Integer.toString(wr));
