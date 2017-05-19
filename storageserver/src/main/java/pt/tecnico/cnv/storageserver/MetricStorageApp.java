@@ -206,7 +206,7 @@ public class MetricStorageApp {
         item.put("query", new AttributeValue(query_for_key));
 
 
-        long sc = 0, sr = 0, wc = 0, wr = 0, coff = 0, roff = 0;
+        double sc = 0, sr = 0, wc = 0, wr = 0, coff = 0, roff = 0;
 
 
         long metric = computeMetric(resultMap);
