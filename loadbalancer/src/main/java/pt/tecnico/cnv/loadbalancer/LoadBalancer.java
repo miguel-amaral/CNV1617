@@ -67,7 +67,6 @@ public class LoadBalancer extends TimerTask {
 
     private void registerAvgAndLast(){
         long avg = getAvgSpeedAll();
-        long last = getLastSpeedAll();
         if(avg != -1){
             synchronized (historicAvg) {
                 historicAvg.add(avg);
@@ -75,9 +74,9 @@ public class LoadBalancer extends TimerTask {
                 if (maxAvg < avg) maxAvg = avg;
             }
         }
+        long last = getLastSpeedAll();
         if(last != -1){
             synchronized (historicLast) {
-                historicLast.add(last);
                 if (minAvgLast > last) minAvgLast = last;
                 if (maxAvgLast < last) maxAvgLast = last;
             }
@@ -86,6 +85,7 @@ public class LoadBalancer extends TimerTask {
             for (Map.Entry<String, EvictingQueueContainer> entry : _speeds.entrySet()) {
                 Long last_current = entry.getValue().lastInserted();
                 if(last_current != null && last_current != -1L ) {
+                    historicLast.add(last_current);
                     if (minLast > last_current) minLast = last_current;
                     if (maxLast < last_current) maxLast = last_current;
                 }
