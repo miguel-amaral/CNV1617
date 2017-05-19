@@ -447,6 +447,7 @@ public class LoadBalancer extends TimerTask {
             for(Long speed : queue) {
                 toReturn.append(speed).append(" : ");
             }
+            return toReturn.toString();
         }
     }
 }
