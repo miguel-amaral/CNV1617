@@ -617,7 +617,7 @@ public class MetricStorageApp {
 
 
             ScanRequest scanRequest = new ScanRequest(defaultTableName);
-            scanRequest.setConditionalOperator(ConditionalOperator.AND);
+            //scanRequest.setConditionalOperator(ConditionalOperator.AND);
 
             Map<String, Condition> scanFilter = new HashMap<String, Condition>();
 
@@ -629,19 +629,19 @@ public class MetricStorageApp {
             for (Map.Entry<String, String> entry : result.entrySet()) {
 
                 switch (entry.getKey()) {
-                    case "f":
+                    /*case "f":
                         System.out.println("file to scan: " + entry.getValue());
                         scanFilter.put("f", new Condition()
                                 .withAttributeValueList(new AttributeValue().withS(entry.getValue()))
                                 .withComparisonOperator(ComparisonOperator.EQ.toString()));
-                        break;
+                        break;*/
                     case "wc":
                         int wc = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
                         System.out.println("wc: " + Integer.toString(wc));
 
                         scanFilter.put("wc", new Condition()
-                                .withAttributeValueList(new AttributeValue("0"))
-                                .withComparisonOperator(ComparisonOperator.GT.toString()));
+                                .withAttributeValueList(new AttributeValue().withN(Integer.toString(wc)))
+                                .withComparisonOperator(ComparisonOperator.GE.toString()));
                         break;
                     /*case "wr":
                         int wr = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
