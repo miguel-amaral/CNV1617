@@ -19,13 +19,13 @@ public class LoadBalancer extends TimerTask {
     private AmazonEC2 ec2;
     private InstanceLauncher instanceLauncher;
     private int _counterOfBootingInstances = 0;
-    private List<Instance> _known_instances = new ArrayList<Instance>();
+//    private List<Instance> _known_instances = new ArrayList<Instance>();
     private List<String> _instances_set_to_removal = new ArrayList<String>();
     private Map<String,Long> _metricsProccessedSinceLastTick = new HashMap<String, Long>();
     private final Map<String, Container> _instances = new HashMap<String, Container>();
 
     private Map<String,JobContainer> _jobs = new HashMap<String, JobContainer>();
-    private Timer timer;
+    private Timer timer_process_speeds;
     private Map<String, Long> _snapshots = new HashMap<String, Long>();
     private List<String> _wentToZeroInstances = new ArrayList<String>();
 
@@ -51,8 +51,8 @@ public class LoadBalancer extends TimerTask {
     }
 
     private void startService() {
-        timer = new Timer();
-        timer.scheduleAtFixedRate(this, STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_LOAD_BALANCER_CHECKS_SPEED_WORKERS, STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_LOAD_BALANCER_CHECKS_SPEED_WORKERS);
+        timer_process_speeds = new Timer();
+        timer_process_speeds.scheduleAtFixedRate(this, STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_LOAD_BALANCER_CHECKS_SPEED_WORKERS, STATIC_VALUES.NUMBER_MILI_SECONDS_INTERVAL_LOAD_BALANCER_CHECKS_SPEED_WORKERS);
     }
 
     private Map<String,Long> makeSnapshotInstancesMetrics(){
@@ -95,6 +95,65 @@ public class LoadBalancer extends TimerTask {
             }
         }
     }
+
+    private void autoScaleAnalisis(){
+
+        //ignoring Those who are already requested to shutdown
+        //system still has to compute
+        long toCompute = getMissingLoad();
+        //system total capacity
+        long systemCapacity = getSystemCapacity();
+//        if(toCompute == 0) destroyAllButOne();
+        if(systemCapacity == 0) {
+            //We have no data :(
+            //nothing has been running for a while
+            return;
+        }
+
+//        STATIC_VALUES.NUMBER_PERIODS_JOB_TOO_BIG_TRESHOLD
+
+        long period = toCompute / systemCapacity;
+        if(period > STATIC_VALUES.UPPER_THRESHOLD) {
+            //Consider case when one job is too big !!!
+
+            //Consider more machines
+            //maybe depending on how much more we have to work
+        } else if (period < STATIC_VALUES.LOWER_THRESHOLD) {
+            //consider less machines
+        }
+
+    }
+
+    private long getMissingLoad() {
+        long load = 0;
+        synchronized (_instances) {
+            for (Map.Entry<String, Container> entry : _instances.entrySet()) {
+                if(_instances_set_to_removal.contains(entry.getKey())) {
+                    //this one needs to be ignored..
+                    continue;
+                }
+                load += entry.getValue().metric;
+            }
+        }
+        return load;
+    }
+
+    private long getSystemCapacity() {
+        long capacity = 0;
+        synchronized (_speeds) {
+            for (Map.Entry<String, EvictingQueueContainer> entry : _speeds.entrySet()) {
+                long machineSpeed = entry.getValue().getBestGuessOfSpeed();
+                if(machineSpeed != -1L) {
+                    capacity += machineSpeed;
+                } else {
+                    Long allSpeed = getAvgSpeedAll();
+                    if(allSpeed != null && allSpeed != 1) capacity += allSpeed;
+                }
+            }
+        }
+        return capacity;
+    }
+
 
     // syncronize _metricsProccessedSinceLastTick then _speeds
     public void run() {
@@ -386,6 +445,11 @@ public class LoadBalancer extends TimerTask {
             return _speeds.get(instanceID).lastInserted();
         }
     }
+    private Long getLastRecentSpeed(String instanceID) {
+        synchronized (_speeds){
+            return _speeds.get(instanceID).lastRececentSpeed();
+        }
+    }
 
     private Long getAvgSpeed(String instanceID) {
         synchronized (_speeds){
@@ -396,7 +460,7 @@ public class LoadBalancer extends TimerTask {
 
     private long calculateRankInstance(long missingToProcess,long incomingRequestMetric, String instanceID ) {
         //getSpeed
-        Long speed = getLastSpeed(instanceID);
+        Long speed = getLastRecentSpeed(instanceID);
         if (speed == null || speed == -1L) {
             speed = getAvgSpeed(instanceID);
         }
@@ -406,7 +470,7 @@ public class LoadBalancer extends TimerTask {
         if (speed == null || speed == -1L) {
             speed = getAvgSpeedAll();
         }
-        if (speed == null || speed == -1L) {
+        if (speed == null || speed == -1L || speed == 0) {
             speed = 1L;
         }
         long total = missingToProcess + incomingRequestMetric;
@@ -414,12 +478,18 @@ public class LoadBalancer extends TimerTask {
         return timeUnitsToCompute;
     }
 
+
+
     public Instance getLightestMachine(long metricValue) {
         long min = Long.MAX_VALUE; //max int
 
         Instance minInstance = null;
         synchronized (_instances) {
             for (Map.Entry<String, Container> entry : _instances.entrySet()) {
+                if(_instances_set_to_removal.contains(entry.getKey())) {
+                    //this one needs to be ignored..
+                    continue;
+                }
                 long rank = calculateRankInstance(entry.getValue().metric,metricValue,entry.getKey());
                 if (rank < min || minInstance == null) {
                     minInstance=entry.getValue().instance;
@@ -475,6 +545,8 @@ public class LoadBalancer extends TimerTask {
         if(difference != 0) { decreaseMetric(job.instance,difference); }
         processUpdate(job,rawProcessed);
     }
+
+
 
     class Container {
         Instance instance;
@@ -550,6 +622,7 @@ public class LoadBalancer extends TimerTask {
         private int numberValid;
         private long current_sum;
         private long speed;
+        private long last_known_speed = -1;
 
         EvictingQueueContainer() {
             queue = new ArrayDeque<Long>(STATIC_VALUES.NUMBER_ELEMENTS_QUEUE_SPEEDS);
@@ -588,6 +661,7 @@ public class LoadBalancer extends TimerTask {
             } else {
 //                System.out.println("number valid");
                 speed = current_sum / numberValid;
+                last_known_speed = speed;
             }
             System.out.println(speed+"");
 //            System.out.println("exiting addElement");
@@ -603,6 +677,19 @@ public class LoadBalancer extends TimerTask {
                 toReturn.append(speed).append(" : ");
             }
             return toReturn.toString();
+        }
+
+        public long getBestGuessOfSpeed() {
+            if(numberValid > 0)
+                return speed;
+            else
+                return last_known_speed;
+        }
+
+        public Long lastRececentSpeed() {
+            if(numberValid > 0) return last_known_speed;
+            return -1L;
+
         }
     }
 }
