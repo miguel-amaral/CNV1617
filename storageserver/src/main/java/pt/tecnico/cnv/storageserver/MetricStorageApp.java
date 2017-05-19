@@ -182,8 +182,6 @@ public class MetricStorageApp {
         return message;
     }
 
-
-
     private static Map<String, AttributeValue> newItem(String query) {
 
         InstQueryParser parser = null;
@@ -208,15 +206,42 @@ public class MetricStorageApp {
         item.put("query", new AttributeValue(query_for_key));
 
 
+        long sc = 0, sr = 0, wc = 0, wr = 0, coff = 0, roff = 0;
+
+
         long metric = computeMetric(resultMap);
 
         System.out.println("INSERTING THIS QUERY:" + query_for_key + "\nWITH METRIC: " + Long.toString(metric) + "\n");
 
-        /*for (Map.Entry<String, String> entry : result.entrySet()){
+        for (Map.Entry<String, String> entry : resultMap.entrySet()) {
 
             switch (entry.getKey()) {
                 case "f":
-                    item.put("file", new AttributeValue(entry.getValue()));
+                    item.put("file", new AttributeValue().withS(entry.getValue()));
+                    break;
+                case "sc":
+                    item.put("sc", new AttributeValue().withN(entry.getValue()));
+                    sc = Long.parseLong(entry.getValue());
+                    break;
+                case "sr":
+                    item.put("sr", new AttributeValue().withN(entry.getValue()));
+                    sr = Long.parseLong(entry.getValue());
+                    break;
+                case "wc":
+                    item.put("wc", new AttributeValue().withN(entry.getValue()));
+                    wc = Long.parseLong(entry.getValue());
+                    break;
+                case "wr":
+                    item.put("wr", new AttributeValue().withN(entry.getValue()));
+                    wr = Long.parseLong(entry.getValue());
+                    break;
+                case "coff":
+                    item.put("coff", new AttributeValue().withN(entry.getValue()));
+                    coff = Long.parseLong(entry.getValue());
+                    break;
+                case "roff":
+                    item.put("roff", new AttributeValue().withN(entry.getValue()));
+                    roff = Long.parseLong(entry.getValue());
                     break;
                 case "instructions":
                     item.put("instructions", new AttributeValue().withN(entry.getValue()));
@@ -224,23 +249,26 @@ public class MetricStorageApp {
                 case "bb_blocks":
                     item.put("bb_blocks", new AttributeValue().withN(entry.getValue()));
                     break;
-                case "methods":
-                    item.put("methods", new AttributeValue().withN(entry.getValue()));
-                    break;
                 case "branch_fail":
                     item.put("branch_fail", new AttributeValue().withN(entry.getValue()));
-                    break;
-                case "branch_success":
-                    item.put("branch_success", new AttributeValue().withN(entry.getValue()));
-                    break;
-                case "sc":
-                    item.put("metric", new AttributeValue().withN(entry.getValue()));
                     break;
                 default:
                     break;
             }
 
-        }*/
+        }
+
+        long row_percent_start = (roff / sr)*100;
+        long row_percent_end = ((roff + wr) / sr)*100;
+        long column_percent_end = ((coff + wc) / sr)*100;
+        long column_percent_start = (coff / sc)*100;
+
+        item.put("row_percent_start", new AttributeValue().withN(Long.toString(row_percent_start)));
+        item.put("row_percent_end", new AttributeValue().withN(Long.toString(row_percent_end)));
+        item.put("column_percent_end", new AttributeValue().withN(Long.toString(column_percent_end)));
+        item.put("column_percent_start", new AttributeValue().withN(Long.toString(column_percent_start)));
+
+
         item.put("metric", new AttributeValue().withN(Long.toString(metric)));
 
         return item;
@@ -317,10 +345,25 @@ public class MetricStorageApp {
         }
 
 
+
+
         System.out.println("GUESSING METRIC WITH SC = : " + sc + " AND " +
                 "WITH SR = : " + sr+ "\n");
         return sc * sr;
     }
+
+
+    public static void deleteDefaultTable() {
+
+        System.out.println("Request for deletion on: " + defaultTableName + "is being handled...\n");
+
+        DeleteTableRequest deleteRequest = new DeleteTableRequest().withTableName(defaultTableName);
+        // Deletes if table exists
+        TableUtils.deleteTableIfExists(_dynamoDB, deleteRequest);
+        System.out.println("Deletion complete!!\n");
+
+    }
+
 
 
     public static String updateItemAttributes(String query) {
@@ -357,18 +400,6 @@ public class MetricStorageApp {
         }
 
         return message + error;
-    }
-
-
-    public static void deleteDefaultTable() {
-
-        System.out.println("Request for deletion on: " + defaultTableName + "is being handled...\n");
-
-        DeleteTableRequest deleteRequest = new DeleteTableRequest().withTableName(defaultTableName);
-        // Deletes if table exists
-        TableUtils.deleteTableIfExists(_dynamoDB, deleteRequest);
-        System.out.println("Deletion complete!!\n");
-
     }
 
     private static String getTableInformation() {
