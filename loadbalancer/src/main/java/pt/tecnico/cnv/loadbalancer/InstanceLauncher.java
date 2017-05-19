@@ -37,14 +37,17 @@ public class InstanceLauncher {
     //Returns the number of destroyed instances
 
     public List<InstanceStateChange> destroyInstances(List<String> instances_ids) {
-        TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest();
-        terminateInstancesRequest.setInstanceIds(instances_ids);
+        if(instances_ids.size() > 0) {
+            TerminateInstancesRequest terminateInstancesRequest = new TerminateInstancesRequest();
+            terminateInstancesRequest.setInstanceIds(instances_ids);
 
-        TerminateInstancesResult result = ec2.terminateInstances(terminateInstancesRequest);
-        System.out.println("delete instances: " + result);
-        List<InstanceStateChange> terminatedInstances = result.getTerminatingInstances();
-        System.out.println("terminatedInstanceslist: " + terminatedInstances);
-        return terminatedInstances;
+            TerminateInstancesResult result = ec2.terminateInstances(terminateInstancesRequest);
+            System.out.println("delete instances: " + result);
+            List<InstanceStateChange> terminatedInstances = result.getTerminatingInstances();
+            System.out.println("terminatedInstanceslist: " + terminatedInstances);
+            return terminatedInstances;
+        }
+        return null;
 
 
     }
