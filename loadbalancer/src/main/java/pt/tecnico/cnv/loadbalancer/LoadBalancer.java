@@ -142,8 +142,27 @@ public class LoadBalancer extends TimerTask {
                 }
             }
         }
+        deleteSetToRemoval();
         System.out.println("Exiting auto scale");
 
+    }
+
+    private void deleteSetToRemoval() {
+
+        instanceLauncher.destroyInstances(_instances_set_to_removal);
+        for(String id : _instances_set_to_removal) {
+            synchronized (_speeds) {
+                _speeds.remove(id);
+            }
+            synchronized (_instances){
+                _instances.remove(id);
+            }
+            synchronized (_metricsProccessedSinceLastTick){
+                _metricsProccessedSinceLastTick.remove(id);
+            }
+
+        }
+        _instances_set_to_removal = new ArrayList<String>();
     }
 
     private void lookForSlowMachines() {
@@ -528,13 +547,13 @@ public class LoadBalancer extends TimerTask {
     private long calculateRankInstance(long missingToProcess,long incomingRequestMetric, String instanceID ) {
         //getSpeed
         Long speed = getLastRecentSpeed(instanceID);
-        if (speed == null || speed == -1L) {
+        if (speed == null || speed == -1L || speed == 0) {
             speed = getAvgSpeed(instanceID);
         }
-        if (speed == null || speed == -1L) {
+        if (speed == null || speed == -1L || speed == 0) {
             speed = getLastSpeedAll();
         }
-        if (speed == null || speed == -1L) {
+        if (speed == null || speed == -1L || speed == 0) {
             speed = getAvgSpeedAll();
         }
         if (speed == null || speed == -1L || speed == 0) {
