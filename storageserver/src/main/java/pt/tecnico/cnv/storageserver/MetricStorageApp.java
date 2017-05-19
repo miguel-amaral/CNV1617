@@ -112,6 +112,11 @@ public class MetricStorageApp {
 
         InstQueryParser parser = null;
         try {
+
+            if((_cache.containsKey(query))) {
+                return;
+            }
+
             parser = new InstQueryParser(query);
         
 
