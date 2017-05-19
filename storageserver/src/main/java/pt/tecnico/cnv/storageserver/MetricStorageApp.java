@@ -10,10 +10,7 @@ import pt.tecnico.cnv.common.MetricCalculation;
 import pt.tecnico.cnv.common.QueryParser;
 import pt.tecnico.cnv.common.STATIC_VALUES;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by rafa32 on 11-05-2017.
@@ -182,8 +179,6 @@ public class MetricStorageApp {
         return message;
     }
 
-
-
     private static Map<String, AttributeValue> newItem(String query) {
 
         InstQueryParser parser = null;
@@ -208,15 +203,42 @@ public class MetricStorageApp {
         item.put("query", new AttributeValue(query_for_key));
 
 
+        double sc = 0, sr = 0, wc = 0, wr = 0, coff = 0, roff = 0;
+
+
         long metric = computeMetric(resultMap);
 
         System.out.println("INSERTING THIS QUERY:" + query_for_key + "\nWITH METRIC: " + Long.toString(metric) + "\n");
 
-        /*for (Map.Entry<String, String> entry : result.entrySet()){
+        for (Map.Entry<String, String> entry : resultMap.entrySet()) {
 
             switch (entry.getKey()) {
                 case "f":
-                    item.put("file", new AttributeValue(entry.getValue()));
+                    item.put("file", new AttributeValue().withS(entry.getValue()));
+                    break;
+                case "sc":
+                    item.put("sc", new AttributeValue().withN(entry.getValue()));
+                    sc = Double.parseDouble(entry.getValue());
+                    break;
+                case "sr":
+                    item.put("sr", new AttributeValue().withN(entry.getValue()));
+                    sr = Double.parseDouble(entry.getValue());
+                    break;
+                case "wc":
+                    item.put("wc", new AttributeValue().withN(entry.getValue()));
+                    wc = Double.parseDouble(entry.getValue());
+                    break;
+                case "wr":
+                    item.put("wr", new AttributeValue().withN(entry.getValue()));
+                    wr = Double.parseDouble(entry.getValue());
+                    break;
+                case "coff":
+                    item.put("coff", new AttributeValue().withN(entry.getValue()));
+                    coff = Double.parseDouble(entry.getValue());
+                    break;
+                case "roff":
+                    item.put("roff", new AttributeValue().withN(entry.getValue()));
+                    roff = Double.parseDouble(entry.getValue());
                     break;
                 case "instructions":
                     item.put("instructions", new AttributeValue().withN(entry.getValue()));
@@ -224,23 +246,32 @@ public class MetricStorageApp {
                 case "bb_blocks":
                     item.put("bb_blocks", new AttributeValue().withN(entry.getValue()));
                     break;
-                case "methods":
-                    item.put("methods", new AttributeValue().withN(entry.getValue()));
-                    break;
                 case "branch_fail":
                     item.put("branch_fail", new AttributeValue().withN(entry.getValue()));
-                    break;
-                case "branch_success":
-                    item.put("branch_success", new AttributeValue().withN(entry.getValue()));
-                    break;
-                case "sc":
-                    item.put("metric", new AttributeValue().withN(entry.getValue()));
                     break;
                 default:
                     break;
             }
 
-        }*/
+        }
+
+        double row_percent_start = (roff / sr)*100;
+        double row_percent_end = ((roff + wr) / sr)*100;
+        double column_percent_start = (coff / sc)*100;
+        double column_percent_end = ((coff + wc) / sr)*100;
+
+        item.put("row_percent_start", new AttributeValue().withN(Integer.toString((int)row_percent_start)));
+        item.put("row_percent_end", new AttributeValue().withN(Integer.toString((int)row_percent_end)));
+        item.put("column_percent_start", new AttributeValue().withN(Integer.toString((int)column_percent_start)));
+        item.put("column_percent_end", new AttributeValue().withN(Integer.toString((int)column_percent_end)));
+
+        System.out.println("row_percent_start:" + Double.toString(row_percent_start));
+        System.out.println("row_percent_end:" + Double.toString(row_percent_end));
+        System.out.println("column_percent_start:" + Double.toString(column_percent_start));
+        System.out.println("column_percent_end:" + Double.toString(column_percent_end));
+
+
+
         item.put("metric", new AttributeValue().withN(Long.toString(metric)));
 
         return item;
@@ -317,10 +348,25 @@ public class MetricStorageApp {
         }
 
 
+
+
         System.out.println("GUESSING METRIC WITH SC = : " + sc + " AND " +
                 "WITH SR = : " + sr+ "\n");
         return sc * sr;
     }
+
+
+    public static void deleteDefaultTable() {
+
+        System.out.println("Request for deletion on: " + defaultTableName + "is being handled...\n");
+
+        DeleteTableRequest deleteRequest = new DeleteTableRequest().withTableName(defaultTableName);
+        // Deletes if table exists
+        TableUtils.deleteTableIfExists(_dynamoDB, deleteRequest);
+        System.out.println("Deletion complete!!\n");
+
+    }
+
 
 
     public static String updateItemAttributes(String query) {
@@ -357,18 +403,6 @@ public class MetricStorageApp {
         }
 
         return message + error;
-    }
-
-
-    public static void deleteDefaultTable() {
-
-        System.out.println("Request for deletion on: " + defaultTableName + "is being handled...\n");
-
-        DeleteTableRequest deleteRequest = new DeleteTableRequest().withTableName(defaultTableName);
-        // Deletes if table exists
-        TableUtils.deleteTableIfExists(_dynamoDB, deleteRequest);
-        System.out.println("Deletion complete!!\n");
-
     }
 
     private static String getTableInformation() {
@@ -509,7 +543,7 @@ public class MetricStorageApp {
         return message + error;
     }
 
-    public static String queryItemFullTest(String query){
+    public static String queryItemFullTest(){
 
         String message = "";
 
@@ -517,28 +551,40 @@ public class MetricStorageApp {
         try{
 
 
-            int index = query.indexOf("instructions");
-            String query_for_key = query.substring(0,index-1);
 
 
-            HashMap<String, Condition> scanFilter = new HashMap<String, Condition>();
-            Condition condition = new Condition()
-                    .withComparisonOperator(ComparisonOperator.EQ.toString())
-                    .withAttributeValueList(new AttributeValue(query_for_key));
-            scanFilter.put("query", condition);
-            ScanRequest scanRequest = new ScanRequest(defaultTableName).withScanFilter(scanFilter);
+            ScanRequest scanRequest = new ScanRequest(defaultTableName);
+            scanRequest.setConditionalOperator(ConditionalOperator.AND);
+
+            Map<String, Condition> scanFilter = new HashMap<String, Condition>();
+            scanFilter.put("row_percent_start", new Condition()
+                    .withAttributeValueList(new AttributeValue().withN("5")).withComparisonOperator(ComparisonOperator.GT.toString()));
+            scanFilter.put("row_percent_end", new Condition()
+                    .withAttributeValueList(new AttributeValue().withN("95")).withComparisonOperator(ComparisonOperator.LT.toString()));
+            scanFilter.put("column_percent_start", new Condition()
+                    .withAttributeValueList(new AttributeValue().withN("5")).withComparisonOperator(ComparisonOperator.GT.toString()));
+            scanFilter.put("column_percent_end", new Condition()
+                    .withAttributeValueList(new AttributeValue().withN("95")).withComparisonOperator(ComparisonOperator.LT.toString()));
+
+
+            scanRequest.setScanFilter(scanFilter);
             ScanResult scanResult = _dynamoDB.scan(scanRequest);
 
-            message += "\n\nResult of equality: " + scanResult;
-            message += "\n\nFilename: " + scanResult.getItems().get(0).get("file").getS();
-
-            int insts = Integer.parseInt(scanResult.getItems().get(0).get("instructions").getN());
-
-            int metric = Integer.parseInt(scanResult.getItems().get(0).get("metric").getN());
+            System.out.println("Printing items..");
 
 
-            message += "\n\n# of Instructions: " + Integer.toString(insts);
-            message += "\nMetric: " + Integer.toString(metric);
+            if(scanResult.getCount() == 0){
+
+                System.out.println("\nNo items matched..");
+            }
+            for(Map<String, AttributeValue> item : scanResult.getItems()) {
+
+               System.out.println("\nrow_percent_start: " + item.get("row_percent_start").getN());
+               System.out.println("\nrow_percent_end: " + item.get("row_percent_end").getN());
+               System.out.println("\ncolumn_percent_start: " + item.get("column_percent_start").getN());
+               System.out.println("\ncolumn_percent_end: " + item.get("column_percent_end").getN());
+
+            }
 
 
 

@@ -49,6 +49,7 @@ public class storageWebServer extends Thread{
             server.createContext("/ping", new PingHandler());
             server.createContext("/data.html", new ReceiveDataHandler());
             server.createContext("/testmetric.html", new TestMetricHandler());
+            server.createContext("/test/item", new TestItemHandler());
             server.createContext("/metric/value", new GenericHandler(new MetricValueStrategy()));
             server.createContext("/deleteTable", new DeleteTableHandler());
             server.setExecutor(Executors.newCachedThreadPool()); // creates a default executor
@@ -121,6 +122,37 @@ public class storageWebServer extends Thread{
                 requestStatus = 400;
                 System.err.println(message);
             }*/} catch (Throwable e) {
+                e.printStackTrace();
+                message = "Error: " + e.getMessage();
+                System.err.println(message);
+            }
+            t.sendResponseHeaders(requestStatus, message.length());
+            os.write(message.getBytes());
+
+            os.close();
+        }
+
+    }
+
+    static class TestItemHandler implements HttpHandler {
+        public void handle(HttpExchange t) throws IOException {
+
+            String query = t.getRequestURI().getQuery();
+
+
+            OutputStream os = t.getResponseBody();
+            String message = "";
+            int requestStatus = 0;
+
+
+            try {
+
+
+
+               message = _app.queryItemFullTest();
+
+
+            } catch (Throwable e) {
                 e.printStackTrace();
                 message = "Error: " + e.getMessage();
                 System.err.println(message);
