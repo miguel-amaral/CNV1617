@@ -622,34 +622,47 @@ public class MetricStorageApp {
             Map<String, Condition> scanFilter = new HashMap<String, Condition>();
 
 
+            System.out.println("################################");
+
+
+
             for (Map.Entry<String, String> entry : result.entrySet()) {
 
                 switch (entry.getKey()) {
                     case "f":
+                        System.out.println("file to scan: " + entry.getValue());
                         scanFilter.put("f", new Condition()
                                 .withAttributeValueList(new AttributeValue().withS(entry.getValue()))
                                 .withComparisonOperator(ComparisonOperator.EQ.toString()));
                         break;
                     case "wc":
                         int wc = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
+                        System.out.println("wc: " + Integer.toString(wc));
+
                         scanFilter.put("wc", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(wc)))
                                 .withComparisonOperator(ComparisonOperator.LT.toString()));
                         break;
                     case "wr":
                         int wr = Integer.parseInt(entry.getValue()); //+ (int)(Integer.parseInt(entry.getValue())*0.10);
+
+                        System.out.println("wr: " + Integer.toString(wr));
                         scanFilter.put("wr", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(wr)))
                                 .withComparisonOperator(ComparisonOperator.LT.toString()));
                         break;
                     case "coff":
                         int coff = Integer.parseInt(entry.getValue()); //- (int)(Integer.parseInt(entry.getValue())*0.05);
+
+                        System.out.println("coff: " + Integer.toString(coff));
                         scanFilter.put("coff", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(coff)))
                                 .withComparisonOperator(ComparisonOperator.GT.toString()));
                         break;
                     case "roff":
                         int roff = Integer.parseInt(entry.getValue()); //- (int)(Integer.parseInt(entry.getValue())*0.05);
+
+                        System.out.println("roff: " + Integer.toString(roff));
                         scanFilter.put("roff", new Condition()
                                 .withAttributeValueList(new AttributeValue().withN(Integer.toString(roff)))
                                 .withComparisonOperator(ComparisonOperator.GT.toString()));
